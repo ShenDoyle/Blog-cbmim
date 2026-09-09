@@ -1,0 +1,110 @@
+- class_name: 左立方
+  subtitle: 智者乐水，仁者乐山
+  avatarImg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp
+  avatarSkills:
+    left:
+      - 🤖️ 增长策略
+      - 📊 数据驱动
+      - 🔥 市场洞察
+      - 💡 创新创造
+      - 🌱 持续学习
+    right:
+      - 项目管理 🤝
+      - 沟通协调 🗣️
+      - 全域营销 💻
+      - 商业意识 🎯
+      - 价值交付 📈
+  name: 南城左立方
+  description: 一名 互联网运营社畜，擅长各大 SEO、SEM、信息流平台的优化和效果提升，ToB 产品的营销运营。
+  aboutsiteTips:
+    tips: 热爱运营
+    title1: 一切的原则是实现结果
+    title2: 过程的每一步都会决定结果的导向
+    word:
+      - 时间管理
+      - 结果导向
+      - 危机应对
+      - 市场洞察
+  helloAbout: 你好!
+  skillsTips:
+    tips: 技能
+    title: 这些是我吃饭的家伙
+  careers:
+    tips: 有价值的经历很多，有机会我们慢慢说
+    title: 履历
+    list:
+      - desc: EDU,市场营销
+        color: "#FF2208"
+      - desc: EDU,计算机科学与技术
+        color: "#357ef5"
+      - desc: JOB,市场部经理
+        color: "#AEBE33"
+    img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_life.webp
+  statistic:
+    link: /archives/
+    text: 文章
+    cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_viewerbg.webp
+  map:
+    title: 我现在住在
+    StrengthenTitle: 中国，昆明市
+    background: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_map.webp
+    backgroundDark: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_dmap.webp
+  selfInfo:
+    selfInfoTips1: 职业
+    selfInfoContentYear: 市场营销经理
+    selfInfoTips2: 特长
+    selfInfoContent2: 数据分析、营销策划、运营
+    selfInfoTips3: 爱好
+    selfInfoContent3: 骑行
+  personalities:
+    author_name: 主人公
+    personality_type: ENFJ-A
+    photo_url: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_me.webp
+    personality_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/ENFJ-A.svg
+    name_url: https://www.16personalities.com/ch/enfj-%E4%BA%BA%E6%A0%BC
+  maxim:
+    maxim_tips: 座右铭
+    maxim_top: 知命不惧，
+    maxim_bottom: 日日自新。
+  buff:
+    buff_tips: 旅行
+    buff_top: 如果有什么事情可以给我力量，我相信旅行可以解决一切问题。
+    buff_bottom: 物质足够，精神满足。
+  game:
+    game_tips: 艾欧尼亚
+    game_title: 英雄联盟
+    game_uid: "UID: 左手右方"
+    game_bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_lol.webp
+  comic:
+    comic_tips: 番剧
+    comic_title: 追番
+    comic_list:
+      - name: 约定的梦幻岛
+        href: https://www.bilibili.com/bangumi/media/md5267750/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1
+        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/647166c44b414.webp
+      - name: 咒术回战
+        href: https://www.bilibili.com/bangumi/media/md28229899/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1
+        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/646db4398832e.webp
+      - name: 紫罗兰永恒花园
+        href: https://www.bilibili.com/bangumi/media/md8892/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1
+        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/646db43983d99.webp
+      - name: 鬼灭之刃
+        href: https://www.bilibili.com/bangumi/media/md22718131/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1
+        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/646db439856a0.webp
+      - name: JOJO的奇妙冒险 黄金之风
+        href: https://www.bilibili.com/bangumi/media/md135652/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1
+        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/64760e38d651a.webp
+  like:
+    like_tips: 关注
+    like_title: 数码科技
+    like_bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_hobby.webp
+    like_bottom: 手机、电脑软硬件
+  music:
+    music_tips: 音乐
+    music_title: 民谣、流行
+    music_bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_music.webp
+    music_link: /music/
+  reward_list:
+    - name: none
+      amount: 0.0
+      datatime: 2023-03-28

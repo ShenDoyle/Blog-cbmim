@@ -1,0 +1,13 @@
+.DS_Store
+Thumbs.db
+db.json
+*.log
+node_modules/
+public/
+.deploy*/
+.obsidian/
+.trae/
+*.psd
+themes/*.7z
+*.code-workspace
+File/

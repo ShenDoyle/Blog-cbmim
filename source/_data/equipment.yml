@@ -1,0 +1,120 @@
+- class_name: 好东西
+  description: 我想分享的好东西
+  tip: 只是一部分，还有很多，有机会慢慢放。
+  top_background: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/bg.webp
+  good_things:
+    - title: 电子
+      description: 男人的浪漫少不了 3C 数码。
+      equipment_list:
+        - name: Acer Laptap
+          specification: Spin5 / I5 11 16 G / 512 GB
+          description: 2K 屏幕，不到 1kg 的重量，360 度折叠，微软雅典娜计划，续航优秀。屏幕支持压感倾斜，可做电子笔记及绘画。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/acerspin5.webp
+          link: https://www.acer.com/us-en/laptops/spin/spin-5-intel
+        - name: 一加手机
+          specification: 7Pro / 蓝色 / 12+256 GB
+          description: 19年于现在，我忠实的老伙计。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/oneplus7pro.webp
+          link: https://www.oneplus.com/hk/7pro#/
+        - name: iPhone
+          specification: 7 and 15 / 黑色 and 白色 / 32 GB and 128 GB
+          description: 备用机，手感无敌。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/iphone7.webp
+          link: https://support.apple.com/kb/SP743?locale=en_US
+        - name: 佳能 EOS
+          specification: 650D / 黑色
+          description: 全球第一款带触摸屏的单反相机，感动。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/EOS650D.webp
+          link: https://www.canon.com.cn/product/650d/
+        - name: Iriver MP3
+          specification: AK Jr / 银色 / 64 GB
+          description: 纯粹的MP3，颜值和品牌都是我喜欢的。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/akjr.webp
+          link: https://www.astellnkern.com/product/product_detail.jsp?productNo=41
+        - name: 掌阅青春版
+          specification: 电纸书 / 白色 / 32 GB
+          description: 纯粹的电子书阅读器，配合Z-Lib，刚刚好。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/iReaderLight.webp
+          link: https://wiki.smzdm.com/p/ryyryn0/
+        - name: 三星微单
+          specification: NX3000 / 白色
+          description: 我对三星的体验一般，相机贵在稳定，微单确实比单反轻便了很多。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/NX3000.webp
+          link: https://www.samsung.com.cn/support/model/EV-NX3000COJCN/
+        - name: PSP Go
+          specification: 游戏掌机 / 黑色
+          description: 它不是成功的PSP，它是我的快乐来源之一。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/PSPGo.webp
+          link: https://productz.com/en/sony-playstation-portable-go/p/QJaeV
+        - name: 斯沃琪
+          specification: YVS401G
+          description: 当时就是很想买，我没有腕表情节，当时它依旧满足了我的心理诉求。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/watch.webp
+          link: https://www.swatch.com/en-ca/blackie-yvs401g/YVS401G.html
+        # - name:
+        #   specification:
+        #   description:
+        #   image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/
+        #   link:
+    - title: 软件
+      description: 好的软件值得付费，不付费也值得支持。
+      equipment_list:
+        - name: 纯纯写作
+          specification: 终身会员 / 安卓
+          description: 安卓端的MarkDown笔记软件，稳定，好用。我需要一款纯粹的软件，恰好它就是。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/purewrite.webp
+          link: https://writer.drakeet.com/
+        - name: Bluecoins
+          specification: 终身会员 / 安卓
+          description: 单纯想给自己的消费做个记录。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/bluecoins.webp
+          link: https://www.bluecoinsapp.com/
+        # - name:
+        #   specification:
+        #   description:
+        #   image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/
+        #   link:
+    - title: 出行
+      description: 户外，有很多值得信任的东西。
+      equipment_list:
+        - name: 美利达挑战者 300 2014
+          specification: 黑红色
+          description: 山地入门好车，一万多公里很安心。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/bike.webp
+          link: https://www.merida-bikes.com/zh-tw/bike/418/tiao-zhan-zhe-300
+        - name: VOOK ONE
+          specification: 白色+黑色
+          description: 公路入门好车，一脚下去就对了。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/vookone.webp
+          link: https://www.douyin.com/user/MS4wLjABAAAAR0CC3xM0YShq5O2bXoN50rtPyWASpnkcAqbr4qN2uf1215EIKTQ_V7I64VtnSb_e?from_tab_name=main&relation=0&vid=7367916865542196515
+
+
+
+        - name: 小米小背包
+          specification: 黑色/蓝色
+          description: 小巧轻便方便，好用不贵。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/mibag.webp
+          link: https://www.mi.com/shop/search?keyword=%E5%B0%8F%E7%B1%B3%E5%B0%8F%E8%83%8C%E5%8C%85
+        # - name:
+        #   specification:
+        #   description:
+        #   image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/
+        #   link:
+    - title: 居家
+      description: 享受智能家居，也是一种快乐。
+      equipment_list:
+        - name: 小爱同学
+          specification: 白色
+          description: 智能家居入门。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/mi.webp
+          link: https://www.mi.com/shop/buy/detail?product_id=13878&cfrom=search
+        - name: 米家空气净化器Pro
+          specification: 白色
+          description: 和小爱同学绝配了。
+          image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/miair.webp
+          link: https://www.mi.com/airpro
+        # - name:
+        #   specification:
+        #   description:
+        #   image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/equipment/
+        #   link:

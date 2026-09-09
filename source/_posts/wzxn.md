@@ -1,0 +1,92 @@
+---
+title: 在电脑上多开微信的方法
+date: 2020/11/18 20:00:00
+updated: 2021-01-07 23:14:57
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/wzxn/2024215171707989450040time_wzxn.webp
+top_group_index: 9
+categories: 分享
+tags:
+    - 技巧
+    - 电脑
+ai:
+    - 这篇文章介绍了一种使用.bat文件实现微信双开的方法。
+    - 这篇文章介绍了一个在电脑上实现微信双开的方式。
+---
+
+平时微信用得少，一直没有很好地把微信上的好友做分类，使用的时候也没有针对分组和标签的习惯，为了把生活和工作分开，我就有了两个同时在使用的微信。
+
+大部分时候，在公司都是使用工作微信，但是还是避免不了同时使用两个微信的情况。但是用的时候发现微信不能像 QQ 一样，可以同时启动多个。今天给大家提供一个比较简单的解决方案。
+
+<!--more-->
+
+## 准备
+
+在桌面找到微信的图标，鼠标右键选择**属性**，在**属性-快捷方式**的页面，我们可以看到微信的安装路径。这时候我们就可以开始下一步了。
+
+![微信安装路径](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/wzxn/微信安装路径.webp)
+
+## 写双开文件
+
+在桌面新建一个**txt**文本，打开之后，把下面这段内容复制粘贴进去：
+
+```
+@echo off
+
+start /d "C:\Program Files (x86)\Tencent\WeChat\" WeChat.exe
+
+start /d "C:\Program Files (x86)\Tencent\WeChat\" WeChat.exe
+
+exit
+```
+
+下面我们修改上面的内容。
+
+其中`"C:\Program Files (x86)\Tencent\WeChat\"`这个部分是微信的默认安装路径，如果你安装的时候做过修改，就需要把这段内容改成你现在的安装路径。
+
+安装路径可以在准备里面的**起始位置**找到。
+
+比如我的做过修改，所以内容就改成了下面的这段：
+
+```
+@echo off
+
+start /d "D:\Program Files\WeChat\" WeChat.exe
+
+start /d "D:\Program Files\WeChat\" WeChat.exe
+
+exit
+```
+
+上面的代码是启动两个微信，如果我们需要启动三个乃至更多的微信，我们就需要把`start /d "D:\Program Files\WeChat\" WeChat.exe`这段代码多复制几行。
+
+没错，有几行就是同时启动几个微信。
+
+比如想同时启动 4 个微信，代码如下：
+
+```
+@echo off
+
+start /d "D:\Program Files\WeChat\" WeChat.exe
+
+start /d "D:\Program Files\WeChat\" WeChat.exe
+
+start /d "D:\Program Files\WeChat\" WeChat.exe
+
+start /d "D:\Program Files\WeChat\" WeChat.exe
+
+exit
+```
+
+完成上面的步骤之后，我们在 txt 编辑器的菜单找到**文件**，选择**另存为**,也可以用快捷键`Ctrl+Shift+s`组合打开另存为窗口。
+
+文件位置选择**桌面**,保存类型选择**所有文件**，文件名改为：`wechat.bat`。
+
+![保存wechat.bat](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/wzxn/保存wechat.bat.webp)
+
+这时候桌面就出现一个名字为`wechat.bat`的可执行文件。
+
+![执行文件](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/wzxn/执行文件.webp)
+
+## 大功告成
+
+现在我们直接通过鼠标双击`wechat.bat`这个文件，就可以按照我们的想法多开微信了。

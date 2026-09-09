@@ -1,0 +1,55 @@
+---
+title: 一个开源的 CMS 系统
+date: 2022/11/26 18:36:52
+updated: 2022/11/26 18:36:52
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/yzncms/2024215171707989451050time_yzncms.webp
+categories: 分享
+tags:
+    - CMS
+    - 开源
+ai:
+    - 这是介绍开源的 YznCMS，基于 ThinkPHP5.1 和 Layui2.7.x，可商用且完全免费。支持新 PHP 版本，相对老牌 CMS 更友好，具备开发手册、博客和视频教程。与其他 CMS 相比，它更适合当前对 PHP 版本要求更高的用户。
+    - 织梦去年割羊毛后，人们纷纷离开，帝国 CMS不再是唯一选择。推荐开源可商用的 YznCMS，基于ThinkPHP5.1和Layui2.7.x，遵循Apache2.0协议，永久免费可商用。免费部分包括框架和自带插件，授权插件需付费。支持PHP7.0以上，数据库要求MySQL5.6以上。系统更新频繁，支持新版本PHP。【项目地址】[Gitee](https://gitee.com/ken678/YZNCMS)【使用手册】[手册](https://www.kancloud.cn/ken678/yzncms)【开发者博客】[博客](https://blog.yzncms.com/)【视频教程】[Bilibili](https://www.bilibili.com/video/av417106995/)
+---
+
+织梦去年割羊毛的操作之后，大批的人涌离织梦，除了老牌的帝国 CMS，还有很多以前相对小众的框架系统被大家看到，今天推荐一个开源可商用的 YznCMS。
+
+<!--more-->
+
+## 介绍
+
+该系统后端基于 ThinkPHP5.1 框架，前端基于 Layui2.7.x，项目创立于 2017 年，完全开源。
+
+遵循**Apache2.0**开源协议，开发者声明**永久免费，可商用**，使用时需要注意，那就是**可去除前台版权**，因此后台版权是不允许去除的。
+
+## 费用
+
+框架和自带插件完全免费，授权插件收费。
+
+## 环境
+
+- WEB 服务器：IIS/Apache/Nginx
+- PHP 版本：php >= 7.0（支持 8.0,推荐 7.1）
+- 数据库：MySQL >= 5.6
+
+## 使用
+
+### 下载
+
+[码云开源地址](https://gitee.com/ken678/YZNCMS)
+
+### 手册
+
+[yzncms1.1.X 使用手册](https://www.kancloud.cn/ken678/yzncms)
+
+### 开发者博客
+
+[御宅男の博客](https://blog.yzncms.com/)
+
+### 视频教程
+
+[哔哩哔哩](https://www.bilibili.com/video/av417106995/)
+
+## 总结
+
+老牌的帝国 CMS 其实是不错的系统，但原作者已经不打算支持新的 PHP 版本了，PHP7.4 已有不少报错情况，8.0 更严格的要求对于绝大多数使用者是致命的。而御宅男这个系统目前更新还比较勤快，对新版本 PHP 的支持也比较友好。
