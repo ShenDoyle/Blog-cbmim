@@ -175,3 +175,17 @@ deploy:
   type: git
   repository: git@github.com:ShenDoyle/ShenDoyle.github.io.git
   branch: main
+
+# Douban sync (hexo-douban 2.x): /books/ and /movies/
+douban:
+  id: 143267574
+  builtin: false
+  timeout: 20000
+  book:
+    path: books/index.html
+    title: 我的阅读
+    quote: 读万卷书，行万里路。
+  movie:
+    path: movies/index.html
+    title: 我的影视
+    quote: 于光影之间，观世间百态。

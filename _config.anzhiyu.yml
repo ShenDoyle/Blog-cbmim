@@ -8,6 +8,8 @@ menu:
 
   爱好:
     音乐: /music/ || anzhiyu-icon-music
+    阅读: /books/ || anzhiyu-icon-book
+    影视: /movies/ || anzhiyu-icon-bilibili
     追番: /bangumis/ || anzhiyu-icon-bilibili
     好物: /equipment/ || anzhiyu-icon-bolt
 
