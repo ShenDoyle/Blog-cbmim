@@ -1,8 +1,8 @@
----
+﻿---
 title: 什么是 SEM
 date: 2019-01-07 23:14:57
 updated: 2019-01-07 23:14:57
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/aboutsem/2024215171707989447040time_sem.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/aboutsem/2024215171707989447040time_sem.webp
 categories: 运营
 tags:
     - SEM

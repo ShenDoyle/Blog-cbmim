@@ -1,8 +1,8 @@
----
+﻿---
 title: 昆明西山：传说中的爱情守护者
 date: 2024/01/01 18:37:05
 updated: 2024/01/01 18:37:05
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/kunmingxishan/2024215181707993654750time_xiujiruo.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/kunmingxishan/2024215181707993654750time_xiujiruo.webp
 categories: 生活
 tags:
     - 故事

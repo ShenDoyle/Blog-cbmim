@@ -1,8 +1,8 @@
----
+﻿---
 title: 隐匿营销：信息流广告的传播
 date: 2020/01/09 17:06:47
 updated: 2020/01/09 17:06:47
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/aboutsa/2024215181707993650751time_aboutsa.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/aboutsa/2024215181707993650751time_aboutsa.webp
 categories: 运营
 tags:
     - 广告

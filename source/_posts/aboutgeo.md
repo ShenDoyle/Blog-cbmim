@@ -1,8 +1,8 @@
----
+﻿---
 title: GEO 的分享
 date: 2025/08/15 16:28:53
 updated: 2025/08/15 16:28:53
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/aboutgeo/2025815171755249886622time_aboutgeo.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/aboutgeo/2025815171755249886622time_aboutgeo.webp
 top_group_index: 9
 categories: 运营
 tags:

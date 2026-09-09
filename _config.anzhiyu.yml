@@ -1,4 +1,4 @@
-# 顶部中间导航
+﻿# 顶部中间导航
 menu:
   首页: /
   文章:
@@ -28,12 +28,12 @@ nav:
       item:
         - name: Copyright
           link: /cc/
-          icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/favicon.ico
+          icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
     - title: 项目
       item:
         - name: Markdown
           link: https://md.5301314.xyz/
-          icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/favicon.ico
+          icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
 
 # mourn （哀悼日，指定日期网站简单变灰，不包括滚动条）
 # 注意： 仅网站首页变灰，其他页面正常显示
@@ -71,7 +71,7 @@ social:
 author_status:
   enable: true
   # 可以是任何图片，建议放表情包或者emoji图片，效果都很好，[表情包速查](https://emotion.xiaokang.me/)
-  statusImg: "https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/ico.webp"
+  statusImg: "https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/ico.webp"
   skills:
     - 📈 数据分析师
     - 💡 创意策划师
@@ -131,23 +131,23 @@ katex:
 # --------------------------------------
 
 # Favicon（网站图标）
-favicon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/favicon.ico
+favicon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
 
 # Avatar (头像)
 avatar:
-  img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp
+  img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp
   effect: false
 
 # Disable all banner image
 disable_top_img: true
 
 # The banner image of home page
-index_img: "background: url('https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/violet.webp') top / cover no-repeat"
+index_img: "background: url('https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/violet.webp') top / cover no-repeat"
 
-archive_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/archive_top.webp
+archive_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/archive_top.webp
 
 # If the banner of page not setting, it will show the top_img
-default_top_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/default.webp
+default_top_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/default.webp
 
 cover:
   # display the cover or not (是否显示文章封面)
@@ -159,18 +159,18 @@ cover:
   position: left
   # When cover is not set, the default cover is displayed (当没有设置cover时，默认的封面显示)
   default_cover:
-    - https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/default.webp
+    - https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/default.webp
 
 # Replace Broken Images (替换无法显示的图片)
 error_img:
-  flink: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/loading.webp
-  post_page: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/loading.webp
+  flink: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/loading.webp
+  post_page: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/loading.webp
 
 # A simple 404 page
 error_404:
   enable: true
   subtitle: "请尝试站内搜索寻找文章"
-  background: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/search_bg.webp
+  background: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/search_bg.webp
 
 post_meta:
   page: # Home Page
@@ -242,12 +242,12 @@ post_copyright:
 # Sponsor/reward
 reward:
   enable: true
-  coinAudio: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/coin.mp3
+  coinAudio: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/coin.mp3
   QR_code:
-    - img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/pay/wechat.webp
+    - img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/pay/wechat.webp
       link:
       text: wechat
-    - img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/pay/alipay.webp
+    - img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/pay/alipay.webp
       link:
       text: alipay
 
@@ -332,7 +332,7 @@ valine:
   guest_info: nick,mail,link # valine comment header info (nick/mail/link)
   recordIP: false # Record reviewer IP
   serverURLs: # This configuration is suitable for domestic custom domain name users, overseas version will be automatically detected (no need to manually fill in)
-  bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/comment_bg.webp # valine background
+  bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/comment_bg.webp # valine background
   emojiCDN: //i0.hdslb.com/bfs/emote/ # emoji CDN
   enableQQ: true # enable the Nickname box to automatically get QQ Nickname and QQ Avatar
   requiredFields: nick,mail # required fields (nick/mail)
@@ -415,9 +415,9 @@ footer:
   runtime:
     enable: false
     # launch_time: 08/17/2019 00:00:00 # 网站上线时间
-    work_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/online.svg
+    work_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/online.svg
     work_description: 搬砖小能手
-    offduty_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/offline.svg
+    offduty_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/offline.svg
     offduty_description: 回归生活了
   # 徽标部分配置项 https://shields.io/
   # https://img.shields.io/badge/CDN-jsDelivr-orange?style=flat&logo=jsDelivr
@@ -425,22 +425,22 @@ footer:
     enable: true
     list:
       - link: https://hexo.io/ #徽标指向网站链接
-        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/Frame-Hexo.svg #徽标 API
+        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/Frame-Hexo.svg #徽标 API
         message: 博客框架为 Hexo_v7.0.0 #徽标提示语
       - link: https://github.com/anzhiyu-c/hexo-theme-anzhiyu
-        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/Theme-AnZhiYu-2E67D3.svg
+        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/Theme-AnZhiYu-2E67D3.svg
         message: 本站使用 AnZhiYu 主题
       - link: https://github.com/
-        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/Source-Github.svg
+        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/Source-Github.svg
         message: 本站项目由 Github 托管
       - link: https://vercel.com/
-        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/vercel.svg
+        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/vercel.svg
         message: 本站项目由 Vercel 分发
       # - link: https://space.bilibili.com/22919283
       #   shields: https://img.shields.io/badge/%E5%9B%9B%E5%8D%81%E5%85%AD-BiliBili-blue
       #   message: 日渐增长的 bilibili
       - link: http://creativecommons.org/licenses/by-nc-sa/4.0/
-        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/Copyright-BY-NC-SA.svg
+        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/Copyright-BY-NC-SA.svg
         message: 本站采用知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议进行许可
   socialBar:
     enable: true #这里一定要注意缩进问题
@@ -760,7 +760,7 @@ preloader:
   source: 3
   # pace theme (see https://codebyzach.github.io/pace/)
   pace_css_url:
-  avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp # 自定加载头像
+  avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp # 自定加载头像
 
 # aside (侧边栏)
 # --------------------------------------
@@ -785,8 +785,8 @@ aside:
     content: 感谢来到我的博客~
   card_weixin:
     enable: false
-    face: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/face.webp
-    backFace: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/face.webp
+    face: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/face.webp
+    backFace: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/face.webp
   card_recent_post:
     enable: true
     limit: 5 # if set 0 will show all
@@ -1003,11 +1003,11 @@ pwa:
   startup_image_enable: true
   manifest: /manifest.json
   theme_color: var(--anzhiyu-main)
-  mask_icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/favicon.ico
-  apple_touch_icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/favicon.ico
-  bookmark_icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/favicon.ico
-  favicon_32_32: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/favicon.ico
-  favicon_16_16: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/favicon.ico
+  mask_icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
+  apple_touch_icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
+  bookmark_icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
+  favicon_32_32: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
+  favicon_16_16: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
 
 # Open graph meta tags
 # https://developers.facebook.com/docs/sharing/webmasters/
@@ -1052,7 +1052,7 @@ home_top:
   banner:
     tips: 一个简单的自用导航
     title: 导航
-    image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/nav_guide.webp
+    image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/nav_guide.webp
     link: https://5301314.xyz/
 
 # 朋友圈配置
@@ -1197,7 +1197,7 @@ rightClickMenu:
 # 首页随便逛逛people模式 而非技能点模式，关闭后为技能点模式需要配置creativity.yml
 peoplecanvas:
   enable: false
-  img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/peoplecanvas.webp
+  img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/peoplecanvas.webp
 
 # 动效
 dynamicEffect:

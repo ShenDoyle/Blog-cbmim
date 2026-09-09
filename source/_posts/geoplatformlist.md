@@ -1,8 +1,8 @@
----
+﻿---
 title: GEO 内容发布平台及操作建议汇总（持续更新）
 date: 2025/08/25 17:31:44 
 updated: 2025/08/25 19:31:44 
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/geoplatformlist/2025828171756374313581time_Cover.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/geoplatformlist/2025828171756374313581time_Cover.webp
 top_group_index: 9
 swiper_index: 7
 categories: 运营

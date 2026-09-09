@@ -1,8 +1,8 @@
----
+﻿---
 title: 了解 GEO——AI 平台的喜好
 date: 2025/08/21 09:02:31
 updated: 2025/08/21 09:02:31
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/geoplatform/2025820171755683650742time_Cover.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/geoplatform/2025820171755683650742time_Cover.webp
 top_group_index: 9
 swiper_index: 7
 categories: 运营

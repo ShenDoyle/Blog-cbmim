@@ -1,8 +1,8 @@
----
+﻿---
 title: 视频号必避关键词清单：内容创作须知
 date: 2024/01/14 13:40:43
 updated: 
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/prohibitedwordssph/2024215181707991788040time_prohibitedwordssph.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/prohibitedwordssph/2024215181707991788040time_prohibitedwordssph.webp
 categories: 运营
 tags:
     - 实用
