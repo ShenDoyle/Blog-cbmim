@@ -2,49 +2,49 @@
   creativity_list:
     - name: Office
       color: "#FCFCFC"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/office.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/office.svg
     - name: Docker
       color: "#005f73"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/docker.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/docker.svg
     - name: Photoshop
       color: "#001E36"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/photoshop.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/photoshop.svg
     - name: Debian
       color: "#94d2bd"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/debian.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/debian.svg
     - name: PowerBI
       color: "#005f73"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/powerbi.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/powerbi.svg
     - name: 百度营销
       color: "#FFFFFF"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/baiduad.webp
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/baiduad.webp
     - name: Python
       color: "#fff"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/python.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/python.svg
     - name: SEM
       color: "#005f73005f73"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/sem.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/sem.svg
     - name: MarkDown
       color: "#135498"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/markdown.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/markdown.svg
     - name: PHP
       color: "#2CB5F3"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/php.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/php.svg
     - name: CSS3
       color: "#FFCC57"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/css.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/css.svg
     - name: JS
       color: "#DE4C36"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/javascript.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/javascript.svg
     - name: HTML
       color: "#005FFE"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/html.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/html.svg
     - name: Git
       color: "#e9d8a6"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/git.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/git.svg
     - name: 腾讯营销
       color: "#FBFDFA"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/tencentad.webp
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/tencentad.webp
     - name: Google AD
       color: "#FBFDFA"
-      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/creativity/googlead.svg
+      icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/creativity/googlead.svg

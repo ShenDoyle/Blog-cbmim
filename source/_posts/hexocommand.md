@@ -2,7 +2,7 @@
 title: Hexo 常用的命令
 date: 2021/01/07 20:00:00
 updated: 2021/01/07 20:00:00
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/hexocommand/2024215171707989443076time_hexo_command.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/hexocommand/2024215171707989443076time_hexo_command.webp
 categories: 技术
 tags:
     - 博客

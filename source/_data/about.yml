@@ -1,6 +1,6 @@
 - class_name: 左立方
   subtitle: 智者乐水，仁者乐山
-  avatarImg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp
+  avatarImg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp
   avatarSkills:
     left:
       - 🤖️ 增长策略
@@ -39,16 +39,16 @@
         color: "#357ef5"
       - desc: JOB,市场部经理
         color: "#AEBE33"
-    img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_life.webp
+    img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/about/about_life.webp
   statistic:
     link: /archives/
     text: 文章
-    cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_viewerbg.webp
+    cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/about/about_viewerbg.webp
   map:
     title: 我现在住在
     StrengthenTitle: 中国，昆明市
-    background: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_map.webp
-    backgroundDark: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_dmap.webp
+    background: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/about/about_map.webp
+    backgroundDark: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/about/about_dmap.webp
   selfInfo:
     selfInfoTips1: 职业
     selfInfoContentYear: 市场营销经理
@@ -59,8 +59,8 @@
   personalities:
     author_name: 主人公
     personality_type: ENFJ-A
-    photo_url: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_me.webp
-    personality_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/ENFJ-A.svg
+    photo_url: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/about/about_me.webp
+    personality_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/ENFJ-A.svg
     name_url: https://www.16personalities.com/ch/enfj-%E4%BA%BA%E6%A0%BC
   maxim:
     maxim_tips: 座右铭
@@ -74,35 +74,35 @@
     game_tips: 艾欧尼亚
     game_title: 英雄联盟
     game_uid: "UID: 左手右方"
-    game_bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_lol.webp
+    game_bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/about/about_lol.webp
   comic:
     comic_tips: 番剧
     comic_title: 追番
     comic_list:
       - name: 约定的梦幻岛
         href: https://www.bilibili.com/bangumi/media/md5267750/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1
-        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/647166c44b414.webp
+        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/647166c44b414.webp
       - name: 咒术回战
         href: https://www.bilibili.com/bangumi/media/md28229899/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1
-        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/646db4398832e.webp
+        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/646db4398832e.webp
       - name: 紫罗兰永恒花园
         href: https://www.bilibili.com/bangumi/media/md8892/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1
-        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/646db43983d99.webp
+        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/646db43983d99.webp
       - name: 鬼灭之刃
         href: https://www.bilibili.com/bangumi/media/md22718131/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1
-        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/646db439856a0.webp
+        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/646db439856a0.webp
       - name: JOJO的奇妙冒险 黄金之风
         href: https://www.bilibili.com/bangumi/media/md135652/?spm_id_from=666.25.b_6d656469615f6d6f64756c65.1
-        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/64760e38d651a.webp
+        cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/64760e38d651a.webp
   like:
     like_tips: 关注
     like_title: 数码科技
-    like_bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_hobby.webp
+    like_bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/about/about_hobby.webp
     like_bottom: 手机、电脑软硬件
   music:
     music_tips: 音乐
     music_title: 民谣、流行
-    music_bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/about/about_music.webp
+    music_bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/about/about_music.webp
     music_link: /music/
   reward_list:
     - name: none

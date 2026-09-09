@@ -4,11 +4,11 @@
   link_list:
     - name: Hexo
       link: https://hexo.io/zh-tw/
-      avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/hexo_logo.svg
+      avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/hexo_logo.svg
       descr: 快速、简单且强大的网站框架
     - name: 南城左立方
       link: https://cbm.im/
-      avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp
+      avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp
       descr: 智者乐水，仁者乐山。
 
 - class_name: 推荐博客
@@ -17,9 +17,9 @@
   link_list:
     - name: 南城左立方
       link: https://cbm.im/
-      avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp
+      avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp
       descr: 专注GEO、SEO、SEM、信息流广告运营。
-      siteshot: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp
+      siteshot: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp
       color: vip
       tag: 运营
 
@@ -30,6 +30,6 @@
   link_list:
     - name: 南城左立方
       link: https://cbm.im/
-      avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp
+      avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp
       descr: 专注GEO、SEO、SEM、信息流广告运营。
       recommend: true

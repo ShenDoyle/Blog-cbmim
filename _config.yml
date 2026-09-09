@@ -103,10 +103,10 @@ ignore:
 envelope_comment:
   enable: true #控制开关
   custom_pic:
-    cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/violet.webp #信笺头部图片
-    line: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/line.webp #信笺底部图片
-    beforeimg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/before.webp # 信封前半部分
-    afterimg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/after.webp # 信封后半部分
+    cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/violet.webp #信笺头部图片
+    line: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/line.webp #信笺底部图片
+    beforeimg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/before.webp # 信封前半部分
+    afterimg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/after.webp # 信封后半部分
   message: #信笺正文，多行文本，写法如下
     - 想问的
     - 想说的

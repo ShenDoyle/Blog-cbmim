@@ -2,7 +2,7 @@
 title: 在电脑上多开微信的方法
 date: 2020/11/18 20:00:00
 updated: 2021-01-07 23:14:57
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/wzxn/2024215171707989450040time_wzxn.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/wzxn/2024215171707989450040time_wzxn.webp
 top_group_index: 9
 categories: 分享
 tags:
@@ -23,7 +23,7 @@ ai:
 
 在桌面找到微信的图标，鼠标右键选择**属性**，在**属性-快捷方式**的页面，我们可以看到微信的安装路径。这时候我们就可以开始下一步了。
 
-![微信安装路径](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/wzxn/微信安装路径.webp)
+![微信安装路径](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/wzxn/微信安装路径.webp)
 
 ## 写双开文件
 
@@ -81,11 +81,11 @@ exit
 
 文件位置选择**桌面**,保存类型选择**所有文件**，文件名改为：`wechat.bat`。
 
-![保存wechat.bat](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/wzxn/保存wechat.bat.webp)
+![保存wechat.bat](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/wzxn/保存wechat.bat.webp)
 
 这时候桌面就出现一个名字为`wechat.bat`的可执行文件。
 
-![执行文件](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/wzxn/执行文件.webp)
+![执行文件](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/wzxn/执行文件.webp)
 
 ## 大功告成
 

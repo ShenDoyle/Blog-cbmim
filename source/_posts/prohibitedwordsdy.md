@@ -2,7 +2,7 @@
 title: 抖音全套违禁词、违规行为规避指南
 date: 2024/01/14 20:40:46
 updated: 
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/prohibitedwordsdy/2024215181707991786062time_prohibitedwordsdy.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/prohibitedwordsdy/2024215181707991786062time_prohibitedwordsdy.webp
 categories: 运营
 tags:
     - 实用

@@ -2,7 +2,7 @@
 title: Typecho 不用插件实现文章阅读次数统计
 date: 2020/04/16 20:00:00
 updated: 2020/04/16 20:00:00
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/typechonub/2024215171707989449047time_typecho_nub.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/typechonub/2024215171707989449047time_typecho_nub.webp
 categories: 技术
 tags:
     - 前端

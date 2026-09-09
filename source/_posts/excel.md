@@ -2,7 +2,7 @@
 title: Excel 快捷键
 date: 2020/10/02 20:00:00
 updated: 2022/08/02 20:00:00
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/excel/2024215171707989442043time_excel.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/excel/2024215171707989442043time_excel.webp
 categories: 技术
 tags:
     - Excel

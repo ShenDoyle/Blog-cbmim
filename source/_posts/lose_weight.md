@@ -2,7 +2,7 @@
 title: 减肥的心得
 date: 2021/07/26 20:00:00
 updated: 2021/07/26 20:00:00
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/lose_weight/2024215171707989445040time_lose_weight.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/lose_weight/2024215171707989445040time_lose_weight.webp
 categories: 生活
 tags:
     - 减肥
@@ -32,11 +32,11 @@ ai:
 
 **2020 年 10 月 8 日：**体重 70.7kg，BMI 值 24.5，体脂 21.2%。
 
-![减肥前体脂称数据](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/lose_weight/减肥前体脂称数据.webp)
+![减肥前体脂称数据](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/lose_weight/减肥前体脂称数据.webp)
 
 **2021 年 09 月 06 号（后面体重又下降了一些，更新一下）：**体重 52.85kg，BMI 值 18.3，体脂 7.5%。
 
-![减肥后体脂称数据](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/lose_weight/减肥后体脂称数据.webp)
+![减肥后体脂称数据](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/lose_weight/减肥后体脂称数据.webp)
 
 **总结：**现在已经是从胖的状态调整到了瘦的状态上，本质上还是不算很健康的，和我原本的计划有一定的偏离。目前唯一可以确定的是减肥是成功的，后面需要找时间锻炼增加一些体重了。
 

@@ -2,7 +2,7 @@
 title: jsDelivr 的使用方法
 date: 2020/11/27 20:00:00
 updated: 2020/11/27 20:00:00
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/jsDelivr/2024215171707989444076time_jsDelivr.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/jsDelivr/2024215171707989444076time_jsDelivr.webp
 categories: 技术
 tags:
     - 前端
