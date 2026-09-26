@@ -3,6 +3,41 @@
  * 参数来源：Cover.psd（760 x 332）原始图层数据
  */
 
+/* 层级约定：渐变(0) < 封面图(1) < 蒙版(2) < 文字层(3)
+   封面图必须定位抬到渐变之上，否则会被渐变盖住 */
+.post_cover img.post_bg,
+.article-sort-item-img img,
+.aside-list-item img,
+.top-group-item img.post_bg,
+.blog-slider__img img {
+  position: relative;
+  z-index: 1;
+}
+
+/* 渐变兜底层：无头图 / 图片加载失败时露出来
+   颜色与角度由 covermeta.json 按文章路径哈希生成，每篇不同且稳定 */
+.co-grad {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  background-color: #1e3a8a;
+  background-size: cover;
+}
+
+/* 无头图时补出来的封面位：沿用主题 .post_cover 的尺寸，内部铺渐变 */
+.co-nocover {
+  position: relative;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.co-nocover > a {
+  position: relative;
+  overflow: hidden;
+  border-radius: inherit;
+}
+
 /* 蒙版：铺满封面并压暗，对应 PSD 的 dim 层（#000 / 46%）
    强度由 front-matter 的 coverdim 控制，JS 写入 --co-dim */
 .co-dim {
@@ -11,7 +46,7 @@
   inset: 0;
   background: rgba(0, 0, 0, var(--co-dim));
   pointer-events: none;
-  z-index: 1;
+  z-index: 2;
   border-radius: inherit;
 }
 
@@ -22,7 +57,6 @@
   --co-t-size: 44px;
   --co-s-size: 15px;
   --co-skew: -12deg;
-  --co-lines: 2;
   position: absolute;
   inset: 0;
   display: flex;
@@ -31,7 +65,7 @@
   padding: 4% 3%;
   box-sizing: border-box;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
   overflow: hidden;
 }
 
@@ -85,10 +119,13 @@
   /* 对应 PSD 投影：#06328a / 58% / 45° / 距离 9 / 模糊 13 */
   text-shadow: 6px 6px 13px rgba(6, 50, 138, 0.58);
 
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: var(--co-lines);
+  /* 强制单行：模糊框高度 = 主标题一行字。放不下的文案由 JS 换成 CBM.IM，
+     这里只作为兜底，正常情况下不会出现省略号 */
+  display: block;
+  width: 100%;
+  white-space: nowrap;
   overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 /* 小尺寸档位：收紧留白、去掉斜切以保证可读性 */

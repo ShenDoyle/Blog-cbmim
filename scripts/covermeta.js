@@ -9,13 +9,25 @@
  *   三处任意一处有值 → 启用主题的封面效果（蒙版 + 文字层）渲染
  * ────────────────────────────────────────────────
  *
+ * ── 渲染位置 ─────────────────────────────────────
+ *   首页 / 归档 / 置顶 / 侧栏的封面图 → 蒙版 + 文字层
+ *   文章顶图（#page-header.post-bg）→ 不叠加任何东西，只保留背景原图
+ * ────────────────────────────────────────────────
+ *
  * front-matter 字段：
- *   covertitle: 封面主标题（可选），最佳 4~12 字
- *               小尺寸档位只能显示 6~10 字，超过 12 字在中小卡片上会被截断
- *   coverset:   封面副标题（可选），最佳 ≤14 字
- *               只在中大尺寸档位显示，超过 24 字自动截断
+ *   covertitle: 封面主标题（可选），建议 ≤8 字
+ *               强制单行：放得下就显示原文，放不下（含没填）→ 显示 CBM.IM
+ *               不再截断、不折行，避免小卡片上出现半截标题
+ *   coverset:   封面副标题（可选），未填时默认 CBM.IM
+ *               位置（主标题上方）、字体、样式与 Cover.psd 一致，不做调整
  *   coverdim:   蒙版强度（可选），默认 0.46
  *                填 0 / false 表示不加蒙版；支持 0~1 小数或 0~100 的百分数
+ *
+ * ── 渐变兜底 ─────────────────────────────────────
+ *   每篇文章都按「路径哈希」生成一组渐变参数（四色 + 角度），
+ *   同一篇永远一致、不同篇互不相同，用于：
+ *     ① 文章没配头图  ② 图片加载失败（CDN 挂了 / 文件名改了）
+ * ────────────────────────────────────────────────
  *
  * ── 封面图最佳分辨率（Notion「封面」字段注释同源）──────
  *   推荐 1600 x 700（16:7），webp 格式，单张 ≤ 300KB
@@ -72,21 +84,103 @@ function dimOf(v) {
   return Math.round(n * 1000) / 1000;
 }
 
+/* ── 渐变兜底参数（无头图 / 图片加载失败时使用）──────
+   算法取自封面生成器 cover-editor.html 的「随机渐变」：
+   一个基准色相 + 同向递进的 3 个色相 + 亮度阶梯 + 随机角度。
+   区别在于随机数由「文章路径哈希」生成 ——
+   同一篇文章每次构建都得到同一组参数，不同文章互不相同。
+*/
+function seedOf(str) {
+  var h = 2166136261 >>> 0;
+  for (var i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 16777619);
+  }
+  h ^= h >>> 15; h = Math.imul(h, 2246822507);
+  h ^= h >>> 13; h = Math.imul(h, 3266489909);
+  h ^= h >>> 16;
+  return h >>> 0;
+}
+
+function rngOf(seed) {
+  return function () {
+    seed = (seed + 0x6d2b79f5) | 0;
+    var t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function hsl2hex(h, s, l) {
+  s /= 100; l /= 100;
+  var k = function (n) { return (n + h / 30) % 12; };
+  var a = s * Math.min(l, 1 - l);
+  var f = function (n) {
+    return l - a * Math.max(-1, Math.min(k(n) - 3, Math.min(9 - k(n), 1)));
+  };
+  var to = function (v) {
+    var x = Math.round(255 * v).toString(16);
+    return x.length < 2 ? '0' + x : x;
+  };
+  return '#' + to(f(0)) + to(f(8)) + to(f(4));
+}
+
+function gradOf(key) {
+  var r = rngOf(seedOf(key));
+  var base = r() * 360;
+  var dir = r() < 0.5 ? 1 : -1;
+  var sat = 66 + r() * 24;          // 66~90
+  var l1 = 30 + r() * 12;           // 30~42
+  var step = 18 + r() * 16;         // 18~34
+  return {
+    c: [
+      hsl2hex(base, sat, l1),
+      hsl2hex((base + dir * step + 360) % 360, sat, l1 + 8),
+      hsl2hex((base + dir * step * 2 + 720) % 360, sat, l1 + 14),
+      hsl2hex((base + dir * step * 3 + 1080) % 360, sat, l1 + 20)
+    ],
+    a: Math.floor(r() * 360)
+  };
+}
+
+/* 主题给「没配封面」的文章套的默认图、以及破图占位图。
+   识别到这两类地址就说明这张封面不是作者自己配的 → 换成渐变兜底。 */
+function defaultImgs() {
+  var cfg = (hexo.theme && hexo.theme.config) || {};
+  var list = [];
+
+  var dc = cfg.cover && cfg.cover.default_cover;
+  if (dc) list = list.concat(Array.isArray(dc) ? dc : [dc]);
+
+  var ei = cfg.error_img;
+  if (typeof ei === 'string') list.push(ei);
+  else if (ei) ['post_page', 'flink'].forEach(function (k) {
+    if (ei[k]) list.push(ei[k]);
+  });
+
+  return list.filter(Boolean).map(str);
+}
+
 hexo.extend.generator.register('covermeta', function (locals) {
-  var map = {};
+  var map = {};    // 封面文字层
+  var grads = {};  // 渐变兜底（全部文章）
   var dup = [];
   var count = 0;
 
   locals.posts.forEach(function (post) {
+    var key = norm(post.path);
+    if (!key) return;
+
+    // 每篇文章都生成一组渐变参数（无头图 / 图片加载失败时兜底）
+    grads[key] = gradOf(key);
+
     var title = unquote(post.covertitle);
     var set = unquote(post.coverset || post.coversub || '');
     var hasDim = !(post.coverdim === undefined || post.coverdim === null || post.coverdim === '');
 
-    // 唯一判定：三处全空 → 跳过，原图不受任何影响
+    // 唯一判定：三处全空 → 不写文字层，原图不受任何影响
     if (!title && !set && !hasDim) return;
 
-    var key = norm(post.path);
-    if (!key) return;
     if (map[key]) dup.push(key);
 
     map[key] = {
@@ -101,10 +195,15 @@ hexo.extend.generator.register('covermeta', function (locals) {
   if (dup.length) {
     hexo.log.warn('[covermeta] 路径冲突（后者覆盖前者）: ' + dup.join(', '));
   }
-  hexo.log.info('[covermeta] 已启用封面文字层的文章：' + count + ' 篇');
+  hexo.log.info('[covermeta] 封面文字层 ' + count + ' 篇 / 渐变兜底 ' +
+    Object.keys(grads).length + ' 篇');
 
   return {
     path: 'covermeta.json',
-    data: JSON.stringify(map)
+    data: JSON.stringify({
+      covers: map,
+      grads: grads,
+      defaults: defaultImgs()
+    })
   };
 });

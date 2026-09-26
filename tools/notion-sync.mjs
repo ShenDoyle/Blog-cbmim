@@ -108,8 +108,10 @@ const OPTIONAL_PROPS = [
 ];
 
 /* ── 封面文字层限制（与 scripts/covermeta.js、Notion 字段注释同源）── */
-const COVER_TITLE_MAX = 12; // 主标题最佳 4~12 字，小尺寸档位只显示 6~10 字
-const COVER_SUB_MAX = 14; // 副标题最佳 ≤14 字，超过 24 字前端自动截断
+// 主标题强制单行：首页卡片约 431px 宽，实测单行约 8 个汉字；
+// 放不下会自动回退显示 CBM.IM，所以建议控制在 8 字以内
+const COVER_TITLE_MAX = 8;
+const COVER_SUB_MAX = 14; // 副标题最佳 ≤14 字，未填时默认 CBM.IM
 
 /** 蒙版强度归一化：46 → 0.46（百分数写法），越界收敛并告警 */
 function readCoverDim(prop, title) {
@@ -248,7 +250,7 @@ async function processPage({ page, props, state, managedPosts, notion, opts, cou
   const coverSub = readText(pick(props, PROPS.coverSub));
   const coverDim = readCoverDim(pick(props, PROPS.coverDim), title);
   if (coverTitle && Array.from(coverTitle).length > COVER_TITLE_MAX) {
-    log.warn(`「${title}」封面标题 ${Array.from(coverTitle).length} 字，超过建议上限 ${COVER_TITLE_MAX} 字（小尺寸卡片会被截断）`);
+    log.warn(`「${title}」封面标题 ${Array.from(coverTitle).length} 字，超过单行上限 ${COVER_TITLE_MAX} 字（放不下会自动回退显示 CBM.IM）`);
   }
   if (coverSub && Array.from(coverSub).length > COVER_SUB_MAX) {
     log.warn(`「${title}」封面副标题 ${Array.from(coverSub).length} 字，超过建议上限 ${COVER_SUB_MAX} 字（中档卡片超过 24 字会截断）`);
