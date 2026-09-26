@@ -9,6 +9,8 @@
     "server": "hexo server",
     "notion:sync": "node tools/notion-sync.mjs",
     "notion:selftest": "node tools/notion-selftest.mjs",
+    "notion:prep": "node tools/notion-import-prep.mjs",
+    "notion:link": "node tools/notion-link-existing.mjs",
     "notion:preview": "node tools/notion-sync.mjs --dry-run --verbose",
     "notion:preview-server": "node tools/notion-sync.mjs && hexo clean && hexo server",
     "publish": "node tools/notion-sync.mjs && hexo clean && hexo generate && hexo deploy"

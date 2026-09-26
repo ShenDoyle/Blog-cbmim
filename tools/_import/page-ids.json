@@ -1,0 +1,32 @@
+{
+  "note": "首次导入（2026-09-26）生成的 slug → Notion 页面 ID 映射。用于把 notion_page_id 回写进 source/_posts/*.md，让同步脚本接管这些文章。",
+  "parentPage": "3e77adb0-e2e0-8114-8917-e6673992874f",
+  "dataSourceId": "8aee0783-0b53-41e0-861e-0b26993518e3",
+  "pages": {
+    "aboutgeo": "3e77adb0-e2e0-81b5-9616-f9671264356e",
+    "aboutgeo20251024": "3e77adb0-e2e0-81a3-b1ea-e95c653f406a",
+    "aboutsa": "3e77adb0-e2e0-8173-9aae-cac91edcbe45",
+    "aboutsem": "3e77adb0-e2e0-81ef-ab65-ec9308990047",
+    "excel": "3e77adb0-e2e0-81f9-b4bc-f4162f5f1cb9",
+    "excelabsoluterelative": "3e77adb0-e2e0-81c9-85a3-d6c2561efbf2",
+    "flashing": "3e77adb0-e2e0-81d6-b341-f633846f3f21",
+    "geoaq": "3e77adb0-e2e0-8132-8ec2-f09174ea555b",
+    "geoplatform": "3e77adb0-e2e0-81c6-9f0a-c4fa85f72df2",
+    "geoplatformlist": "3e77adb0-e2e0-8152-9293-e37e62180c5b",
+    "geosuggestions": "3e77adb0-e2e0-811d-ac10-e99fbd238621",
+    "hexocommand": "3e77adb0-e2e0-81d7-8850-e396a5c20e3a",
+    "jsDelivr": "3e77adb0-e2e0-819e-8e04-d5688378f492",
+    "kunmingxishan": "3e77adb0-e2e0-81a5-9a30-f30cb982d1b7",
+    "learnvlookup": "3e77adb0-e2e0-818b-b8e7-e2302e68c6fb",
+    "lose_weight": "3e77adb0-e2e0-8145-9ac8-f6bd557a54b6",
+    "newsemer": "3e77adb0-e2e0-8178-9219-cc650e35cd18",
+    "onedrive": "3e77adb0-e2e0-8155-ba76-ee7d51d039d4",
+    "prohibitedwordsdy": "3e77adb0-e2e0-8136-9668-e88023ab5816",
+    "prohibitedwordssph": "3e77adb0-e2e0-8138-88d9-ffe4c7a4fa36",
+    "prohibitedwordsxhs": "3e77adb0-e2e0-810b-818b-e9be6897bb12",
+    "semvssa": "3e77adb0-e2e0-81c8-85b1-ecaf0bab2584",
+    "typechonub": "3e77adb0-e2e0-8150-8051-d24d8689ef53",
+    "wzxn": "3e77adb0-e2e0-81e3-8774-f88c2fdcdf55",
+    "yzncms": "3e77adb0-e2e0-8131-bfd0-cfd85f414159"
+  }
+}

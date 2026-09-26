@@ -10,6 +10,7 @@
  *   callout 首行 [note:xxx]      → 指定 type / no-icon / 标题（可选写法）
  *   toggle（折叠块）             → {% hideToggle 标题 %}…{% endhideToggle %}
  *   段落内容为 [more]            → <!--more-->（自定义摘要截断）
+ *   第一条分割线（divider）       → <!--more-->（页面上更直观的写法；后续分割线保持原样）
  *   代码块 / 表格 / 引用 / 列表   → 原样（走主题默认渲染）
  *
  * 注意：toggle 不能走「自定义转换器」——notion-to-md 会在
@@ -157,6 +158,25 @@ function convertToggles(markdown) {
 }
 
 /**
+ * 第一条独立成行的 `---` → <!--more-->。
+ *
+ * 首次导入把 Hexo 的 <!--more--> 落成 Notion 的分割线（比一行 [more] 文字直观），
+ * 这里做反向映射。只在正文里还没有 [more] 占位符时生效，且只认第一条，
+ * 后面的分割线保持原样（避免把正文里用于视觉分隔的线误当摘要截断）。
+ */
+function convertFirstDividerToMore(markdown) {
+  if (markdown.includes(MORE_MARKER)) return { text: markdown, converted: false };
+  const lines = markdown.split('\n');
+  for (let i = 0; i < lines.length; i += 1) {
+    if (lines[i].trim() === '---') {
+      lines[i] = MORE_MARKER;
+      return { text: lines.join('\n'), converted: true };
+    }
+  }
+  return { text: markdown, converted: false };
+}
+
+/**
  * 渲染整页正文。
  * @returns {Promise<string>} Markdown 正文（未落盘，未本地化图片）
  */
@@ -171,7 +191,10 @@ export async function renderPageBody({ notion, pageId }) {
     log.warn(`页面内含子页面（${extras.join(', ')}），其内容已忽略；如需收录请拆成独立文章。`);
   }
 
-  const toggles = convertToggles(body);
+  const divided = convertFirstDividerToMore(body);
+  if (divided.converted) log.debug('摘要截断：已把第一条分割线转成 <!--more-->');
+
+  const toggles = convertToggles(divided.text);
   if (toggles.converted) log.debug(`折叠块：转换 ${toggles.converted} 个为 hideToggle`);
   if (toggles.nested) {
     log.warn(`检测到 ${toggles.nested} 个嵌套折叠块，主题标签不支持嵌套，已保留原生 HTML（能用但样式朴素）。`);

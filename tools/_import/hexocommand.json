@@ -1,0 +1,18 @@
+{
+  "slug": "hexocommand",
+  "properties": {
+    "标题": "Hexo 常用的命令",
+    "Slug": "hexocommand",
+    "分类": [
+      "技术"
+    ],
+    "标签": [
+      "博客"
+    ],
+    "摘要": "这篇文章是作者记录 Hexo 使用过程中常忘记的命令和修改参数的方法。作者提供了问题解决渠道、常用命令（如生成网站、本地预览、部署等）、清理缓存、创建文章和检查版本等操作，以及文章格式的头部和摘要模板。这些指南可以帮助作者更顺利地使用 Hexo。\n这篇文章记录了作者使用Hexo时常用的命令和修改参数方法，包括生成网站、本地预览、部署等操作，以及文章头部和摘要模板。这些指南有助于作者更有效地利用Hexo。",
+    "发布": "__YES__",
+    "封面": "https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/hexocommand/2024215171707989443076time_hexo_command.webp",
+    "date:日期:start": "2021-01-07T20:00:00+08:00"
+  },
+  "content": "用 Hexo 的时间不是很长，但是用了一段时间真的非常喜欢。不过由于 Github 使用不是很熟练，所以经常过一段时间不用就忘了命令和一些常需要修改的参数，所以在这篇文章里面记录下来。\n\n---\n\n## 问题解决渠道\n\n[hexo 皮肤Github](https://github.com/theme-nexmoe/hexo-theme-nexmoe)\n\n[hexo 主题使用说明](https://docs.nexmoe.com/)\n\n[hexo 皮肤预览](https://r9.cm/)\n\n[hexo 官网使用说明](https://hexo.io/zh-cn/docs/commands.html)\n\n## 最常用\n\n- 生成网站\n\n`hexo g` # 生成全站静态文件\n\n> ```bash\n> hexo generate # 完整写法\n> ```\n>\n> 生成或者更新 `public` 文件夹\n\n- 本地预览\n\n`hexo s` # 启动本地预览服务\n\n> ```bash\n> hexo server # 完整写法\n> ```\n>\n> 启动服务器，访问网址： http://localhost:4000/ 进行本地预览。\n\n- 部署\n\n`hexo d` # 部署网站到 `Github` 。\n\n> ```bash\n> hexo deploy # 完整写法\n> ```\n>\n> 把本地的网站推送到 `Github` ，完成推送后，需要重新到项目设置处绑定域名。\n\n- 清理缓存\n\n`hexo clean` # 清除缓存文件 (`db.json`) 和已生成的静态文件 (`public`)\n\n> 部分情况（比如更换主题后），发现站点的更改不生效，可以试试运行该命令。\n\n- 创建文章\n\n`hexo n \"我的博客\"` # 新建文章\n\n> ```bash\n> hexo new \"我的博客\" # 完整写法\n> ```\n>\n> 新建一篇名字为我的博客的文章。我一般是用 **Typora** 写文章，所以这个命令使用的不多。\n\n- 检查版本\n\n`hexo version` # 显示 hexo 版本\n\n## 文章格式\n\n### 头部\n\n```\n---\ntitle: # 文章标题\ndate: # 发表日期\nupdated: # 更新日期\ncover: # 封面图片\ncategories: # 分类\ntags:\n    - # 标签\n---\n\n```\n\n### 摘要\n\n下列代码前面的内容会被渲染成摘要。\n\n```\n---\n```\n"
+}

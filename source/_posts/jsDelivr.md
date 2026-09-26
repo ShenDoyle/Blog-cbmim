@@ -9,6 +9,7 @@ tags:
 ai: 
     - 这篇文章介绍了jsDelivr公共CDN服务的使用方法。它支持通过npm、github和wordpress加速访问资源。示例展示了不同资源加载方式的URL格式，包括加载npm包、github项目分支和wordpress插件/主题。该指南可以帮助站长有效地利用 jsDelivr 提升网站的访问速度和节省CDN流量。
     - 这篇文章介绍了 **jsDelivr** 公共CDN服务的使用方法，支持npm、github和wordpress资源加载。展示了加速资源访问的URL格式，有助于站长优化网站访问速度和节省CDN流量。
+notion_page_id: 3e77adb0-e2e0-819e-8e04-d5688378f492
 ---
 
 **jsDelivr** 是一款免费开源的公共 CDN 服务，很多站长会把网站的静态文件通过 **jsDelivr** 加速来访问，这样既实现了对网站的加速，又能节约不少网站 CDN 的流量，可谓是神器。

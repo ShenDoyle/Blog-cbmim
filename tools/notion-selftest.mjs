@@ -72,6 +72,14 @@ const CHILDREN = {
     block('b7-1', 'bulleted_list_item', { rich_text: [rt('第一项')] }),
     block('b7-2', 'numbered_list_item', { rich_text: [rt('第二项')] }),
   ],
+  // 无 [more] 占位符：验证「第一条分割线当摘要截断、后面的保持原样」
+  'page-divider': [
+    block('d1', 'paragraph', { rich_text: [rt('截断前的第一段。')] }),
+    block('d2', 'divider', {}),
+    block('d3', 'paragraph', { rich_text: [rt('截断后的第二段。')] }),
+    block('d4', 'divider', {}),
+    block('d5', 'paragraph', { rich_text: [rt('第三条正文。')] }),
+  ],
 };
 
 /** 假客户端：只实现 blocks.children.list，够 notion-to-md 用 */
@@ -157,6 +165,15 @@ await check('标题/代码/引用/分割线正常输出', () => {
   assert.ok(body.includes('console.log(1)'), '代码块丢失');
   assert.ok(body.includes('> 一句引用'), '引用未渲染');
   assert.ok(body.includes('---'), '分割线丢失');
+});
+
+await check('第一条分割线 → <!--more-->，后续分割线保持原样', async () => {
+  const out = await renderPageBody({ notion: fakeNotion, pageId: 'page-divider' });
+  const firstMore = out.indexOf('<!--more-->');
+  assert.ok(firstMore >= 0, '第一条分割线未转成摘要截断');
+  assert.ok(firstMore > out.indexOf('截断前的第一段'), '截断标记应排在第一段之后');
+  assert.ok(firstMore < out.indexOf('截断后的第二段'), '截断标记应排在第二段之前');
+  assert.ok(out.lastIndexOf('---') > firstMore, '后续分割线应保留为 ---');
 });
 
 await check('图片：Notion 自有图床可识别，自家 CDN 不重复落地', () => {

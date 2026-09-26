@@ -5,6 +5,31 @@
 
 ---
 
+## 零、当前状态（2026-09-26）
+
+Notion 侧结构与首次导入**已经建好**，下面「一次性配置」的第 1、2 步不用再手工做：
+
+| 项 | 值 |
+|---|---|
+| Notion 根页面 | [CBMIM 博客](https://app.notion.com/p/3e77adb0e2e081148917e6673992874f) |
+| 博文库（data source） | `8aee0783-0b53-41e0-861e-0b26993518e3` |
+| 页面库（data source） | `b12990b0-b20f-47d5-81a6-6c3096ef4249` |
+| 已导入文章 | **25 篇**（全部，含封面 / 日期 / 分类 / 标签 / 摘要 / 置顶） |
+| 本地托管标记 | 25 篇 `source/_posts/*.md` 已写入 `notion_page_id` |
+| slug → 页面 ID 映射 | `tools/_import/page-ids.json` |
+
+**还差一步才能真正跑通**：给同步脚本一个 Notion **Integration token**（OAuth 连接器那个 token 不能给脚本用）：
+
+1. https://www.notion.so/profile/integrations → **New integration** → Internal → 拿 `ntn_` 开头的 token
+2. 打开 Notion 里的「CBMIM 博客」页面 → 右上角 `···` → **连接** → 选中刚建的 Integration（父页面连上，下面的两个库自动生效）
+3. 把 token 写进站点根目录的 `.env`：`NOTION_TOKEN=ntn_xxx`、`NOTION_DATABASE_ID=8aee0783-0b53-41e0-861e-0b26993518e3`
+4. 跑 `npm run notion:preview`（不写文件）确认无误，再跑 `npm run notion:sync`
+
+> ⚠️ `npm run notion:sync` 会用 Notion 侧内容**重写**这 25 篇的 front-matter（字段顺序会变、`updated` 会更新为 Notion 的最后编辑时间）。
+> 执行前先 `git status` 确认工作区干净，跑完用 `git diff` 检查，不满意直接 `git checkout -- source/_posts` 回滚。
+
+---
+
 ## 一、原理（一眼看懂）
 
 ```
@@ -35,7 +60,7 @@ Notion 数据库 ──①同步脚本──▶ source/_posts/*.md ──②hexo
 | 分类 | 单选 | | 对应 `categories`；只填一个时按字符串输出 |
 | 标签 | 多选 | | 对应 `tags` |
 | 封面 | 文件与媒体 或 URL | | 对应 `cover`，图会下载落地 |
-| 置顶 | 数字 | | 对应 `top_group_index`，数字越大越靠前 |
+| 置顶 | **下拉（9/7/5/3/1）** | | 对应 `top_group_index`，数字越大越靠前；空 = 不置顶 |
 | 摘要 | 文本 | | 对应 `ai`；**多行 = 多条摘要** |
 | 发布 | 复选框 | ✅ | 勾选才生成文章，用来做草稿箱 |
 | 封面标题 | 文本 | | 对应 `covertitle`，配合现有封面蒙版脚本 |
@@ -79,14 +104,15 @@ Notion 数据库 ──①同步脚本──▶ source/_posts/*.md ──②hexo
 
 ### 摘要截断
 
-想控制首页显示的摘要长度，在正文里**单独一行写**：
+想控制首页显示的摘要长度，正文里**两种写法都认**：
 
-```
-[more]
-```
+| 写法 | 说明 |
+|---|---|
+| 插入一条**分割线**（Notion 输入 `---`） | 推荐。页面上一目了然 |
+| 单独一行写 `[more]` | 兼容写法，转出来同样是 `<!--more-->` |
 
-要求：这一行独占一个段落（前后空行）。转出来就是 Hexo 的 `<!--more-->`。
-**不写的话脚本会自动插在第一段之后**，并在日志里提醒。
+规则：取**第一条**分割线作为截断点，它之后的分割线保持原样。
+**都不写的话脚本会自动插在第一段之后**，并在日志里提醒。
 
 ### 提示框（callout → 主题 note）
 
@@ -166,6 +192,17 @@ npm run notion:sync -- --only my-post-slug --verbose
 npm run publish
 ```
 
+**首次导入相关（已完成，留档备用）**
+
+```bash
+# 本地文章 → Notion 导入包（tools/_import/<slug>.json）
+npm run notion:prep
+
+# 把 tools/_import/page-ids.json 的映射回写进 md 的 notion_page_id
+npm run notion:link -- --dry-run    # 先看会改什么
+npm run notion:link                 # 实际写入
+```
+
 > 令牌优先级：系统环境变量 > `.env`。`.env` 已在 `.gitignore` 里，不会进仓库；
 > 想更安全就只放 GitHub Secrets，本地不用 `.env`。
 
@@ -200,7 +237,10 @@ npm run publish
 | 路径 | 作用 |
 |---|---|
 | `tools/notion-sync.mjs` | 同步入口（CLI） |
-| `tools/notion-selftest.mjs` | 离线自检（14 项断言） |
+| `tools/notion-selftest.mjs` | 离线自检（15 项断言） |
+| `tools/notion-import-prep.mjs` | 本地文章 → Notion 导入包（首次导入用） |
+| `tools/notion-link-existing.mjs` | 把 `notion_page_id` 回写进 md（首次导入用） |
+| `tools/_import/` | 首次导入的中间产物：`<slug>.json` + `page-ids.json` |
 | `tools/notion/config.mjs` | 字段名候选、路径、图片命名空间、颜色映射 |
 | `tools/notion/api.mjs` | Notion API 访问（兼容 v5 新接口） |
 | `tools/notion/render.mjs` | 区块 → Markdown + 主题语法映射 |
@@ -211,4 +251,8 @@ npm run publish
 | `.notion-sync-state.json` | 增量状态（**需要提交**） |
 | `.env.example` | 本机令牌模板；复制成 `.env` 后填入（`.env` 不进仓库） |
 
-**不改动**：`themes/anzhiyu/**`、`_config.yml`、`_config.anzhiyu.yml`、`source/_posts/` 里原有的 25 篇手写文章。
+**不改动**：`themes/anzhiyu/**`（主题定制版另存于 [CBMIM-theme](https://github.com/ShenDoyle/CBMIM-theme)）、`_config.yml`、`_config.anzhiyu.yml`。
+
+**关于原有 25 篇文章**：正文与 front-matter 全部原样保留，只多了一行 `notion_page_id`（首次导入的托管标记）。
+所以它们**现在是 Notion 托管的**——第一次跑 `notion:sync` 会按 Notion 侧内容重写一次（内容等价，字段顺序会变）。
+若不想让某篇被托管，删掉那一行 `notion_page_id` 即可。
