@@ -86,6 +86,8 @@ jobs:
             echo "CONTENT_CHANGED=0" >> "$GITHUB_ENV"
           else
             git commit -m "chore(notion): 同步 Notion 文章 $(date -u '+%Y-%m-%d %H:%M UTC')"
+            # 本地可能在此期间推过新提交（如手改 README），rebase 兜底避免 push 被拒
+            git pull --rebase origin main
             git push
             echo "CONTENT_CHANGED=1" >> "$GITHUB_ENV"
           fi

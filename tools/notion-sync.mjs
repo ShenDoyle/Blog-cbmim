@@ -364,7 +364,7 @@ async function main() {
   let list = pages;
   if (opts.only) {
     list = list.filter(
-      (p) => p.id === opts.only || p.id.replace(/-/g, '') === opts.only.replace(/-/g, '') || p.id.endsWith(opts.only)
+      (p) => p.id === opts.only || p.id.replace(/-/g, '') === opts.only.replace(/-/g, '') || p.id.endsWith(opts.only) || p.id.startsWith(opts.only)
     );
     if (!list.length) {
       log.err(`--only 没匹配到任何页面：${opts.only}`);

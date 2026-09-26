@@ -145,6 +145,14 @@
       "assets": [],
       "syncedAt": "2026-09-26T14:40:13.503Z"
     },
+    "3e77adb0-e2e0-81c7-8d96-c5f700a89ada": {
+      "slug": "blog-notion-migration",
+      "file": "blog-notion-migration.md",
+      "date": "2026/09/26 08:00:00",
+      "lastEditedTime": "2026-09-26T16:27:00.000Z",
+      "assets": [],
+      "syncedAt": "2026-09-26T16:28:37.859Z"
+    },
     "3e77adb0-e2e0-81c8-85b1-ecaf0bab2584": {
       "slug": "semvssa",
       "file": "semvssa.md",
