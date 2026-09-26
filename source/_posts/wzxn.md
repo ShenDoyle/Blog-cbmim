@@ -1,16 +1,16 @@
-﻿---
+---
 title: 在电脑上多开微信的方法
 date: 2020/11/18 20:00:00
-updated: 2021-01-07 23:14:57
+updated: 2026/09/26 19:28:00
 cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/wzxn/2024215171707989450040time_wzxn.webp
 top_group_index: 9
 categories: 分享
 tags:
-    - 技巧
-    - 电脑
+  - 技巧
+  - 电脑
 ai:
-    - 这篇文章介绍了一种使用.bat文件实现微信双开的方法。
-    - 这篇文章介绍了一个在电脑上实现微信双开的方式。
+  - 这篇文章介绍了一种使用.bat文件实现微信双开的方法。
+  - 这篇文章介绍了一个在电脑上实现微信双开的方式。
 notion_page_id: 3e77adb0-e2e0-81e3-8774-f88c2fdcdf55
 ---
 
@@ -30,7 +30,7 @@ notion_page_id: 3e77adb0-e2e0-81e3-8774-f88c2fdcdf55
 
 在桌面新建一个**txt**文本，打开之后，把下面这段内容复制粘贴进去：
 
-```
+```javascript
 @echo off
 
 start /d "C:\Program Files (x86)\Tencent\WeChat\" WeChat.exe
@@ -48,7 +48,7 @@ exit
 
 比如我的做过修改，所以内容就改成了下面的这段：
 
-```
+```javascript
 @echo off
 
 start /d "D:\Program Files\WeChat\" WeChat.exe
@@ -64,7 +64,7 @@ exit
 
 比如想同时启动 4 个微信，代码如下：
 
-```
+```javascript
 @echo off
 
 start /d "D:\Program Files\WeChat\" WeChat.exe

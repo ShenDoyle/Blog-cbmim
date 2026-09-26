@@ -97,7 +97,7 @@ function validateSchema(properties) {
   if (!properties || !Object.keys(properties).length) return;
 
   const missingRequired = REQUIRED_PROPS.filter((p) => !pick(properties, PROPS[p.key]));
-  const missingOptional = OPTIONAL_PROPS.filter((p) => !pick(properties, PROPS[p.key]));
+  const missingOptional = OPTIONAL_PROPS.filter((k) => !pick(properties, PROPS[k]));
 
   if (missingRequired.length) {
     log.warn('数据库里没找到这些关键字段，可能影响同步效果：');

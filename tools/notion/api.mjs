@@ -75,7 +75,7 @@ export async function queryAllPages(notion, dataSourceId) {
     round += 1;
     const base = { start_cursor: cursor, page_size: 100 };
     const res = useDataSources
-      ? await notion.dataSources.query({ data_source_id: dataSourceId, result_type: 'page', in_trash: false, ...base })
+      ? await notion.dataSources.query({ data_source_id: dataSourceId, result_type: 'page', ...base })
       : await notion.databases.query({ database_id: dataSourceId, ...base });
 
     for (const item of res.results || []) {

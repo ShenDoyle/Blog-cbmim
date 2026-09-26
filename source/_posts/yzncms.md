@@ -1,15 +1,15 @@
-﻿---
+---
 title: 一个开源的 CMS 系统
-date: 2022/11/26 18:36:52
-updated: 2022/11/26 18:36:52
+date: 2022/11/26 18:36:00
+updated: 2026/09/26 19:21:00
 cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/yzncms/2024215171707989451050time_yzncms.webp
 categories: 分享
 tags:
-    - CMS
-    - 开源
+  - CMS
+  - 开源
 ai:
-    - 这是介绍开源的 YznCMS，基于 ThinkPHP5.1 和 Layui2.7.x，可商用且完全免费。支持新 PHP 版本，相对老牌 CMS 更友好，具备开发手册、博客和视频教程。与其他 CMS 相比，它更适合当前对 PHP 版本要求更高的用户。
-    - 织梦去年割羊毛后，人们纷纷离开，帝国 CMS不再是唯一选择。推荐开源可商用的 YznCMS，基于ThinkPHP5.1和Layui2.7.x，遵循Apache2.0协议，永久免费可商用。免费部分包括框架和自带插件，授权插件需付费。支持PHP7.0以上，数据库要求MySQL5.6以上。系统更新频繁，支持新版本PHP。【项目地址】[Gitee](https://gitee.com/ken678/YZNCMS)【使用手册】[手册](https://www.kancloud.cn/ken678/yzncms)【开发者博客】[博客](https://blog.yzncms.com/)【视频教程】[Bilibili](https://www.bilibili.com/video/av417106995/)
+  - 这是介绍开源的 YznCMS，基于 ThinkPHP5.1 和 Layui2.7.x，可商用且完全免费。支持新 PHP 版本，相对老牌 CMS 更友好，具备开发手册、博客和视频教程。与其他 CMS 相比，它更适合当前对 PHP 版本要求更高的用户。
+  - 织梦去年割羊毛后，人们纷纷离开，帝国 CMS不再是唯一选择。推荐开源可商用的 YznCMS，基于ThinkPHP5.1和Layui2.7.x，遵循Apache2.0协议，永久免费可商用。免费部分包括框架和自带插件，授权插件需付费。支持PHP7.0以上，数据库要求MySQL5.6以上。系统更新频繁，支持新版本PHP。【项目地址】Gitee【使用手册】手册【开发者博客】博客【视频教程】Bilibili
 notion_page_id: 3e77adb0-e2e0-8131-bfd0-cfd85f414159
 ---
 
