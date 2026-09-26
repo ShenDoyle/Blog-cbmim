@@ -17,9 +17,9 @@ aside: false
 ```YML
 - name: 南城左立方
   link: https://cbm.im/
-  avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp
+  avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp
   descr: 南城左立方
-  siteshot: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp
+  siteshot: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp
 ```
 
 <!-- endtab -->
@@ -29,9 +29,9 @@ aside: false
 | 名字       | 值                                                                                 |
 | ---------- | ---------------------------------------------------------------------------------- |
 | 站点名称   | 南城左立方                                                                         |
-| 站点截图   | https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp |
+| 站点截图   | https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp |
 | 站点链接   | https://cbm.im/                                                                    |
-| 站长头像   | https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp                                                     |
+| 站长头像   | https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp                                                     |
 | 站点描述   | 专注GEO、SEO、SEM、信息流广告运营。                                                |
 | 站点关键词 | 博客,笔记,学习,分享                                                                |
 
@@ -60,9 +60,9 @@ a(href='https://cbm.im/' rel="external nofollow") 南城笔记
 ```JSON
 {
   "title": "南城笔记",
-  "screenshot": "https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp",
+  "screenshot": "https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp",
   "url": "https://cbm.im/",
-  "avatar": "https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp",
+  "avatar": "https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp",
   "description": "智者乐水，仁者乐山。",
   "keywords": "博客,笔记,学习,分享"
 }
@@ -77,7 +77,7 @@ a(href='https://cbm.im/' rel="external nofollow") 南城笔记
     title: "南城笔记",
     intro: "智者乐水，仁者乐山。",
     link: "https://cbm.im/",
-    image: "https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp",
+    image: "https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp",
   }
 ```
 
@@ -141,8 +141,8 @@ a(href='https://cbm.im/' rel="external nofollow") 南城笔记
 1. 我的名称: `南城笔记`
 2. 网站地址: `https://cbm.im/`
 3. 描述: `智者乐水，仁者乐山。`
-4. 头像: `https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp`
-5. 站点截图: `https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp`
+4. 头像: `https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp`
+5. 站点截图: `https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp`
 
 参照以下格式留言 📋 即可。
 
@@ -159,9 +159,9 @@ a(href='https://cbm.im/' rel="external nofollow") 南城笔记
 ```YML
 昵称：南城笔记
 网站地址：https://cbm.im/
-头像图片url：https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp
+头像图片url：https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp
 描述：智者乐水，仁者乐山。
-站点截图:(可选)：https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp
+站点截图:(可选)：https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp
 ```
 
 站点截图建议自己提供，尺寸尽量不要大于 300*300。
@@ -181,8 +181,8 @@ https://image.thum.io/get/width/400/crop/800/allowJPG/wait/20/anheyu.com/https:/
 1. 我的名称: `南城笔记`
 2. 网站地址: `https://cbm.im/`
 3. 描述: `智者乐水，仁者乐山。`
-4. 头像: `https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/avatar.webp`
-5. 站点截图: `https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp`
+4. 头像: `https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp`
+5. 站点截图: `https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/cbm_im/2024215181707994558749time_cbm.im.webp`
 
 请**确认**你符合的条件：
 

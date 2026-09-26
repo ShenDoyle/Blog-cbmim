@@ -103,10 +103,10 @@ ignore:
 envelope_comment:
   enable: true #控制开关
   custom_pic:
-    cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/violet.webp #信笺头部图片
-    line: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/line.webp #信笺底部图片
-    beforeimg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/before.webp # 信封前半部分
-    afterimg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/source/img/site/after.webp # 信封后半部分
+    cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/violet.webp #信笺头部图片
+    line: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/line.webp #信笺底部图片
+    beforeimg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/before.webp # 信封前半部分
+    afterimg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/after.webp # 信封后半部分
   message: #信笺正文，多行文本，写法如下
     - 想问的
     - 想说的
@@ -164,6 +164,17 @@ aplayer:
 # path: atom.xml
 # limit: 20
 
+# Local Search
+## plugin: hexo-generator-searchdb
+## Docs: https://github.com/next-theme/hexo-generator-searchdb
+## 主题依赖 config.search.path（见 themes/anzhiyu/layout/includes/head/config.pug）
+## 缺失该段会导致 Issue #348：local_search 开启但无索引文件
+search:
+  path: search.xml
+  field: post
+  content: true
+  format: striptags
+
 # Extensions
 ## Plugins: https://hexo.io/plugins/
 ## Themes: https://hexo.io/themes/
@@ -177,15 +188,26 @@ deploy:
   branch: main
 
 # Douban sync (hexo-douban 2.x): /books/ and /movies/
+# builtin: true 表示 hexo g 时自动执行 hexo douban。
+# 关键：builtin 为 false 时，每次 hexo g 都会删除豆瓣生成的页面，导致 /books/ /movies/ 404。
 douban:
   id: 143267574
-  builtin: false
+  builtin: true
   timeout: 20000
+  # 每页条目数。用户要求 8 条一页，分页栏由此生效。
+  # 源码仅读取 douban.item_per_page（非 book/movie 子级），默认 10。
+  item_per_page: 8
   book:
     path: books/index.html
-    title: 我的阅读
-    quote: 读万卷书，行万里路。
+    title: CBM.IM
+    # quote 留空：idouban 仅在 quote 为真值时渲染 blockquote，置空即不显示注释语。
+    quote:
+    # 标签顺序默认 ["do","wish","collect"]，首屏会落在空的「在读」，页面看起来像空白。
+    # 改为已读优先，保证打开即有内容。可选值仅限 do / wish / collect。
+    actions: [collect, wish, do]
   movie:
     path: movies/index.html
-    title: 我的影视
-    quote: 于光影之间，观世间百态。
+    title: CBM.IM
+    quote:
+    # 同 book：在看数量少且常为空，改为已看优先。可选值仅限 do / wish / collect。
+    actions: [collect, wish, do]

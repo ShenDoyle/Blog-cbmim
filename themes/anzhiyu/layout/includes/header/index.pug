@@ -16,12 +16,18 @@ if !theme.disable_top_img && page.top_img !== false
     - var site_title = page.title || page.tag || page.category || config.title
     - var isHomeClass = is_home() ? 'full_page' : 'not-home-page'
     - is_post() ? isHomeClass = 'post-bg' : isHomeClass
+    //- 修复 issue #341：原写法恒用 home_index_img_bg，而该变量仅在首页分支赋值，
+    //- 导致独立页面（about/link/comments 等）顶部图丢失。
+    //- 首页沿用完整 CSS 值，文章页留空交给 <img id="post-top-bg">，其余页面用封面 URL 兜底。
+    - var header_bg = is_home() ? home_index_img_bg : (is_post() ? '' : (bg_img ? 'background: url(' + bg_img + ') top / cover no-repeat' : ''))
   else
     - var isHomeClass = 'not-top-img'
+    - var header_bg = ''
 else
   - var top_img = false
   - var isHomeClass = 'not-top-img'
-header#page-header(class=`${isHomeClass}` style=home_index_img_bg)
+  - var header_bg = ''
+header#page-header(class=`${isHomeClass}` style=header_bg)
   !=partial('includes/header/nav', {}, {cache: true})
   if top_img !== false
     if is_post()

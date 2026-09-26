@@ -139,10 +139,13 @@ avatar:
   effect: false
 
 # Disable all banner image
-disable_top_img: true
+# 改为 false 以启用封面/头图显示（文章页 post-bg 与首页 full_page 头图）
+disable_top_img: false
 
 # The banner image of home page
-index_img: "background: url('https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/violet.webp') top / cover no-repeat"
+# 设为 false 即首页不显示顶图（主题通过 theme.index_img !== false 判定）
+# 注意：此处须为 false，不可写成空值或删除，否则会回落到 default_top_img
+index_img: false
 
 archive_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/archive_top.webp
 
@@ -1212,10 +1215,18 @@ inject:
   head:
     # 自定义css
     # - <link rel="stylesheet" href="/css/custom.css" media="defer" onload="this.media='all'">
+    # 封面文字层（topic / subtopic 分层渲染）
+    - <link rel="stylesheet" href="/css/cover-overlay.css">
+    # 友链页评论闸门
+    - <link rel="stylesheet" href="/css/link-gate.css">
 
   bottom:
     # 自定义js
     # - <script src="/js/xxx"></script>
+    # 封面文字层：读取 /covermeta.json，按容器宽度分档叠加主题 / 副主题
+    - <script src="/js/cover-overlay.js" defer></script>
+    # 友链页：申请条件全部勾选后才放开评论区
+    - <script src="/js/link-gate.js" defer></script>
 
 # CDN
 # Don't modify the following settings unless you know how they work
