@@ -200,5 +200,8 @@ export async function renderPageBody({ notion, pageId }) {
     log.warn(`检测到 ${toggles.nested} 个嵌套折叠块，主题标签不支持嵌套，已保留原生 HTML（能用但样式朴素）。`);
   }
 
-  return toggles.text;
+  // Notion「Plain Text」代码块的语言名会被原样输出，归一成裸围栏（Hexo 视为无语言）
+  const normalized = toggles.text.replace(/^```(?:plain ?text|plaintext)\s*$/gim, '```');
+
+  return normalized;
 }

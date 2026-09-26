@@ -66,18 +66,21 @@ jobs:
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             echo "▶ 预览模式"
             npm run notion:sync -- --dry-run --verbose
+            npm run notion:pages -- --dry-run --verbose
           elif [ "${{ inputs.force }}" = "true" ]; then
             echo "▶ 全量重建"
             npm run notion:sync -- --force
+            npm run notion:pages -- --force
           else
             echo "▶ 增量同步"
             npm run notion:sync
+            npm run notion:pages
           fi
 
       - name: 把生成的文章与图片提交回源码仓
         if: ${{ inputs.dry_run != true }}
         run: |
-          git add -A source/_posts source/img .notion-sync-state.json
+          git add -A source .notion-sync-state.json .notion-pages-state.json
           if git diff --cached --quiet; then
             echo "内容无变化"
             echo "CONTENT_CHANGED=0" >> "$GITHUB_ENV"

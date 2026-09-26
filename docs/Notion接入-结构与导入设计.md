@@ -52,14 +52,16 @@ CBMIM 博客（父页面 = 你说的"文件夹"）
 
 ## 四、独立页面（"其它自己写内容的子页面"）
 
-分三档，按性价比排：
+「📄 页面」库字段：页面名称（标题）/ 路径（`source/xxx/index.md`）/ 说明 / 发布（勾选）。
+由 `npm run notion:pages` 同步，md 只替换正文（front-matter 留在本地），已接入 Actions 流水线。
 
-| 档位 | 页面 | 现在的内容在哪 | 处理方式 |
+| 档位 | 页面 | 处理方式 | 状态 |
 |---|---|---|---|
-| **① 直接纳入**（纯文本，零风险） | 版权协议 `/cc/`、隐私政策 `/privacy/`、关于页正文 `/about/` | `source/<页>/index.md` 正文 | 进「📄 页面」数据库，Notion 改完同步回 md |
-| **② 部分纳入** | 关于页的卡片信息（头像 / 技能标签 / 签名） | `source/_data/about.yml` | 后期用「站点数据」库管理，脚本生成 YAML |
-| **③ 暂不纳入** | 音乐馆 `/music/`、标签 `/tags/`、分类 `/categories/` | 主题配置自动生成 | 无自由文本，Notion 化了也没意义 |
-| **③ 暂不纳入** | 友链 `/link/`、好东西 `/equipment/` | `source/_data/link.yml`、`equipment.yml` | 结构化数据，量大；第二期再做 |
+| **① 直接纳入**（正文） | 版权协议 `/cc/`、隐私政策 `/privacy/` | Notion 正文 → `source/<页>/index.md` | ✅ 已纳管 |
+| **① 数据文件** | 友链 `link.yml`、好物 `equipment.yml`、关于 `about.yml`、装备页头 `artegories.yml`、创造力 `creativity.yml` | Notion 页面里放一个 yaml 代码块存全文，同步逐字写回 `source/_data/`（bangumis.json 由插件生成，不纳管） | ✅ 已纳管 |
+| **② 部分纳入** | 关于页卡片信息已随 about.yml 纳管 | — | ✅ |
+| **③ 暂不纳入** | 音乐馆 `/music/`、标签 `/tags/`、分类 `/categories/` | 主题配置自动生成 | 无自由文本 |
+| **③ 暂不纳入** | 友链页交互门禁等（`source/js/link-gate.js`） | 代码而非内容 | 不适合 Notion 化 |
 
 ## 五、导入清单（首次）
 

@@ -1,0 +1,61 @@
+{
+  "version": 1,
+  "pages": {
+    "3e77adb0-e2e0-811d-a8fc-c9859a582cdf": {
+      "id": "3e77adb0-e2e0-811d-a8fc-c9859a582cdf",
+      "name": "好物数据",
+      "path": "source/_data/equipment.yml",
+      "file": "source/_data/equipment.yml",
+      "lastEditedTime": "2026-09-26T15:40:00.000Z",
+      "syncedAt": "2026-09-26T15:41:42.187Z"
+    },
+    "3e77adb0-e2e0-8132-bea4-ee8154a11fbb": {
+      "id": "3e77adb0-e2e0-8132-bea4-ee8154a11fbb",
+      "name": "版权协议",
+      "path": "source/cc/index.md",
+      "file": "source/cc/index.md",
+      "lastEditedTime": "2026-09-26T15:26:00.000Z",
+      "syncedAt": "2026-09-26T15:41:43.974Z"
+    },
+    "3e77adb0-e2e0-8150-9a10-df4ceef9d2dc": {
+      "id": "3e77adb0-e2e0-8150-9a10-df4ceef9d2dc",
+      "name": "隐私政策",
+      "path": "source/privacy/index.md",
+      "file": "source/privacy/index.md",
+      "lastEditedTime": "2026-09-26T15:32:00.000Z",
+      "syncedAt": "2026-09-26T15:41:46.265Z"
+    },
+    "3e77adb0-e2e0-8156-a5a0-e9294f11887f": {
+      "id": "3e77adb0-e2e0-8156-a5a0-e9294f11887f",
+      "name": "创造力数据",
+      "path": "source/_data/creativity.yml",
+      "file": "source/_data/creativity.yml",
+      "lastEditedTime": "2026-09-26T15:40:00.000Z",
+      "syncedAt": "2026-09-26T15:41:40.595Z"
+    },
+    "3e77adb0-e2e0-81a9-95ef-caf5a5128c0e": {
+      "id": "3e77adb0-e2e0-81a9-95ef-caf5a5128c0e",
+      "name": "关于页数据",
+      "path": "source/_data/about.yml",
+      "file": "source/_data/about.yml",
+      "lastEditedTime": "2026-09-26T15:40:00.000Z",
+      "syncedAt": "2026-09-26T15:41:41.587Z"
+    },
+    "3e77adb0-e2e0-81eb-b9df-c4a647f12573": {
+      "id": "3e77adb0-e2e0-81eb-b9df-c4a647f12573",
+      "name": "友链数据",
+      "path": "source/_data/link.yml",
+      "file": "source/_data/link.yml",
+      "lastEditedTime": "2026-09-26T15:40:00.000Z",
+      "syncedAt": "2026-09-26T15:41:43.477Z"
+    },
+    "3e77adb0-e2e0-81fc-aec5-d511e8da16e1": {
+      "id": "3e77adb0-e2e0-81fc-aec5-d511e8da16e1",
+      "name": "装备页数据",
+      "path": "source/_data/artegories.yml",
+      "file": "source/_data/artegories.yml",
+      "lastEditedTime": "2026-09-26T15:40:00.000Z",
+      "syncedAt": "2026-09-26T15:41:41.079Z"
+    }
+  }
+}

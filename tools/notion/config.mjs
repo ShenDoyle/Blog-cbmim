@@ -22,6 +22,11 @@ export const DRAFTS_DIR = path.join(SITE_ROOT, 'source', '_drafts');
 export const IMG_ROOT = path.join(SITE_ROOT, 'source', 'img');
 export const STATE_FILE = path.join(SITE_ROOT, '.notion-sync-state.json');
 
+/** 独立页面库（📄 页面）；优先读环境变量，默认值 = CBMIM 博客下的页面数据源 */
+export const PAGES_DATA_SOURCE_ID = (process.env.NOTION_PAGES_DB_ID || '').trim() ||
+  'b12990b0-b20f-47d5-81a6-6c3096ef4249';
+export const PAGES_STATE_FILE = path.join(SITE_ROOT, '.notion-pages-state.json');
+
 /** 图片命名空间：与既有文章一致 → source/img/cbmim/<slug>/xxx.webp */
 export const IMG_NAMESPACE = 'cbmim';
 

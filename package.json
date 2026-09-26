@@ -8,6 +8,7 @@
     "deploy": "hexo deploy",
     "server": "hexo server",
     "notion:sync": "node tools/notion-sync.mjs",
+    "notion:pages": "node tools/notion-pages-sync.mjs",
     "notion:selftest": "node tools/notion-selftest.mjs",
     "notion:prep": "node tools/notion-import-prep.mjs",
     "notion:link": "node tools/notion-link-existing.mjs",

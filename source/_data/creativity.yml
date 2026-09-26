@@ -1,4 +1,4 @@
-﻿- class_name: 开启创造力
+- class_name: 开启创造力
   creativity_list:
     - name: Office
       color: "#FCFCFC"
