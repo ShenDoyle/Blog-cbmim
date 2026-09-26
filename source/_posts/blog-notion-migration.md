@@ -1,7 +1,7 @@
 ---
 title: 把博客搬进 Notion：一次完整的后台迁移实录
 date: 2026/09/26 08:00:00
-updated: 2026/09/27 00:27:00
+updated: 2026/09/27 00:36:00
 cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/cover.webp
 categories: 技术
 tags:
@@ -80,3 +80,128 @@ Notion 里建了「CBMIM 博客」页面，下面两个数据库：
 ## 结语
 
 这次迁移最满意的不是省掉了哪条命令，而是**写作和发布彻底解耦**：Notion 负责内容，GitHub 负责构建，两边靠一个同步脚本对话。后面打算把「📄 页面」库也补满，再把评论和统计的配置收进 Notion 管——慢慢来。
+
+## 主题效果展示
+
+下面把这套主题支持的效果集中试一遍——既是功能清单，也是给新链路做一次渲染体检：Notion 里写的每一行，原样落到 md，再由主题渲染成最终页面。
+
+### 提示框
+
+{% note success %}
+
+同步成功：Notion → 仓库 → 站点，全链路跑通。
+
+{% endnote %}
+
+{% note warning %}
+
+封面图建议 1600×700，否则首页卡片会裁掉画面主体。
+
+{% endnote %}
+
+{% note danger %}
+
+源码仓与产物仓必须分开，force push 会直接覆盖源码。
+
+{% endnote %}
+
+### 折叠块
+
+{% hideToggle 点开看：同步脚本的四条设计 %}
+
+1. 增量同步，按 last_edited_time 判断；
+2. Slug 与日期锁定，防止 URL 漂移；
+3. Notion 图片立即下载落地；
+4. 只增改不删。
+
+{% endhideToggle %}
+
+### 标签页
+
+{% tabs 链路 %}
+
+<!-- tab 同步 -->
+
+Notion 改完 → 同步脚本拉取 → 写入 source/_posts。
+
+<!-- endtab -->
+
+<!-- tab 发布 -->
+
+GitHub Actions 构建 → 强推产物仓 → Pages 生效。
+
+<!-- endtab -->
+
+{% endtabs %}
+
+### 时间线
+
+{% timeline 迁移时间线 %}
+
+<!-- timeline 第一步 -->
+
+25 篇存量文章导入 Notion。
+
+<!-- endtimeline -->
+
+<!-- timeline 第二步 -->
+
+独立页面与 _data 数据文件纳管。
+
+<!-- endtimeline -->
+
+<!-- timeline 第三步 -->
+
+Actions 接管发布，本地环境退居二线。
+
+<!-- endtimeline -->
+
+{% endtimeline %}
+
+### 按钮与卡片
+
+{% btns %}
+
+{% cell 打开 Notion, [https://www.notion.so/](https://www.notion.so/) %}
+
+{% cell 源码仓库, [https://github.com/ShenDoyle/Blog-cbmim](https://github.com/ShenDoyle/Blog-cbmim) %}
+
+{% endbtns %}
+
+{% sitegroup %}
+
+{% site [https://cbm.im](https://cbm.im/), [https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/cover.webp](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/cover.webp), 南城左立方, 就是本站 %}
+
+{% endsitegroup %}
+
+### 复选框
+
+{% checkbox checked, 封面已处理为 1600×700 webp %}
+
+{% checkbox 评论与统计也接入 Notion %}
+
+### 折叠面板
+
+{% folding 展开看：构建的门控条件 %}
+
+- 生成的 HTML 不能是空文件；
+- 首页与文章页需命中关键内容；
+- covermeta.json 需包含封面三件套。
+
+{% endfolding %}
+
+### 行内标签
+
+快捷键 {% kbd Ctrl %}+{% kbd S %}，{% u 下划线 %}，{% emp 着重 %}，{% wavy 波浪线 %}，{% label 标签 blue %}，{% span 红色文字, red %}。
+
+### 图廊
+
+{% gallery %}
+
+![封面：雨夜搬迁](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/cover.webp)
+
+![正文配图](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/body-full.webp)
+
+{% endgallery %}
+
+以上每一项都在本地构建里逐个核对过渲染结果——能看到的样式，就是主题真实生效的样式。
