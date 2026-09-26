@@ -11,3 +11,11 @@ public/
 themes/*.7z
 *.code-workspace
 File/
+
+# 本地密钥（Notion 令牌等），切勿提交
+.env
+.env.local
+*.local.env
+
+# 同步状态需要提交，勿加入忽略
+!.notion-sync-state.json

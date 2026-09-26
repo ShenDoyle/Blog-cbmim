@@ -81,6 +81,39 @@ Notion → Hexo 同步
   npm run notion:sync -- --dry-run --verbose
 `;
 
+/* ────────────────────────── 字段体检 ────────────────────────── */
+
+const REQUIRED_PROPS = [
+  { key: 'title', hint: '文章标题' },
+  { key: 'slug', hint: '决定文章 URL，一旦发布不要再改' },
+  { key: 'date', hint: '不填会回退到页面创建时间，并在日志里提醒' },
+  { key: 'publish', hint: '不填则默认全部视为已发布' },
+];
+
+const OPTIONAL_PROPS = ['categories', 'tags', 'cover', 'topIndex', 'summary', 'coverTitle'];
+
+/** 按数据库 schema 检查字段是否齐备，缺了就直说缺什么、叫什么名字能认 */
+function validateSchema(properties) {
+  if (!properties || !Object.keys(properties).length) return;
+
+  const missingRequired = REQUIRED_PROPS.filter((p) => !pick(properties, PROPS[p.key]));
+  const missingOptional = OPTIONAL_PROPS.filter((p) => !pick(properties, PROPS[p.key]));
+
+  if (missingRequired.length) {
+    log.warn('数据库里没找到这些关键字段，可能影响同步效果：');
+    for (const p of missingRequired) {
+      log.warn(`  · ${p.hint} → 可命名为：${PROPS[p.key].join(' / ')}`);
+    }
+  }
+  if (missingOptional.length) {
+    log.info(
+      `未创建的可选字段（不影响发布）：${missingOptional.map((k) => PROPS[k][0]).join('、')}；` +
+        `需要的话可命名为：${missingOptional.flatMap((k) => PROPS[k]).join(' / ')}`
+    );
+  }
+  if (!missingRequired.length && !missingOptional.length) log.ok('字段体检通过：必填与可选字段齐全');
+}
+
 /* ────────────────────────── 单篇处理 ────────────────────────── */
 
 function resolveSlug({ page, props, existing, title }) {
@@ -252,11 +285,17 @@ async function main() {
     return 1;
   }
 
-  const notion = createClient(token);
+  const notion = createClient(token, { verbose: opts.verbose });
 
   log.info('连接 Notion …');
   const dataSource = await resolveDataSource(notion, databaseId);
-  log.ok(`数据源就绪：${dataSource.id}`);
+  if (dataSource.resolved) {
+    log.ok(`数据库就绪：${dataSource.name || '(未命名)'}（数据源 ${dataSource.id}）`);
+    validateSchema(dataSource.properties);
+  } else {
+    // 读不到 schema 不一定是错（旧版 API 也走这条兜底），真正的权限问题会在查询时暴露
+    log.debug('未能读取数据库结构，直接把该 ID 当数据源查询');
+  }
 
   const pages = await queryAllPages(notion, dataSource.id);
   log.info(`拉取到 ${pages.length} 个页面`);

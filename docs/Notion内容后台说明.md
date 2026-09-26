@@ -144,13 +144,16 @@ Notion 的 **Toggle** 块会自动转成主题的折叠面板，标题取 toggle
 ## 四、命令速查
 
 ```bash
+# 首次：把令牌放进本机 .env（不会被提交）
+cp .env.example .env      # 然后填入 NOTION_TOKEN 和 NOTION_DATABASE_ID
+
 # 离线自检（不需要令牌，验证转换规则）
 npm run notion:selftest
 
 # 预览：只打印将要做什么，不写文件
 npm run notion:preview
 
-# 正式同步（需要 NOTION_TOKEN / NOTION_DATABASE_ID）
+# 正式同步（读 .env，或读系统环境变量）
 npm run notion:sync
 
 # 强制全量重写（怀疑状态文件出错时用）
@@ -162,6 +165,9 @@ npm run notion:sync -- --only my-post-slug --verbose
 # 本地一条龙：同步 → 构建 → 部署（不用 Actions 时）
 npm run publish
 ```
+
+> 令牌优先级：系统环境变量 > `.env`。`.env` 已在 `.gitignore` 里，不会进仓库；
+> 想更安全就只放 GitHub Secrets，本地不用 `.env`。
 
 ### 增量与安全规则
 
@@ -203,5 +209,6 @@ npm run publish
 | `tools/notion/state.mjs` | 增量状态与磁盘自愈 |
 | `.github/workflows/notion-publish.yml` | 定时 / 手动发布流水线 |
 | `.notion-sync-state.json` | 增量状态（**需要提交**） |
+| `.env.example` | 本机令牌模板；复制成 `.env` 后填入（`.env` 不进仓库） |
 
 **不改动**：`themes/anzhiyu/**`、`_config.yml`、`_config.anzhiyu.yml`、`source/_posts/` 里原有的 25 篇手写文章。

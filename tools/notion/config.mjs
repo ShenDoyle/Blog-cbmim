@@ -10,6 +10,7 @@
  */
 
 import path from 'node:path';
+import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 
 const HERE = path.dirname(fileURLToPath(import.meta.url));
@@ -97,12 +98,40 @@ export const MORE_MARKER = '<!--more-->';
 /** 报告里显示、但不算错误的提示级别 */
 export const MANAGED_FIELD = 'notion_page_id';
 
-/** 读取环境变量，缺啥报啥 */
+/**
+ * 读取环境变量，缺啥报啥。
+ * 额外支持站点根目录下的 .env（该文件已在 .gitignore 中，令牌不会进仓库）。
+ */
 export function readEnv() {
+  loadDotEnv();
   const token = (process.env.NOTION_TOKEN || '').trim();
   const databaseId = (process.env.NOTION_DATABASE_ID || process.env.NOTION_DB_ID || '').trim();
   const missing = [];
   if (!token) missing.push('NOTION_TOKEN');
   if (!databaseId) missing.push('NOTION_DATABASE_ID');
   return { token, databaseId, missing };
+}
+
+/** 极简 .env 解析：只填 process.env 里还没有的键，不覆盖已有值 */
+function loadDotEnv() {
+  const file = path.join(SITE_ROOT, '.env');
+  let raw;
+  try {
+    // 同步读取，避免把整个调用链改成 async
+    raw = readFileSync(file, 'utf8');
+  } catch {
+    return;
+  }
+  for (const line of raw.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed || trimmed.startsWith('#')) continue;
+    const eq = trimmed.indexOf('=');
+    if (eq < 1) continue;
+    const key = trimmed.slice(0, eq).trim();
+    let value = trimmed.slice(eq + 1).trim();
+    if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+      value = value.slice(1, -1);
+    }
+    if (!process.env[key]) process.env[key] = value;
+  }
 }

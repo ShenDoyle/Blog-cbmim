@@ -11,8 +11,17 @@ import { Client } from '@notionhq/client';
 
 import { log } from './log.mjs';
 
-export function createClient(token) {
-  return new Client({ auth: token });
+export function createClient(token, { verbose = false } = {}) {
+  return new Client({
+    auth: token,
+    // SDK 默认会往 stdout 打自己的警告，跟我们的日志混在一起；
+    // 统一收编：只在 --verbose 时透出。
+    logLevel: verbose ? 'debug' : 'error',
+    logger: (level, message, extraInfo) => {
+      const detail = extraInfo && Object.keys(extraInfo).length ? ` ${JSON.stringify(extraInfo)}` : '';
+      log.debug(`Notion SDK[${level}] ${message}${detail}`);
+    },
+  });
 }
 
 /**
@@ -25,8 +34,9 @@ export async function resolveDataSource(notion, databaseId) {
     const db = await notion.databases.retrieve({ database_id: databaseId });
     const refs = Array.isArray(db.data_sources) ? db.data_sources : [];
     if (refs.length) {
-      log.debug(`数据库解析成功：${refs.length} 个数据源，使用「${refs[0].name || refs[0].id}」`);
-      return { id: refs[0].id, databaseId, properties: db.properties || {} };
+      const name = refs[0].name || '';
+      log.debug(`数据库解析成功：${refs.length} 个数据源，使用「${name || refs[0].id}」`);
+      return { id: refs[0].id, databaseId, properties: db.properties || {}, resolved: true, name };
     }
   } catch (err) {
     log.debug(`按数据库 ID 解析失败（可能本身就是数据源 ID）：${err.message}`);
@@ -36,14 +46,20 @@ export async function resolveDataSource(notion, databaseId) {
   try {
     const ds = await notion.dataSources?.retrieve?.({ data_source_id: databaseId });
     if (ds) {
-      return { id: ds.id, databaseId, properties: ds.properties || {} };
+      return {
+        id: ds.id,
+        databaseId,
+        properties: ds.properties || {},
+        resolved: true,
+        name: (ds.title || []).map((t) => t.plain_text).join(''),
+      };
     }
   } catch (err) {
     log.debug(`按数据源 ID 解析失败：${err.message}`);
   }
 
-  // 3) 兜底：原样当数据源用
-  return { id: databaseId, databaseId, properties: {} };
+  // 3) 兜底：原样当数据源用。schema 读不到，字段校验会跳过。
+  return { id: databaseId, databaseId, properties: {}, resolved: false, name: '' };
 }
 
 /** 分页拉全量（默认排除回收站 / 归档） */
