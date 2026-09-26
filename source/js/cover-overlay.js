@@ -4,8 +4,8 @@
  * 依赖：/covermeta.json（由 scripts/covermeta.js 生成）
  *
  * ── 核心规则 ──────────────────────────────────────
- *   文章没填 covertitle  →  完全不介入，原封面图原样显示
- *   文章填了 covertitle  →  在原图上叠蒙版，再按容器宽度分档渲染文字
+ *   covertitle / coverset / coverdim 三处全空 → 完全不介入，原封面图原样显示
+ *   三处任意一处有值 → 叠蒙版（未填强度时默认 0.46），有文字则分档渲染
  * ─────────────────────────────────────────────────
  *
  * 为什么不用像素图里的字：封面在侧栏 / 归档 / 首页卡片 / 文章头图四个位置
@@ -154,6 +154,13 @@
       sEl.style.display = 'none';
     }
 
+    // 只填了蒙版强度、没有文字 → 隐藏卡片，只保留蒙版效果
+    var card = ov.querySelector('.co-card');
+    if (card) {
+      var hasText = ov.dataset.topic || (tr.showSub && ov.dataset.sub);
+      card.style.display = hasText ? '' : 'none';
+    }
+
     // 行高上限：xs / sm 档单行，其余最多两行
     var maxLines = (tr.id === 'xs' || tr.id === 'sm') ? 1 : 2;
 
@@ -180,7 +187,7 @@
     var ph = document.querySelector(PAGE_HOST);
     if (ph) {
       var item = meta[norm(location.pathname)];
-      if (item && item.t) {
+      if (item) {
         ph.dataset.coSelf = '1';
         attach(ph, item);
       }
@@ -198,11 +205,8 @@
       if (!key) return;
 
       var it = meta[key];
-      if (!it || !it.t) return;                 // 未填 covertitle → 不介入
+      if (!it) return;                          // 三处全空 → 不介入
 
-      if (it.b && img.getAttribute('src') !== it.b) {
-        img.setAttribute('src', it.b);          // 可选：替换成指定底图
-      }
       attach(host, it);
     });
   }

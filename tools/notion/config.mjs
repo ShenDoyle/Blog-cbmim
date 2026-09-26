@@ -57,11 +57,16 @@ export const PROPS = {
   summary: ['摘要', '描述', 'Description', 'ai'],
   publish: ['发布', 'Published', 'Publish', '上线'],
   pageId: ['页面ID', 'PageID', 'NotionID'],
-  // 以下 4 个为可选，配合 scripts/covermeta.js 的封面蒙版使用
+  // 以下 3 个为可选，配合 scripts/covermeta.js 的封面蒙版使用
   coverTitle: ['封面标题', 'covertitle'],
   coverSub: ['封面副标题', 'coverset'],
   coverDim: ['蒙版强度', 'coverdim'],
-  coverBase: ['封面底图', 'cover_base'],
+  // 以下为主题支持但按需填写的可选配置，留空则不写入 front-matter
+  aside: ['侧栏', 'aside'],                     // true/false，false 时文章不显示侧栏
+  toc: ['目录', 'toc'],                         // true/false，控制文章目录显隐
+  comments: ['评论', 'comments'],               // true/false，false 时关闭该篇评论
+  keywords: ['关键词', 'keywords'],             // SEO 关键词，英文逗号分隔
+  topImg: ['头图', 'top_img'],                  // 文章页头图 URL；填 false 隐藏头图
 };
 
 /** callout 颜色 → anzhiyu/butterfly 的 note 类型 */

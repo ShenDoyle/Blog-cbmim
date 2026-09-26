@@ -35,6 +35,7 @@ import {
   readImageUrl,
   readList,
   readNumber,
+  readOptionalBool,
   readText,
   sanitizeSlug,
   slugFromTitle,
@@ -90,7 +91,38 @@ const REQUIRED_PROPS = [
   { key: 'publish', hint: '不填则默认全部视为已发布' },
 ];
 
-const OPTIONAL_PROPS = ['categories', 'tags', 'cover', 'topIndex', 'summary', 'coverTitle'];
+const OPTIONAL_PROPS = [
+  'categories',
+  'tags',
+  'cover',
+  'topIndex',
+  'summary',
+  'coverTitle',
+  'coverSub',
+  'coverDim',
+  'aside',
+  'toc',
+  'comments',
+  'keywords',
+  'topImg',
+];
+
+/* ── 封面文字层限制（与 scripts/covermeta.js、Notion 字段注释同源）── */
+const COVER_TITLE_MAX = 12; // 主标题最佳 4~12 字，小尺寸档位只显示 6~10 字
+const COVER_SUB_MAX = 14; // 副标题最佳 ≤14 字，超过 24 字前端自动截断
+
+/** 蒙版强度归一化：46 → 0.46（百分数写法），越界收敛并告警 */
+function readCoverDim(prop, title) {
+  const raw = readNumber(prop);
+  if (raw === undefined) return undefined;
+  let n = raw;
+  if (n > 1 && n <= 100) n = n / 100;
+  if (n < 0 || n > 1) {
+    log.warn(`「${title}」蒙版强度 ${raw} 超出 0~1 范围，已收敛到 ${n < 0 ? 0 : 1}`);
+    n = Math.min(1, Math.max(0, n));
+  }
+  return Math.round(n * 1000) / 1000;
+}
 
 /** 按数据库 schema 检查字段是否齐备，缺了就直说缺什么、叫什么名字能认 */
 function validateSchema(properties) {
@@ -210,6 +242,21 @@ async function processPage({ page, props, state, managedPosts, notion, opts, cou
   const tags = readList(pick(props, PROPS.tags));
   const categories = readList(pick(props, PROPS.categories));
   const summary = readText(pick(props, PROPS.summary));
+
+  // 封面文字层：三处全空 → 原图不加任何效果；任一填写 → 启用主题效果
+  const coverTitle = readText(pick(props, PROPS.coverTitle));
+  const coverSub = readText(pick(props, PROPS.coverSub));
+  const coverDim = readCoverDim(pick(props, PROPS.coverDim), title);
+  if (coverTitle && Array.from(coverTitle).length > COVER_TITLE_MAX) {
+    log.warn(`「${title}」封面标题 ${Array.from(coverTitle).length} 字，超过建议上限 ${COVER_TITLE_MAX} 字（小尺寸卡片会被截断）`);
+  }
+  if (coverSub && Array.from(coverSub).length > COVER_SUB_MAX) {
+    log.warn(`「${title}」封面副标题 ${Array.from(coverSub).length} 字，超过建议上限 ${COVER_SUB_MAX} 字（中档卡片超过 24 字会截断）`);
+  }
+
+  // 主题可选配置：留空不写入 front-matter
+  const topImgRaw = readText(pick(props, PROPS.topImg));
+
   const fields = {
     title,
     date,
@@ -219,10 +266,14 @@ async function processPage({ page, props, state, managedPosts, notion, opts, cou
     categories: categories.length === 1 ? categories[0] : categories,
     tags,
     ai: summary ? summary.split(/\r?\n/).map((s) => s.trim()).filter(Boolean) : undefined,
-    covertitle: readText(pick(props, PROPS.coverTitle)) || undefined,
-    coverset: readText(pick(props, PROPS.coverSub)) || undefined,
-    coverdim: readNumber(pick(props, PROPS.coverDim)),
-    cover_base: readImageUrl(pick(props, PROPS.coverBase)) || undefined,
+    covertitle: coverTitle || undefined,
+    coverset: coverSub || undefined,
+    coverdim: coverDim,
+    aside: readOptionalBool(pick(props, PROPS.aside)),
+    toc: readOptionalBool(pick(props, PROPS.toc)),
+    comments: readOptionalBool(pick(props, PROPS.comments)),
+    keywords: readText(pick(props, PROPS.keywords)) || undefined,
+    top_img: topImgRaw ? (topImgRaw.toLowerCase() === 'false' ? false : topImgRaw) : undefined,
     [MANAGED_FIELD]: page.id,
   };
 

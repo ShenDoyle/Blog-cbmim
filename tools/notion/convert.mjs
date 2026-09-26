@@ -81,6 +81,16 @@ export function readCheckbox(prop, fallback = true) {
   return fallback;
 }
 
+/** 取可选布尔（三态）：select("true"/"false") / checkbox / 文本 "true"/"false"；未填返回 undefined */
+export function readOptionalBool(prop) {
+  if (!prop) return undefined;
+  if (prop.type === 'checkbox') return !!prop.checkbox;
+  const text = readText(prop).toLowerCase();
+  if (text === 'true') return true;
+  if (text === 'false') return false;
+  return undefined;
+}
+
 /** 取日期起始时间（ISO 字符串） */
 export function readDate(prop) {
   if (!prop || prop.type !== 'date' || !prop.date) return '';

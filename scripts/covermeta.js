@@ -1,23 +1,28 @@
 /**
  * covermeta.js — Hexo 生成器
  *
- * 作用：扫描 source/_posts/*.md 的 front-matter，把封面标题抽取出来，
+ * 作用：扫描 source/_posts/*.md 的 front-matter，把封面元信息抽取出来，
  *       生成一份 covermeta.json，供前端 cover-overlay.js 叠加「蒙版 + 文字」。
  *
  * ── 核心规则（唯一判定条件）────────────────────────
- *   不填 covertitle  →  完全不介入，原封面图原样显示（现有图片零改动）
- *   填了 covertitle  →  在原封面图上叠一层蒙版，再渲染文字
+ *   covertitle / coverset / coverdim 三处全空 → 完全不介入，原封面图原样显示
+ *   三处任意一处有值 → 启用主题的封面效果（蒙版 + 文字层）渲染
  * ────────────────────────────────────────────────
  *
  * front-matter 字段：
- *   covertitle: 封面主标题（必填才启用），建议 4~12 字
- *   coverset:   封面副标题（可选），建议 4~14 字
+ *   covertitle: 封面主标题（可选），最佳 4~12 字
+ *               小尺寸档位只能显示 6~10 字，超过 12 字在中小卡片上会被截断
+ *   coverset:   封面副标题（可选），最佳 ≤14 字
+ *               只在中大尺寸档位显示，超过 24 字自动截断
  *   coverdim:   蒙版强度（可选），默认 0.46
  *                填 0 / false 表示不加蒙版；支持 0~1 小数或 0~100 的百分数
- *   cover_base: 替换封面底图（可选）。留空则直接使用现有 cover 图。
  *
- * 蒙版的作用：把原封面图整体压暗，让上方的文字获得足够对比度。
- * 因此即使现有封面图里已烘焙过文字，也会被压到背景层，不会与新文字抢视觉。
+ * ── 封面图最佳分辨率（Notion「封面」字段注释同源）──────
+ *   推荐 1600 x 700（16:7），webp 格式，单张 ≤ 300KB
+ *   依据：文字层设计画布 760 x 332（比例 2.29:1）的 2 倍；
+ *         首页大卡片 2x retina 约 1660 x 400，文章头图区高 500px
+ *   构图建议：主体内容放在画面中央约 40% 高的横向安全带内，
+ *             首页卡片会裁成约 4.1:1，置顶小卡约 2.8:1，均以中心裁切
  */
 
 'use strict';
@@ -73,9 +78,12 @@ hexo.extend.generator.register('covermeta', function (locals) {
   var count = 0;
 
   locals.posts.forEach(function (post) {
-    // 唯一判定：没写主标题就跳过，原图不受任何影响
     var title = unquote(post.covertitle);
-    if (!title) return;
+    var set = unquote(post.coverset || post.coversub || '');
+    var hasDim = !(post.coverdim === undefined || post.coverdim === null || post.coverdim === '');
+
+    // 唯一判定：三处全空 → 跳过，原图不受任何影响
+    if (!title && !set && !hasDim) return;
 
     var key = norm(post.path);
     if (!key) return;
@@ -83,9 +91,8 @@ hexo.extend.generator.register('covermeta', function (locals) {
 
     map[key] = {
       t: title,
-      s: unquote(post.coverset || post.coversub || ''),
+      s: set,
       d: dimOf(post.coverdim),
-      b: unquote(post.cover_base),
       title: str(post.title)
     };
     count++;

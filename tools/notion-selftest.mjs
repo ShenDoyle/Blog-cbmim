@@ -23,6 +23,7 @@ import {
   readDate,
   readList,
   readNumber,
+  readOptionalBool,
   readText,
   sanitizeSlug,
 } from './notion/convert.mjs';
@@ -239,6 +240,16 @@ await check('属性读取：中英文名、类型兼容', () => {
   assert.equal(readText(pick({ Title: { type: 'title', title: [rt('EN')] } }, PROPS.title)), 'EN');
   // 缺字段时默认视为已发布
   assert.equal(readCheckbox(null, true), true);
+});
+
+await check('可选布尔三态：select(true/false)/空 均正确', () => {
+  const sel = (name) => ({ type: 'select', select: name ? { name } : null });
+  assert.equal(readOptionalBool(sel('true')), true);
+  assert.equal(readOptionalBool(sel('false')), false);
+  assert.equal(readOptionalBool(sel('')), undefined);
+  assert.equal(readOptionalBool(sel('其他')), undefined);
+  assert.equal(readOptionalBool(null), undefined);
+  assert.equal(readOptionalBool({ type: 'checkbox', checkbox: true }), true);
 });
 
 await check('slug 清洗：去空格与非法字符', () => {
