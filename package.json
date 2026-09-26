@@ -6,12 +6,18 @@
     "build": "hexo generate",
     "clean": "hexo clean",
     "deploy": "hexo deploy",
-    "server": "hexo server"
+    "server": "hexo server",
+    "notion:sync": "node tools/notion-sync.mjs",
+    "notion:selftest": "node tools/notion-selftest.mjs",
+    "notion:preview": "node tools/notion-sync.mjs --dry-run --verbose",
+    "notion:preview-server": "node tools/notion-sync.mjs && hexo clean && hexo server",
+    "publish": "node tools/notion-sync.mjs && hexo clean && hexo generate && hexo deploy"
   },
   "hexo": {
     "version": "7.0.0"
   },
   "dependencies": {
+    "@notionhq/client": "^5.26.0",
     "add": "^2.0.6",
     "hexo": "^7.0.0",
     "hexo-bilibili-bangumi": "^1.8.9",
@@ -32,6 +38,7 @@
     "hexo-server": "^3.0.0",
     "hexo-theme-landscape": "^1.0.0",
     "hexo-wordcount": "^6.0.1",
+    "notion-to-md": "^3.1.9",
     "or": "^0.2.0",
     "valine": "^1.5.1",
     "yarn": "^1.22.21"

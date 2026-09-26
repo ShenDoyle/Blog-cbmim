@@ -1,0 +1,143 @@
+name: Notion 同步并发布
+
+# 触发方式
+#   1) 定时：每 6 小时自动跑一次（GitHub 用的是 UTC 时间，00/06/12/18 点）
+#   2) 手动：仓库 Actions 页面点 “Run workflow”，手机上也能点
+on:
+  schedule:
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: 只预览同步结果，不写文件、不发布
+        type: boolean
+        default: false
+      force:
+        description: 忽略增量，所有 Notion 文章重新生成
+        type: boolean
+        default: false
+
+# 需要写回源码仓（提交生成的文章与图片）
+permissions:
+  contents: write
+
+# 避免两次运行同时改同一批文件
+concurrency:
+  group: notion-publish
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: 拉取 Notion → 构建 → 发布
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    env:
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      TZ: Asia/Shanghai
+
+    steps:
+      - name: 检出源码
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: 准备 Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci --no-audit --no-fund
+
+      - name: 配置 git 身份
+        run: |
+          git config --global user.name  "github-actions[bot]"
+          git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: 离线自检（转换规则回归）
+        run: npm run notion:selftest
+
+      - name: 同步 Notion
+        id: sync
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            echo "▶ 预览模式"
+            npm run notion:sync -- --dry-run --verbose
+          elif [ "${{ inputs.force }}" = "true" ]; then
+            echo "▶ 全量重建"
+            npm run notion:sync -- --force
+          else
+            echo "▶ 增量同步"
+            npm run notion:sync
+          fi
+
+      - name: 把生成的文章与图片提交回源码仓
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          git add -A source/_posts source/img .notion-sync-state.json
+          if git diff --cached --quiet; then
+            echo "内容无变化"
+            echo "CONTENT_CHANGED=0" >> "$GITHUB_ENV"
+          else
+            git commit -m "chore(notion): 同步 Notion 文章 $(date -u '+%Y-%m-%d %H:%M UTC')"
+            git push
+            echo "CONTENT_CHANGED=1" >> "$GITHUB_ENV"
+          fi
+
+      - name: 判断是否需要构建发布
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            echo "手动触发 → 强制走一遍构建发布"
+            echo "NEED_DEPLOY=1" >> "$GITHUB_ENV"
+          elif [ "${CONTENT_CHANGED:-0}" = "1" ]; then
+            echo "NEED_DEPLOY=1" >> "$GITHUB_ENV"
+          else
+            echo "内容未变化，跳过构建与发布"
+            echo "NEED_DEPLOY=0" >> "$GITHUB_ENV"
+          fi
+
+      - name: 构建站点
+        if: env.NEED_DEPLOY == '1'
+        run: |
+          npx hexo clean
+          # 豆瓣 / 追番要联网抓取，偶发失败时重试一次
+          npx hexo generate || {
+            echo "首次构建失败，60 秒后重试（多为豆瓣/追番抓取超时）"
+            sleep 60
+            npx hexo clean
+            npx hexo generate
+          }
+
+      - name: 发布到 GitHub Pages 仓库
+        if: env.NEED_DEPLOY == '1'
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          if [ -z "$DEPLOY_KEY" ]; then
+            echo "缺少 secret：DEPLOY_KEY（ShenDoyle.github.io 的可写部署密钥）"
+            exit 1
+          fi
+          mkdir -p ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
+          npx hexo deploy
+
+      - name: 结果摘要
+        if: always()
+        run: |
+          {
+            echo "### 同步结果"
+            echo ""
+            echo "| 项 | 值 |"
+            echo "|---|---|"
+            echo "| 触发方式 | ${{ github.event_name }} |"
+            echo "| 内容有变化 | ${CONTENT_CHANGED:-0} |"
+            echo "| 已执行发布 | ${NEED_DEPLOY:-0} |"
+            echo "| 预览模式 | ${{ inputs.dry_run }} |"
+          } >> "$GITHUB_STEP_SUMMARY"
