@@ -1,7 +1,7 @@
 {
-  "name": "hexo-theme-anzhiyu",
+  "name": "hexo-theme-cbmim",
   "version": "1.7.1",
-  "description": "A Simple and Card UI Design theme for Hexo",
+  "description": "CBMIM theme — 基于 AnZhiYu（hexo-theme-anzhiyu）的 cbm.im 站点定制版 Hexo 主题",
   "main": "package.json",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -9,24 +9,33 @@
   "keywords": [
     "hexo",
     "theme",
+    "cbmim",
+    "CBMIM theme",
     "anzhiyu",
-    "Card UI Design",
     "AnZhiYu",
-    "hexo-theme-anzhiyu"
+    "Card UI Design"
   ],
   "repository": {
     "type": "git",
-    "url": "https://github.com/anzhiyu-c/hexo-theme-anzhiyu.git"
+    "url": "https://github.com/ShenDoyle/CBMIM-theme.git"
   },
   "bugs": {
-    "url": "https://github.com/anzhiyu-c/hexo-theme-anzhiyu/issues",
-    "email": "me@anheyu.com"
+    "url": "https://github.com/ShenDoyle/CBMIM-theme/issues"
   },
   "dependencies": {
     "hexo-renderer-stylus": "^3.0.0",
     "hexo-renderer-pug": "^3.0.0"
   },
-  "homepage": "https://hexo.anheyu.com/",
+  "homepage": "https://cbm.im/",
   "author": "anzhiyu <me@anheyu.com>",
+  "contributors": [
+    "ShenDoyle (CBMIM theme 定制维护) <https://github.com/ShenDoyle/CBMIM-theme>"
+  ],
+  "upstream": {
+    "name": "hexo-theme-anzhiyu",
+    "version": "1.7.1",
+    "repository": "https://github.com/anzhiyu-c/hexo-theme-anzhiyu.git",
+    "branch": "dev"
+  },
   "license": "GPL-3.0"
 }
