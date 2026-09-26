@@ -5,7 +5,7 @@
  */
 
 /* checkbox 可点击性修复
-   anzhiyu 主题对 .checkbox input 设了 pointer-events: none 却没有接管点击，
+   主题对 .checkbox input 设了 pointer-events: none 却没有接管点击，
    这里用样式覆盖恢复交互 */
 .checkbox input[type="checkbox"] {
   pointer-events: auto !important;

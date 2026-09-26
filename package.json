@@ -38,6 +38,7 @@
     "hexo-renderer-pug": "^3.0.0",
     "hexo-renderer-stylus": "^3.0.0",
     "hexo-server": "^3.0.0",
+    "hexo-theme-cbmim": "github:ShenDoyle/CBMIM-theme#main",
     "hexo-theme-landscape": "^1.0.0",
     "hexo-wordcount": "^6.0.1",
     "notion-to-md": "^3.1.9",

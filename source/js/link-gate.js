@@ -2,7 +2,7 @@
  * link-gate.js — 友链页 checkbox 修复 + 评论区闸门
  *
  * 功能一：修复主题缺陷导致的多选框无法点击
- *   anzhiyu 主题在 themes/anzhiyu/source/css/_tags/checkbox.styl 中给
+ *   主题在 checkbox 样式（_tags/checkbox.styl）中给
  *   .checkbox input 设了 pointer-events: none，但主题 JS 里没有任何代码
  *   接管点击事件，因此 {% checkbox %} 生成的复选框无法勾选。
  *   这里恢复 input 的可点击性，并让点击整行文字也能切换。
