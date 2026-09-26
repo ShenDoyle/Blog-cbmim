@@ -10,10 +10,16 @@
  *   文章顶图（#page-header.post-bg）不叠加任何东西，只保留背景原图。
  *
  * ── 文字取值 ──────────────────────────────────────
- *   副标题：未填时默认 "CBM.IM"（位置 / 字体 / 样式与源文件一致，不做调整）
- *   主标题：强制单行。原样放得下就显示原文；
- *           放不下（或没填）→ 显示 "CBM.IM"，不截断、不折行
- *           这样在置顶小卡、最近发布一类小尺寸位置不会出现半截标题
+ *   小字：固定 "CBM.IM"（品牌署名，与 Cover.psd 默认版式一致，不可配置）
+ *   大字：主题文案（covertitle），强制单行。原样放得下就显示原文；
+ *         放不下（或没填）→ 显示 "CBM.IM"，不截断、不折行
+ *         大字已退化成 CBM.IM 时小字不再重复出现
+ *
+ * ── 模糊框（半透明卡片）────────────────────────────
+ *   尺寸固定为封面生成器 cover-editor.html 的默认参数，不随档位变化：
+ *     宽 554/760 = 72.9%   高 162/332 = 48.8%   圆角 20/760 = 2.63%
+ *     内边距 20.75/760 = 2.73%   主副标题间距 0.030 × 容器宽
+ *   只有字号随容器缩放（保证小卡片可读），框体本身是默认尺寸的比例复刻。
  *
  * 为什么不用像素图里的字：封面在首页卡片 / 置顶小卡 / 侧栏 / 归档等位置
  * 被不同尺寸裁切，烘焙进像素的文字无法随容器缩放，小尺寸下必然糊掉或被切掉。
@@ -36,15 +42,27 @@
   var BASE_W = 760;
   var BASE_H = 332;
 
-  // 档位参数：宽度阈值 + 缩放指数 + 最小字号 + 字数上限
-  // tLen 已不再用于主标题（改由「单行是否放得下」实测决定），保留供文档参考
-  // sLen 仍用于副标题截断
+  // 档位参数：宽度阈值 + 缩放指数 + 最小字号
+  // 只影响字号与是否显示小字，不再影响框体尺寸（框体固定为默认比例）
+  // r = 1：字号与框体同步等比缩放，整块封面就是默认版式的等比复刻，
+  //        这样 8 字主题在首页卡片（约 513px 宽）也能单行放得下；
+  //        只有卡片小到字号低于可读下限时，才由 tMin / sMin 兜底放大。
   var TIERS = [
-    { id: 'xs', max: 170, r: 0.72, tMin: 13, sMin: 0,  tLen: 6,  sLen: 0,  skew: 0,  cardW: 92, gap: 0.10, showSub: false },
-    { id: 'sm', max: 300, r: 0.72, tMin: 16, sMin: 11, tLen: 10, sLen: 0,  skew: -6, cardW: 86, gap: 0.12, showSub: false },
-    { id: 'md', max: 560, r: 0.72, tMin: 20, sMin: 11, tLen: 14, sLen: 24, skew: -9, cardW: 80, gap: 0.16, showSub: true },
-    { id: 'lg', max: Infinity, r: 0.72, tMin: 34, sMin: 13, tLen: 0, sLen: 0, skew: -12, cardW: 73, gap: 0.18, showSub: true }
+    { id: 'xs', max: 170, r: 1, tMin: 13, sMin: 0,  skew: 0,   showSub: false },
+    { id: 'sm', max: 300, r: 1, tMin: 16, sMin: 11, skew: -6,  showSub: false },
+    { id: 'md', max: 560, r: 1, tMin: 20, sMin: 11, skew: -9,  showSub: true },
+    { id: 'lg', max: Infinity, r: 1, tMin: 34, sMin: 13, skew: -12, showSub: true }
   ];
+
+  // 模糊框的固定比例 —— 取自 cover-editor.html 默认参数（画布 760 × 332）
+  //   卡片 554 × 162 / 圆角 20 / 内边距 20.75 / 主副标题间距约 22.8
+  var BOX = {
+    w: 554 / 760,      // 框宽 = 容器宽 × 0.729
+    h: 162 / 332,      // 框高 = 容器高 × 0.488
+    r: 20 / 760,       // 圆角 = 容器宽 × 0.0263
+    pad: 20.75 / 760,  // 内边距 = 容器宽 × 0.0273
+    gap: 22.8 / 760    // 主副标题间距 = 容器宽 × 0.030
+  };
 
   // 覆盖电池/暗色管的文字保护：蒙版太浅时自动加深，保证可读
   var DIM_FLOOR = 0.32;
@@ -65,10 +83,11 @@
      保证「同一篇文章每次都一样、不同文章互不相同」。
      用途：① 文章没配头图 ② 图片加载失败（CDN 挂、文件名改了）── */
 
-  var meta = null;   // covermeta.json 原文
-  var COVERS = {};   // 封面文字层数据：{ 文章路径: { t, s, d } }
-  var GRADS = {};    // 渐变兜底数据：{ 文章路径: { c: [4 色], a: 角度 } }
-  var DEFAULTS = []; // 主题默认封面 / 破图占位图地址
+  var meta = null;        // covermeta.json 原文
+  var COVERS = {};        // 封面文字层数据：{ 文章路径: { t, s, d } }
+  var GRADS = {};         // 渐变兜底数据：{ 文章路径: { c: [4 色], a: 角度 } }
+  var DEFAULTS = [];      // 主题默认封面（= 这篇没配头图）
+  var PLACEHOLDERS = [];  // 懒加载占位图 / 破图占位图（≠ 没配头图，不能当无图处理）
   var ro = null;
   var timer = null;
 
@@ -91,13 +110,6 @@
   // 非线性缩放：w=760 → base；w=380 → 0.607×base；w=150 → 0.311×base
   function scale(w, base, r) {
     return base * Math.pow(w / BASE_W, r);
-  }
-
-  function clip(s, n) {
-    if (!n || !s) return s || '';
-    var chars = Array.from(s);
-    if (chars.length <= n) return s;
-    return chars.slice(0, n).join('') + '…';
   }
 
   function findLink(el) {
@@ -136,6 +148,11 @@
 
       var card = document.createElement('div');
       card.className = 'co-card';
+      // pangu.js（盘古之白，主题全站开）会在「CBM.IM」与中文大字之间插空格，
+      // 实现方式是往大字文本节点前面塞空格 → 引发临界溢出。
+      // pangu 判定 canIgnoreNode 时会检查祖先的 g_editable 属性，
+      // 这里借这个无副作用的属性让整个文字卡片对 pangu 免疫。
+      card.setAttribute('g_editable', 'true');
 
       var s = document.createElement('span');
       s.className = 'co-sub';
@@ -167,40 +184,31 @@
     var sEl = ov.querySelector('.co-sub');
 
     // 先写尺寸变量，再测文字是否放得下（字号影响测量结果）
-    ov.style.setProperty('--co-card-w', tr.cardW + '%');
-    ov.style.setProperty('--co-gap', tr.gap + 'em');
+    // 框体尺寸固定为默认比例，随容器等比缩放，不随档位变化
+    ov.style.setProperty('--co-pad', px(w * BOX.pad, 3));
+    ov.style.setProperty('--co-gap', px(w * BOX.gap, 2));
+    ov.style.setProperty('--co-radius', px(w * BOX.r, 3));
     ov.style.setProperty('--co-t-size', tSize.toFixed(1) + 'px');
     ov.style.setProperty('--co-s-size', sSize.toFixed(1) + 'px');
     ov.style.setProperty('--co-skew', tr.skew + 'deg');
     ov.style.setProperty('--co-h', h + 'px');
 
-    var rawTitle = ov.dataset.topic || '';
-    var rawSub = ov.dataset.sub || '';
+    var rawTitle = String(ov.dataset.topic || '').trim();
 
-    // 只填了蒙版强度、没有标题也没有副标题 → 隐藏卡片，只保留蒙版
-    var card = ov.querySelector('.co-card');
-    if (!rawTitle && !rawSub) {
-      if (card) card.style.display = 'none';
-      tEl.textContent = '';
-      sEl.textContent = '';
-      return;
-    }
-    if (card) card.style.display = '';
-
-    /* 主标题：单行优先，放不下就整段换成品牌名（不截断、不折行） */
-    var usedBrand = false;
-    var fits = rawTitle ? put(tEl, rawTitle) : false;
-    if (!fits) {
-      usedBrand = put(tEl, BRAND);
-      if (!usedBrand) tEl.textContent = '';
+    /* 大字 = 主题：在不低于档位可读下限（tMin）的范围内自动缩排，
+       缩到下限仍放不下（或压根没填）→ 整段换成 CBM.IM，不截断、不折行 */
+    var isTopic = false;
+    var fitted = rawTitle ? fitSize(tEl, rawTitle, tSize, tr.tMin) : -1;
+    if (fitted > 0) {
+      isTopic = true;
+    } else {
+      fitSize(tEl, BRAND, tSize, tr.tMin);
     }
 
-    /* 副标题：未填则默认品牌名（位置、字体、样式与源文件一致） */
-    var subText = rawSub || BRAND;
-    // 主标题已退化成品牌名时，若副标题也是默认的品牌名就别重复显示
-    var showSub = tr.showSub && (rawSub ? true : !usedBrand);
+    /* 小字 = 固定品牌名。大字已退化成 CBM.IM 时不再重复显示小字 */
+    var showSub = tr.showSub && isTopic;
     if (showSub) {
-      sEl.textContent = clip(subText, tr.sLen);
+      sEl.textContent = BRAND;
       sEl.style.display = '';
     } else {
       sEl.textContent = '';
@@ -208,10 +216,30 @@
     }
   }
 
-  // 写入文案并判断单行能否放下（nowrap + width:100% 下 scrollWidth 即真实文本宽度）
-  function put(el, text) {
+  function px(v, min) {
+    return Math.max(min || 0, Math.round(v * 100) / 100).toFixed(2) + 'px';
+  }
+
+  /* 写入文案并把字号压到「单行放得下」为止：
+     · 优先用计算字号 from，放不下就在 [min, from] 之间二分收缩
+     · 收缩下限 = 档位可读下限（tMin），低于这个字号宁可换 CBM.IM
+       这样小卡片不会出现「缩到看不清也要塞进去」的半截标题
+     返回最终字号；返回 -1 表示连下限都放不下 */
+  function fitSize(el, text, from, min) {
+    var set = function (v) { el.style.fontSize = (Math.round(v * 100) / 100) + 'px'; };
     el.textContent = text;
-    return el.scrollWidth <= el.clientWidth + 1;
+    set(from);
+    if (el.scrollWidth <= el.clientWidth) return from;
+
+    var lo = Math.min(min, from), hi = from, i;
+    for (i = 0; i < 14 && hi - lo > 0.3; i++) {
+      var mid = (lo + hi) / 2;
+      set(mid);
+      if (el.scrollWidth <= el.clientWidth) lo = mid; else hi = mid;
+    }
+    // 留 3% 安全余量：避免测量与实际渲染的亚像素误差造成临界溢出
+    set(lo * 0.97);
+    return el.scrollWidth <= el.clientWidth ? lo * 0.97 : -1;
   }
 
   // 渐变兜底层：铺在封面最底层（z-index 0），图片正常时看不见，
@@ -232,15 +260,27 @@
     return img.getAttribute('data-lazy-src') || img.getAttribute('src') || '';
   }
 
-  // 命中「主题默认封面 / 破图占位图」= 这篇没配头图，或图挂了
-  function isDefault(url) {
-    for (var i = 0; i < DEFAULTS.length; i++) {
-      if (url && url.indexOf(DEFAULTS[i]) > -1) return true;
+  function hit(url, list) {
+    for (var i = 0; i < list.length; i++) {
+      if (url && url.indexOf(list[i]) > -1) return true;
     }
     return false;
   }
 
-  // 没配头图 / 图片加载失败 → 隐藏图片，露出渐变兜底
+  // 命中「主题默认封面」= 这篇压根没配头图
+  function isDefault(url) { return hit(url, DEFAULTS); }
+  // 命中「占位图」= 懒加载还没换上真图，不能据此判定无图
+  function isPlaceholder(url) { return hit(url, PLACEHOLDERS); }
+
+  /* 没配头图 / 图片真的加载失败 → 隐藏图片，露出渐变兜底
+     判定顺序很关键：
+       ① 真图地址命中默认封面 → 无图，走渐变
+       ② 当前 src 还是占位图    → 图片在路上，什么都不做，等 load / error
+       ③ 已加载完但 naturalWidth 为 0 → 真破了，走渐变
+       ④ error 事件            → 走渐变
+     之前把 loading.webp（占位图）也算成默认封面，导致所有有图的卡片
+     在懒加载期间被判成「无图」，整站都渲染成渐变 —— 这里必须分开。
+     图后来又加载成功（pjax / 懒加载晚到）时会自动恢复显示。 */
   function guardImg(img, host, key) {
     if (img.dataset.coGuard === '1') return;
     img.dataset.coGuard = '1';
@@ -250,13 +290,23 @@
       img.style.visibility = 'hidden';
       host.dataset.coBroken = '1';
     };
+    var ok = function () {
+      if (host.dataset.coBroken !== '1') return;
+      host.dataset.coBroken = '0';
+      img.style.visibility = '';
+    };
     var check = function () {
-      if (isDefault(srcOf(img))) { fail(); return; }
+      var url = srcOf(img);
+      if (isDefault(url)) { fail(); return; }
+      if (isPlaceholder(url) || !url) return;
       if (img.complete && !img.naturalWidth) fail();
+      else if (img.naturalWidth) ok();
     };
 
-    // 无论当前是否已加载都挂监听：懒加载、pjax 换页都可能晚于本脚本
-    img.addEventListener('error', fail);
+    img.addEventListener('error', function () {
+      // 占位图自己加载失败不代表真图失败，只有真图地址报错才算
+      if (!isPlaceholder(srcOf(img))) fail();
+    });
     img.addEventListener('load', check);
     check();
   }
@@ -349,6 +399,7 @@
         COVERS = meta.covers || meta || {};
         GRADS = meta.grads || {};
         DEFAULTS = meta.defaults || [];
+        PLACEHOLDERS = meta.placeholders || [];
         boot();
       })
       .catch(function () { meta = {}; });

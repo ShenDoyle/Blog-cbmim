@@ -52,36 +52,45 @@
 
 /* 文字层容器：铺满封面，内部居中 */
 .co-wrap {
-  --co-card-w: 73%;
-  --co-gap: 0.18em;
-  --co-t-size: 44px;
-  --co-s-size: 15px;
+  /* 框体默认尺寸（cover-editor.html 原始参数，画布 760 × 332）：
+     宽 554/760 = 72.9%　高 162/332 = 48.8%
+     内边距 / 圆角 / 间距由 JS 按容器宽度等比换算后写入，保证任何尺寸下
+     框体都是同一套默认比例，不随档位、不随视口变化 */
+  --co-card-w: 72.9%;
+  --co-card-h: 48.8%;
+  --co-pad: 20.75px;
+  --co-gap: 22.8px;
+  --co-radius: 20px;
+  --co-t-size: 58px;
+  --co-s-size: 20px;
   --co-skew: -12deg;
   position: absolute;
   inset: 0;
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 4% 3%;
+  padding: 0;
   box-sizing: border-box;
   pointer-events: none;
   z-index: 3;
   overflow: hidden;
 }
 
-/* 半透明卡片：对应 PSD 的白 / 40%、圆角 20 */
+/* 半透明卡片：对应 PSD 的白 / 40%、圆角 20、尺寸 554 × 162 */
 .co-card {
   position: relative;
   width: var(--co-card-w);
+  min-height: var(--co-card-h);
   max-width: 100%;
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: var(--co-gap);
-  padding: 0.34em 0.62em;
+  padding: var(--co-pad);
   box-sizing: border-box;
   background: rgba(255, 255, 255, 0.4);
-  border-radius: clamp(8px, 2.6vw, 20px);
+  border-radius: var(--co-radius);
   box-shadow: 0 2px 14px rgba(6, 50, 138, 0.14);
   backdrop-filter: blur(2px);
   -webkit-backdrop-filter: blur(2px);
@@ -128,25 +137,10 @@
   text-overflow: ellipsis;
 }
 
-/* 小尺寸档位：收紧留白、去掉斜切以保证可读性 */
-.co-wrap[data-tier='xs'] .co-card,
-.co-wrap[data-tier='sm'] .co-card {
-  padding: 0.24em 0.42em;
-  gap: 0;
-}
-
+/* 小尺寸档位：只收紧字号相关样式，框体尺寸保持默认比例不变 */
 .co-wrap[data-tier='xs'] .co-title {
   letter-spacing: 0;
   text-shadow: 3px 3px 8px rgba(6, 50, 138, 0.58);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.co-wrap[data-tier='sm'] .co-title {
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
 }
 
 /* 主题自带置顶/轮播卡片的字号过冲保护 */

@@ -14,12 +14,17 @@
  *   文章顶图（#page-header.post-bg）→ 不叠加任何东西，只保留背景原图
  * ────────────────────────────────────────────────
  *
+ * ── 文字层取值 ─────────────────────────────────────
+ *   大字 = 主题：covertitle，强制单行，放得下显示原文，
+ *                放不下（或没填）→ 显示 CBM.IM
+ *   小字 = 固定 CBM.IM：与 Cover.psd 默认版式一致，不再受 coverset 影响
+ *
  * front-matter 字段：
  *   covertitle: 封面主标题（可选），建议 ≤8 字
  *               强制单行：放得下就显示原文，放不下（含没填）→ 显示 CBM.IM
  *               不再截断、不折行，避免小卡片上出现半截标题
- *   coverset:   封面副标题（可选），未填时默认 CBM.IM
- *               位置（主标题上方）、字体、样式与 Cover.psd 一致，不做调整
+ *   coverset:   【已弃用】封面副标题。小字固定渲染 CBM.IM，此字段不再影响
+ *               显示效果，仅保留读取以兼容旧数据（仍可作为「启用效果」的触发项）
  *   coverdim:   蒙版强度（可选），默认 0.46
  *                填 0 / false 表示不加蒙版；支持 0~1 小数或 0~100 的百分数
  *
@@ -143,22 +148,33 @@ function gradOf(key) {
   };
 }
 
-/* 主题给「没配封面」的文章套的默认图、以及破图占位图。
-   识别到这两类地址就说明这张封面不是作者自己配的 → 换成渐变兜底。 */
+/* ── 两类「非正文封面图」必须分开判断 ──────────────────
+   defaults（主题默认封面）  = 这篇压根没配头图 → 用渐变兜底
+   placeholders（懒加载占位 / 破图占位）= 图片还在加载，或加载失败
+        ⚠️ 占位图绝不能算进 defaults：懒加载时 src 就是这张占位图，
+           把它当成「没配头图」会让所有有图的卡片都被判成无图，
+           于是整站都渲染成渐变 —— 这是上一版的事故根因。
+   ──────────────────────────────────────────────── */
 function defaultImgs() {
   var cfg = (hexo.theme && hexo.theme.config) || {};
-  var list = [];
 
+  // ① 没配头图时主题套的默认封面
+  var def = [];
   var dc = cfg.cover && cfg.cover.default_cover;
-  if (dc) list = list.concat(Array.isArray(dc) ? dc : [dc]);
+  if (dc) def = def.concat(Array.isArray(dc) ? dc : [dc]);
 
+  // ② 懒加载占位图 / error_img（图片加载失败后主题会换成这个）
+  var ph = [];
   var ei = cfg.error_img;
-  if (typeof ei === 'string') list.push(ei);
+  if (typeof ei === 'string') ph.push(ei);
   else if (ei) ['post_page', 'flink'].forEach(function (k) {
-    if (ei[k]) list.push(ei[k]);
+    if (ei[k]) ph.push(ei[k]);
   });
+  // 常见 1×1 透明占位（部分浏览器 / 懒加载库用）
+  ph.push('data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7');
 
-  return list.filter(Boolean).map(str);
+  var s = function (a) { return a.filter(Boolean).map(str); };
+  return { defaults: s(def), placeholders: s(ph) };
 }
 
 hexo.extend.generator.register('covermeta', function (locals) {
@@ -198,12 +214,15 @@ hexo.extend.generator.register('covermeta', function (locals) {
   hexo.log.info('[covermeta] 封面文字层 ' + count + ' 篇 / 渐变兜底 ' +
     Object.keys(grads).length + ' 篇');
 
+  var imgs = defaultImgs();
+
   return {
     path: 'covermeta.json',
     data: JSON.stringify({
       covers: map,
       grads: grads,
-      defaults: defaultImgs()
+      defaults: imgs.defaults,
+      placeholders: imgs.placeholders
     })
   };
 });
