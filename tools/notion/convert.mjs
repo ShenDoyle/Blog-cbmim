@@ -245,8 +245,23 @@ function unwrapTagLinks(body) {
   );
 }
 
+/**
+ * 标签页的包裹层容错：本主题的 tabs 标签要求 `{% tabs 名称 %}` … `{% endtabs %}`，
+ * 内部才是 `<!-- tab 标题 -->` … `<!-- endtab -->`。
+ * 但很多人（含我）习惯写成 butterfly 的 `<!-- tabs 名称 -->` … `<!-- endtabs -->`，
+ * 结果整块变成不可见的 HTML 注释、标签页完全不渲染。这里把它等价转换过来。
+ */
+function normalizeTagWrapper(body) {
+  return String(body || '')
+    .replace(/^[ \t]*<!--\s*tabs\b([^\n]*?)-->[ \t]*$/gm, (m, rest) => {
+      const name = String(rest || '').trim();
+      return name ? `{% tabs ${name} %}` : '{% tabs %}';
+    })
+    .replace(/^[ \t]*<!--\s*endtabs\s*-->[ \t]*$/gm, '{% endtabs %}');
+}
+
 export function normalizeBody(body) {
-  return unwrapTagLinks(String(body || ''))
+  return unwrapTagLinks(normalizeTagWrapper(String(body || '')))
     .replace(/\r\n/g, '\n')
     .replace(/[ \t]+$/gm, '')
     .replace(/\n{3,}/g, '\n\n')

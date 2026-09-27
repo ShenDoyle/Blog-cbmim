@@ -1,7 +1,7 @@
 ---
 title: 把博客搬进 Notion：一次完整的后台迁移实录
 date: 2026/09/26 08:00:00
-updated: 2026/09/27 21:33:00
+updated: 2026/09/27 22:43:00
 cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/cover.webp
 categories: 技术
 tags:
@@ -160,7 +160,7 @@ danger：这一步会覆盖产物仓。
 
 ### 标签页
 
-<!-- tabs 构建链路 -->
+{% tabs 构建链路 %}
 
 <!-- tab 本地 -->
 
@@ -174,7 +174,7 @@ push 到 main，Actions 自动构建并部署。
 
 <!-- endtab -->
 
-<!-- endtabs -->
+{% endtabs %}
 
 ### 时间线
 
@@ -224,7 +224,7 @@ Actions 接管发布，本地环境退居二线。
 
 ### 行内标签
 
-快捷键 {% kbd Ctrl %}+{% kbd S %}，{% u 下划线 %}，{% emp 着重 %}，{% wavy 波浪线 %}，{% label 标签 blue %}，{% span 红色文字, red %}。
+快捷键 {% kbd Ctrl %}+{% kbd S %}，{% u 下划线 %}，{% emp 着重 %}，{% wavy 波浪线 %}，{% label 标签 blue %}，{% span red, 红色文字 %}。
 
 ### 图廊
 
