@@ -218,8 +218,27 @@ export function ensureMoreMarker(body) {
 }
 
 /** 统一空白：行尾空格、连续空行、结尾换行 */
+/**
+ * Notion 会把正文里的裸 URL 自动美化成 Markdown 链接。
+ * 一旦这个 URL 出现在主题标签的参数里（{% cell 文字, 链接 %}、{% site ..., screenshot=链接 %}），
+ * 导出后就会变成 [链接](链接)，而标签解析器会把整串 [x](y) 当成参数值 —— 链接坏掉、图片空掉。
+ * 这里把「标签参数内部」的自链接（文字与地址相同的链接）解包回裸 URL。
+ * 只在 {% ... %} 与 <!-- ... --> 这种单行标签片段里做，正文里的正常链接不受影响。
+ */
+function unwrapTagLinks(body) {
+  const same = (a, b) => {
+    const norm = (s) => String(s || '').trim().replace(/\/+$/, '');
+    return norm(a) === norm(b);
+  };
+  return String(body || '').replace(/\{%[^%\n]*%\}|<!--[^\n]*-->/g, (tag) =>
+    tag.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (full, text, url) =>
+      same(text, url) ? url : full
+    )
+  );
+}
+
 export function normalizeBody(body) {
-  return String(body || '')
+  return unwrapTagLinks(String(body || ''))
     .replace(/\r\n/g, '\n')
     .replace(/[ \t]+$/gm, '')
     .replace(/\n{3,}/g, '\n\n')

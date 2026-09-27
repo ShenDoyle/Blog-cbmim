@@ -365,9 +365,17 @@ async function main() {
   const counters = { changed: [], skipped: [], unpublished: [], warnings: [] };
   let list = pages;
   if (opts.only) {
-    list = list.filter(
-      (p) => p.id === opts.only || p.id.replace(/-/g, '') === opts.only.replace(/-/g, '') || p.id.endsWith(opts.only) || p.id.startsWith(opts.only)
-    );
+    // 既能按页面 ID 匹配，也能按 slug / 文件名匹配（帮助里写的就是 <slug|pageId>）
+    const needle = opts.only.replace(/-/g, '').toLowerCase();
+    const byId = (p) => p.id === opts.only ||
+      p.id.replace(/-/g, '') === needle ||
+      p.id.endsWith(opts.only) ||
+      p.id.startsWith(opts.only);
+    const bySlug = (p) => {
+      const slug = String(state.pages[p.id]?.slug || '').toLowerCase();
+      return slug && (slug === opts.only.toLowerCase() || slug.endsWith(opts.only.toLowerCase()));
+    };
+    list = list.filter((p) => byId(p) || bySlug(p));
     if (!list.length) {
       log.err(`--only 没匹配到任何页面：${opts.only}`);
       return 1;
