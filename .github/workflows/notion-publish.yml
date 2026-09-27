@@ -36,7 +36,11 @@ concurrency:
 jobs:
   publish:
     name: 拉取 Notion → 构建 → 发布
-    runs-on: ubuntu-latest
+    # 固定 24.04 而不是 ubuntu-latest：
+    # ubuntu-latest 会在 2026-10-20 迁移到 Ubuntu 26，构建环境会静默变化
+    # （Node/Python/OpenSSL 版本都可能动），固定版本保证「今天能构建 = 明天还能构建」。
+    # 需要升级时只改这一行，然后手动 Run workflow 做一次回归。
+    runs-on: ubuntu-24.04
     timeout-minutes: 30
     # 同步回写产生的 bot 提交不再触发第二次运行（防止 push 触发成环）
     if: github.actor != 'github-actions[bot]'
@@ -47,19 +51,24 @@ jobs:
       TZ: Asia/Shanghai
 
     steps:
+      # actions/* 用主版本标签（@vN）而不是钉死补丁号：
+      # 这样能自动收到安全更新，大版本升级由人工控制。
+      # v5+ 起 action 本身运行在 Node 24 上（Node 20 已废弃）。
       - name: 检出源码
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
       - name: 准备 Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v7
         with:
           node-version: '22'
           cache: npm
 
       - name: 安装依赖
-        run: npm ci --no-audit --no-fund
+        run: |
+          echo "node $(node -v) / npm $(npm -v)"
+          npm ci --no-audit --no-fund
 
       - name: 配置 git 身份
         run: |
