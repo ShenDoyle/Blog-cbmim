@@ -96,6 +96,14 @@ jobs:
             npm run notion:pages
           fi
 
+      - name: 同步站点设置（Notion「⚙️ 站点设置」→ source/_data/site-settings.yml）
+        run: |
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            npm run notion:settings -- --dry-run --verbose
+          else
+            npm run notion:settings
+          fi
+
       - name: 把生成的文章与图片提交回源码仓
         if: ${{ inputs.dry_run != true }}
         run: |
