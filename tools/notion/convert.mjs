@@ -230,10 +230,18 @@ function unwrapTagLinks(body) {
     const norm = (s) => String(s || '').trim().replace(/\/+$/, '');
     return norm(a) === norm(b);
   };
+  const isUrl = (s) => /^(https?:\/\/|\/)/i.test(String(s).trim());
+
+  // 前置边界（行首 / 空白 / 逗号 / 等号 / 括号）：只处理「独立成段」的链接，
+  // 描述文字里的正常链接（如 看[这里](url)）不碰。
   return String(body || '').replace(/\{%[^%\n]*%\}|<!--[^\n]*-->/g, (tag) =>
-    tag.replace(/\[([^\]\n]+)\]\(([^)\s]+)\)/g, (full, text, url) =>
-      same(text, url) ? url : full
-    )
+    tag.replace(/(^|[\s,=({])?\[([^\]\n]+)\]\(([^)\s]+)\)/g, (full, pre, text, url) => {
+      const head = pre || '';
+      if (same(text, url)) return head + url;      // 自链接：Notion 自动美化的 [url](url)
+      if (isUrl(text)) return head + text.trim();  // 文字本身是 URL：粘贴覆盖时保留了旧链接注解
+      if (isUrl(url)) return head + url.trim();    // 文字是说明、地址才是参数（cell 的链接参数写成 [文字](链接)）
+      return full;
+    })
   );
 }
 

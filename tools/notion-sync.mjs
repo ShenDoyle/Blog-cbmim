@@ -22,7 +22,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { createClient, explainError, queryAllPages, resolveDataSource } from './notion/api.mjs';
-import { collectMarkdownImageUrls, localizeUrls, pruneOrphanAssets, rewriteMarkdownImages } from './notion/assets.mjs';
+import { collectMarkdownImageUrls, collectReferencedAssets, localizeUrls, pruneOrphanAssets, rewriteMarkdownImages } from './notion/assets.mjs';
 import { MANAGED_FIELD, POSTS_DIR, PROPS, readEnv } from './notion/config.mjs';
 import {
   buildFrontMatter,
@@ -73,7 +73,7 @@ Notion → Hexo 同步
   --force          忽略 last_edited_time，全部重新生成
   --only <值>      只处理某个 slug 或 Notion 页面 ID（调试用）
   --limit <n>      只处理前 n 篇（调试用）
-  --prune-assets   删除已不再被引用的 notion-* 图片
+  --prune-assets   清理已无引用的图片（全站扫描 source/ 的引用关系后删除孤儿 notion-*）
   --verbose        打印细节
   --help           显示本帮助
 
@@ -301,12 +301,6 @@ async function processPage({ page, props, state, managedPosts, notion, opts, cou
         log.warn(`Slug 变更，已删除旧文件 ${existing.file}`);
       }
     }
-
-    if (opts.pruneAssets) {
-      const referenced = Object.values(fields).filter((v) => typeof v === 'string' && v.includes('/img/'));
-      const removed = await pruneOrphanAssets(slug, [...referenced, ...localized.map.values(), cover]);
-      if (removed.length) log.info(`清理了 ${removed.length} 张未引用图片：${slug}/`);
-    }
   }
 
   state.pages[page.id] = {
@@ -401,6 +395,24 @@ async function main() {
   if (gones.length) {
     log.warn(`${gones.length} 篇此前同步过的文章本次未出现（已取消发布或删除），本地文件已保留、未自动删除：`);
     for (const id of gones) log.warn(`  ${state.pages[id].file}  ← ${state.pages[id].slug}`);
+  }
+
+  /* ── 清理未被引用的图片（--prune-assets）──
+     放在所有文章写盘之后做一次全站扫描：
+     正文里被引用、但当前这篇 front-matter 没提到的图（gallery、cell/site 标签、
+     非 Notion 图床的 jsDelivr 图）都能被正确保留。 */
+  if (opts.pruneAssets && !opts.dryRun) {
+    const refs = await collectReferencedAssets();
+    const { removed, skipped } = await pruneOrphanAssets(refs, { dryRun: false });
+    if (!skipped) {
+      if (removed.length) {
+        log.info(`清理了 ${removed.length} 张已无引用的图片：`);
+        for (const r of removed.slice(0, 15)) log.info(`  ${r}`);
+        if (removed.length > 15) log.info(`  …另有 ${removed.length - 15} 张`);
+      } else {
+        log.info('没有需要清理的未引用图片');
+      }
+    }
   }
 
   await saveState(state, { dryRun: opts.dryRun });

@@ -97,11 +97,11 @@ jobs:
             npm run notion:pages -- --dry-run --verbose
           elif [ "${{ inputs.force }}" = "true" ]; then
             echo "▶ 全量重建"
-            npm run notion:sync -- --force
+            npm run notion:sync -- --force --prune-assets
             npm run notion:pages -- --force
           else
             echo "▶ 增量同步"
-            npm run notion:sync
+            npm run notion:sync -- --prune-assets
             npm run notion:pages
           fi
 
