@@ -30,11 +30,26 @@ Notion（唯一内容后台）
 紧急修站也可以本地跑（有 Node 环境时）：
 
 ```bash
-npm install
+npm ci
 npm run notion:sync      # 同步文章
 npm run notion:pages     # 同步独立页面与数据文件
+npm run notion:settings  # 同步主题设置（Notion「⚙️ 站点设置」）
 npx hexo clean && npx hexo generate && npx hexo deploy
 ```
+
+### 发布的三种触发方式（2026-09-27 起）
+
+| 触发 | 行为 | 适用 |
+|---|---|---|
+| **push 到 main** | 立刻构建 + 部署 | 改主题/脚本/配置/手工文章 |
+| **每 6 小时定时** | **只在 Notion 内容有变化时**才构建部署 | 日常写文章，等它自己上线 |
+| **手动 Run workflow** | 强制构建 + 部署（`dry_run` 只预览，`force` 全量重建） | 想立刻上线 / 排错 |
+
+⚠️ 定时触发不会因为"源码改了"而部署 —— 源码改动必须 push（push 本身即触发部署，不用再点任何按钮）。
+判断线上是否为最新：**看产物仓 `ShenDoyle.github.io` 的最后一次提交时间**（`cbm.im` 的 `Server: Vercel` 只是前置缓存，不是托管方）。
+
+📘 完整的可执行方案（从零到线上、改主题流程、回滚、排错手册、标签签名速查）见主题仓：
+[`CBMIM-theme/docs/使用与部署手册.md`](https://github.com/ShenDoyle/CBMIM-theme/blob/main/docs/使用与部署手册.md)
 
 ## 目录结构
 
