@@ -140,23 +140,72 @@ async function findDb(notion) {
   return { dsId: hit.id, dbId: hit.parent?.database_id || hit.id, raw: hit };
 }
 
+const SCHEMA_PROPS = {
+  值: { rich_text: {} },
+  类型: { select: { options: ['bool', 'number', 'string', 'array', 'map'].map((n) => ({ name: n })) } },
+  分组: { rich_text: {} },
+  当前值: { rich_text: {} },
+  说明: { rich_text: {} },
+  风险: { select: { options: ['安全', '谨慎', '危险'].map((n) => ({ name: n })) } },
+  启用: { checkbox: {} },
+};
+
 async function createDb(notion) {
-  const created = await notion.databases.create({
+  // v5（API 2025-09-03）用 initial_data_source.properties；旧版用 properties
+  const base = {
     parent: { type: 'page_id', page_id: ROOT_PAGE_ID },
     title: [{ type: 'text', text: { content: DB_TITLE } }],
     description: [{ type: 'text', text: { content: '主题设置：值留空 = 不覆盖；勾「启用」且值非空才生效（下次构建生效）' } }],
-    properties: {
-      键: { title: {} },
-      值: { rich_text: {} },
-      类型: { select: { options: ['bool', 'number', 'string', 'array', 'map'].map((n) => ({ name: n })) } },
-      分组: { rich_text: {} },
-      当前值: { rich_text: {} },
-      说明: { rich_text: {} },
-      风险: { select: { options: ['安全', '谨慎', '危险'].map((n) => ({ name: n })) } },
-      启用: { checkbox: {} },
-    },
-  });
-  return created;
+  };
+  const properties = Object.assign({ 键: { title: {} } }, SCHEMA_PROPS);
+  try {
+    return await notion.databases.create(Object.assign({ initial_data_source: { properties } }, base));
+  } catch (err) {
+    log.debug('initial_data_source 建库失败，回退旧格式：' + (err?.message || err));
+    return notion.databases.create(Object.assign({ properties }, base));
+  }
+}
+
+/** 幂等补全属性：数据库已存在但没有我们要的列时（或历史版本建歪了）补齐 */
+async function ensureSchema(notion, dsId, dbId, ds) {
+  const props = ds?.properties || {};
+  let titleName = Object.keys(props).find((k) => props[k].type === 'title') || 'Name';
+  const missing = Object.keys(SCHEMA_PROPS).filter((k) => !props[k]);
+
+  // 默认建库只有一个标题列（叫 Name），顺手改名成「键」
+  if (titleName !== '键') {
+    try {
+      await notion.dataSources.update({ data_source_id: dsId, properties: { [titleName]: { name: '键' } } });
+      log.info(`标题列「${titleName}」已改名为「键」`);
+      titleName = '键';
+    } catch (err) {
+      log.debug('标题列改名失败，沿用原名：' + (err?.message || err));
+    }
+  }
+
+  if (!missing.length) return titleName;
+
+  const patch = {};
+  for (const k of missing) patch[k] = SCHEMA_PROPS[k];
+  log.info(`数据库缺少 ${missing.length} 列，正在补：${missing.join(' / ')}`);
+
+  try {
+    await notion.dataSources.update({ data_source_id: dsId, properties: patch });
+  } catch (err) {
+    log.debug('dataSources.update 失败，回退 databases.update：' + (err?.message || err));
+    await notion.databases.update({ database_id: dbId, properties: patch });
+  }
+  return titleName;
+}
+
+/** 取数据源 schema（拿标题列名用） */
+async function dsSchema(notion, dsId) {
+  try {
+    return await notion.dataSources.retrieve({ data_source_id: dsId });
+  } catch (err) {
+    log.debug('读取数据源 schema 失败：' + (err?.message || err));
+    return null;
+  }
 }
 
 function dataSourceIdOf(db) {
@@ -164,18 +213,16 @@ function dataSourceIdOf(db) {
   return refs.length ? refs[0].id : db.id;
 }
 
-function rowProps(row, { withValue = false } = {}) {
-  const p = {
-    键: { title: [{ text: { content: row.key.slice(0, 2000) } }] },
-    类型: { select: { name: row.type } },
-    分组: { rich_text: [{ text: { content: row.group.slice(0, 2000) } }] },
-    风险: { select: { name: row.risk } },
-    启用: { checkbox: false },
-  };
-  const def = show(row.def);
-  if (def) p['当前值'] = { rich_text: [{ text: { content: (row.cur !== undefined ? show(row.cur) : def).slice(0, 1900) } }] };
-  if (def) p['说明'] = { rich_text: [{ text: { content: ('默认值：' + def).slice(0, 1900) } }] };
-  if (withValue) p['值'] = { rich_text: [{ text: { content: String(withValue).slice(0, 1900) } }] };
+function rowProps(row, titleName) {
+  const p = {};
+  p[titleName] = { title: [{ text: { content: String(row.key).slice(0, 2000) } }] };
+  p['类型'] = { select: { name: row.type } };
+  p['分组'] = { rich_text: [{ text: { content: row.group.slice(0, 2000) } }] };
+  p['风险'] = { select: { name: row.risk } };
+  p['启用'] = { checkbox: false };
+  const cur = row.cur !== undefined ? show(row.cur) : show(row.def);
+  if (show(row.def)) p['说明'] = { rich_text: [{ text: { content: ('默认值：' + show(row.def)).slice(0, 1900) } }] };
+  if (cur) p['当前值'] = { rich_text: [{ text: { content: cur.slice(0, 1900) } }] };
   return p;
 }
 
@@ -211,24 +258,36 @@ async function runInit(notion, opts) {
     if (opts.dryRun) { log.info('[dry-run] 将创建数据库「' + DB_TITLE + '」并导入 ' + rows.length + ' 行'); return; }
     const created = await createDb(notion);
     log.ok(`已创建数据库「${DB_TITLE}」`);
-    found = { dsId: dataSourceIdOf(created), dbId: created.id, raw: created };
+    const dsId = dataSourceIdOf(created);
+    found = { dsId, dbId: created.id, raw: await dsSchema(notion, dsId) };
   } else {
     log.info(`复用已有数据库「${DB_TITLE}」`);
   }
   const { dsId, dbId } = found;
+  const titleName = await ensureSchema(notion, dsId, dbId, found.raw);
 
-  const existing = new Set((await queryAllPages(notion, dsId)).map((p) => textOf(p.properties['键'])));
+  const existing = new Set(
+    (await queryAllPages(notion, dsId)).map((p) => textOf(p.properties[titleName]))
+  );
   const todo = rows.filter((r) => !existing.has(r.key));
   log.info(`已有 ${existing.size} 行，本次新增 ${todo.length} 行`);
 
   if (opts.dryRun || !todo.length) return;
 
+  // 串行创建一行要 3~6 秒（Notion 写入较慢），几百个键太耗时 → 并发 4 路
+  const CONCURRENCY = 4;
+  let idx = 0;
   let done = 0;
-  for (const row of todo) {
-    await createRow(notion, dsId, dbId, rowProps(row));
-    done += 1;
-    if (done % 50 === 0) log.info(`  已导入 ${done}/${todo.length}`);
-  }
+  const worker = async () => {
+    while (idx < todo.length) {
+      const row = todo[idx];
+      idx += 1;
+      await createRow(notion, dsId, dbId, rowProps(row, titleName));
+      done += 1;
+      if (done % 25 === 0) log.info(`  已导入 ${done}/${todo.length}`);
+    }
+  };
+  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
   log.ok(`导入完成：${done} 行`);
 }
 
@@ -236,6 +295,9 @@ async function runSync(notion, opts) {
   const found = await findDb(notion);
   if (!found) throw new Error(`未找到数据库「${DB_TITLE}」，请先跑一次 npm run notion:settings -- --init`);
   const dsId = found.dsId;
+  const ds = found.raw || await dsSchema(notion, dsId);
+  const titleName = Object.keys(ds?.properties || {}).find((k) => ds.properties[k].type === 'title') || '键';
+
   const pages = await queryAllPages(notion, dsId);
   log.info(`设置行：${pages.length}`);
 
@@ -246,7 +308,7 @@ async function runSync(notion, opts) {
   const problems = [];
 
   for (const page of pages) {
-    const key = textOf(page.properties['键']).trim();
+    const key = textOf(page.properties[titleName]).trim();
     if (!key) continue;
     const on = page.properties['启用']?.checkbox === true;
     const raw = textOf(page.properties['值']).trim();
