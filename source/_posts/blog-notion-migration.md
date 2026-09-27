@@ -1,7 +1,7 @@
 ---
 title: 把博客搬进 Notion：一次完整的后台迁移实录
 date: 2026/09/26 08:00:00
-updated: 2026/09/27 21:12:00
+updated: 2026/09/27 21:33:00
 cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/cover.webp
 categories: 技术
 tags:
@@ -204,7 +204,7 @@ Actions 接管发布，本地环境退居二线。
 
 {% btns %}
 
-{% cell 打开 Notion, https://www.notion.so/, https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-avatar.webp %}
+{% cell 打开 Notion, https://www.notion.so/, [https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-avatar.webp](https://cbm.im/2026/09/26/blog-notion-migration/) %}
 
 {% cell 源码仓库, https://github.com/ShenDoyle/Blog-cbmim, https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-avatar.webp %}
 
@@ -212,7 +212,7 @@ Actions 接管发布，本地环境退居二线。
 
 {% sitegroup %}
 
-{% site 南城左立方, url=https://cbm.im/, screenshot=https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-shot.webp, avatar=https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-avatar.webp, description=就是本站：运营笔记与 GEO 实践 %}
+{% site 南城左立方, url=https://cbm.im/, screenshot=https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/notion-10d1493be8.webp, avatar=https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-avatar.webp, description=就是本站：运营笔记与 GEO 实践 %}
 
 {% endsitegroup %}
 
