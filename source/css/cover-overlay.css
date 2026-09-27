@@ -29,6 +29,10 @@
 
 /* 文字层容器：铺满封面，内部居中 */
 .co-wrap {
+  /* 字体与 cover-editor.html 完全一致：两种文字共用同一个 fontFamily，
+     且都拿 YouSheBiaoTiHei（优设标题黑）打头 —— 生成器里 sub 与 title 是同一套字体，
+     这里用同一个变量保证永不跑偏（fallback 顺序也照抄 FONT_FALLBACK） */
+  --co-font: 'YouSheBiaoTiHei', 'Microsoft YaHei', 'PingFang SC', sans-serif;
   position: absolute;
   inset: 0;
   display: flex;
@@ -78,25 +82,28 @@
   text-overflow: ellipsis;
 }
 
-/* 小字在上、大字在下，与 PSD 版式一致 */
+/* 小字在上、大字在下，与 PSD 版式一致。
+   参数逐项对齐 cover-editor.html：sSize 20 @554、sTrack 0.8 → 0.04em、
+   sColor #ffffff 满不透明、**无倾斜（skew 传 0）**、**无投影**、字重 normal */
 .co-sub {
   order: 1;
+  font-family: var(--co-font);
   font-size: var(--co-s-size, 4px);
   font-weight: 400;
   line-height: 1.25;
-  letter-spacing: 0.04em;   /* = PSD sTrack 0.8px @ 20px */
-  opacity: 0.92;
+  letter-spacing: 0.04em;   /* = sTrack 0.8px @ 20px */
+  color: #fff;
 }
 
 .co-title {
   order: 2;
-  font-family: 'YouSheBiaoTiHei', 'HarmonyOS Sans SC', 'PingFang SC',
-    'Microsoft YaHei', sans-serif;
+  font-family: var(--co-font);
   font-size: var(--co-t-size, 10px);
   font-weight: 700;
   line-height: 1.14;
-  letter-spacing: 0.06em;   /* = PSD tTrack 3.5px @ 58px */
+  letter-spacing: 0.06em;   /* = tTrack 3.5px @ 58px */
   transform: skewX(var(--co-skew, -12deg));
-  /* 对应 PSD 投影：#06328a / 58% / 45° / 距离 9 / 模糊 13（按字号等比） */
-  text-shadow: 0.1034em 0.1034em 0.2242em rgba(6, 50, 138, 0.58);
+  /* 对应 PSD 投影：#06328a / 58% / 45° / 距离 9 / 模糊 13（按字号等比）
+     6.36 = 9 × cos45°，13/9 为该投影的模糊/距离比 */
+  text-shadow: 0.1097em 0.1097em 0.2242em rgba(6, 50, 138, 0.58);
 }
