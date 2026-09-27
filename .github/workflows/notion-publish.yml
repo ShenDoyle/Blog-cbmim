@@ -1,9 +1,16 @@
 name: Notion 同步并发布
 
 # 触发方式
-#   1) 定时：每 6 小时自动跑一次（GitHub 用的是 UTC 时间，00/06/12/18 点）
-#   2) 手动：仓库 Actions 页面点 “Run workflow”，手机上也能点
+#   1) 推送：任何推送到 main 的源码改动（改主题、改封面脚本、改配置、图片入库）→ 立即构建上线
+#   2) 手动：仓库 Actions 页面点 “Run workflow”，手机上也能点（强制走一遍构建发布）
+#   3) 定时：每 6 小时（GitHub 用 UTC，00/06/12/18 点 = 北京 08/14/20/02 点）
+#            只在「Notion 内容有变化」时才构建发布，避免空跑
+#
+# 防环：同步会把文章回写成 bot 提交并推回 main，
+#       该 push 由 bot 触发 → job 级 if 直接跳过，不会无限自我触发。
 on:
+  push:
+    branches: [main]
   schedule:
     - cron: '0 */6 * * *'
   workflow_dispatch:
@@ -31,6 +38,8 @@ jobs:
     name: 拉取 Notion → 构建 → 发布
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    # 同步回写产生的 bot 提交不再触发第二次运行（防止 push 触发成环）
+    if: github.actor != 'github-actions[bot]'
 
     env:
       NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
@@ -56,6 +65,16 @@ jobs:
         run: |
           git config --global user.name  "github-actions[bot]"
           git config --global user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: 凭据预检（缺 Secret 立刻失败，避免报难懂的 API 错误）
+        run: |
+          fail=0
+          [ -n "$NOTION_TOKEN" ]       || { echo "::error::缺少 secret：NOTION_TOKEN"; fail=1; }
+          [ -n "$NOTION_DATABASE_ID" ] || { echo "::error::缺少 secret：NOTION_DATABASE_ID"; fail=1; }
+          if [ "${{ inputs.dry_run }}" != "true" ]; then
+            [ -n "${{ secrets.DEPLOY_KEY }}" ] || { echo "::error::缺少 secret：DEPLOY_KEY（ShenDoyle.github.io 的可写部署密钥）"; fail=1; }
+          fi
+          exit $fail
 
       - name: 离线自检（转换规则回归）
         run: npm run notion:selftest
@@ -95,13 +114,18 @@ jobs:
       - name: 判断是否需要构建发布
         if: ${{ inputs.dry_run != true }}
         run: |
+          # push / 手动触发都强制构建发布；定时触发只在内容变化时构建
           if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
             echo "手动触发 → 强制走一遍构建发布"
             echo "NEED_DEPLOY=1" >> "$GITHUB_ENV"
+          elif [ "${{ github.event_name }}" = "push" ]; then
+            echo "推送触发 → 构建并发布"
+            echo "NEED_DEPLOY=1" >> "$GITHUB_ENV"
           elif [ "${CONTENT_CHANGED:-0}" = "1" ]; then
+            echo "定时触发且内容有变化 → 构建并发布"
             echo "NEED_DEPLOY=1" >> "$GITHUB_ENV"
           else
-            echo "内容未变化，跳过构建与发布"
+            echo "定时触发且内容未变化 → 跳过构建与发布"
             echo "NEED_DEPLOY=0" >> "$GITHUB_ENV"
           fi
 
@@ -116,6 +140,23 @@ jobs:
             npx hexo clean
             npx hexo generate
           }
+          echo "产物文件数：$(find public -type f | wc -l)"
+
+      - name: 发布前预检（部署密钥与产物仓可写性）
+        if: env.NEED_DEPLOY == '1'
+        env:
+          DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh && chmod 700 ~/.ssh
+          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
+          chmod 600 ~/.ssh/deploy_key
+          echo "密钥类型：$(head -1 ~/.ssh/deploy_key)"
+          echo "密钥指纹（sha256，可用于比对是否配对）：$(sha256sum ~/.ssh/deploy_key | cut -c1-16)"
+          # accept-new：首次连接自动记录主机指纹，避免 keyscan 失败导致 ssh 直接拒绝
+          ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null || true
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          echo "--- ssh 认证探测 ---"
+          ssh -T -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new git@github.com 2>&1 || true
 
       - name: 发布到 GitHub Pages 仓库
         if: env.NEED_DEPLOY == '1'
@@ -126,12 +167,20 @@ jobs:
             echo "缺少 secret：DEPLOY_KEY（ShenDoyle.github.io 的可写部署密钥）"
             exit 1
           fi
-          mkdir -p ~/.ssh
-          printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null
-          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=yes"
-          npx hexo deploy
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          if ! npx hexo deploy; then
+            echo "::group::部署失败诊断"
+            if [ -d .deploy_git ]; then
+              git -C .deploy_git remote -v
+              git -C .deploy_git log --oneline -3
+              git -C .deploy_git status --short | head -20
+            else
+              echo ".deploy_git 不存在（hexo-deployer-git 首次 clone 阶段就失败了）"
+            fi
+            echo "::endgroup::"
+            exit 1
+          fi
+          echo "产物仓最新提交：$(git ls-remote git@github.com:ShenDoyle/ShenDoyle.github.io.git refs/heads/main | cut -c1-7)"
 
       - name: 结果摘要
         if: always()
@@ -141,7 +190,7 @@ jobs:
             echo ""
             echo "| 项 | 值 |"
             echo "|---|---|"
-            echo "| 触发方式 | ${{ github.event_name }} |"
+            echo "| 触发方式 | ${{ github.event_name }}（${{ github.actor }}） |"
             echo "| 内容有变化 | ${CONTENT_CHANGED:-0} |"
             echo "| 已执行发布 | ${NEED_DEPLOY:-0} |"
             echo "| 预览模式 | ${{ inputs.dry_run }} |"
