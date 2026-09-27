@@ -1,7 +1,7 @@
 ---
 title: 把博客搬进 Notion：一次完整的后台迁移实录
 date: 2026/09/26 08:00:00
-updated: 2026/09/27 22:43:00
+updated: 2026/09/27 22:53:00
 cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/cover.webp
 categories: 技术
 tags:
@@ -147,9 +147,11 @@ danger：这一步会覆盖产物仓。
 
 ### 复选框与折叠
 
-- [x] 封面已处理为 1600×700 webp
-- [ ] 评论与统计也接入 Notion
-- [ ] 还没做的：独立图床仓
+{% checkbox checked, 封面已处理为 1600×700 webp %}
+
+{% checkbox 评论与统计也接入 Notion %}
+
+{% checkbox 还没做的：独立图床仓 %}
 
 {% hideToggle 展开看：部署的门控条件 %}
 - 生成的 HTML 不能是空文件；
