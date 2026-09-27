@@ -1,7 +1,7 @@
 ---
 title: 把博客搬进 Notion：一次完整的后台迁移实录
 date: 2026/09/26 08:00:00
-updated: 2026/09/27 20:33:00
+updated: 2026/09/27 21:12:00
 cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/cover.webp
 categories: 技术
 tags:
@@ -111,7 +111,7 @@ hexo generate → hexo deploy → 强推产物仓 → Pages → cbm.im
 
 下面这张就是直接拖进 Notion 的，同步时自动落地：
 
-![site-shot.webp](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/notion-03dd63e9d9.webp)
+![Vvik_2026-09-27_21-11-42.webp](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/notion-10d1493be8.webp)
 
 {% note success %}
 为什么一定要落地？Notion 的图片是带签名的临时链接，大约 1 小时就过期。直接引用它的地址，文章上线一小时后图就全挂了。
