@@ -204,7 +204,7 @@ Actions 接管发布，本地环境退居二线。
 
 {% btns %}
 
-{% cell 打开 Notion, https://www.notion.so/, [https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-avatar.webp](https://cbm.im/2026/09/26/blog-notion-migration/) %}
+{% cell 打开 Notion, https://www.notion.so/, https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-avatar.webp %}
 
 {% cell 源码仓库, https://github.com/ShenDoyle/Blog-cbmim, https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-avatar.webp %}
 
