@@ -1,9 +1,8 @@
 ---
 title: 了解 GEO（一）
 date: 2025/08/20 17:57:00
-updated: 2026/09/26 19:28:00
+updated: 2026/10/30 14:25:00
 cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/geoaq/2025820171755683650742time_Cover.webp
-top_group_index: 9
 categories: 运营
 tags:
   - GEO

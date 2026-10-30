@@ -1,9 +1,8 @@
 ---
 title: 在电脑上多开微信的方法
 date: 2020/11/18 20:00:00
-updated: 2026/09/26 19:28:00
+updated: 2026/10/30 14:24:00
 cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/wzxn/2024215171707989450040time_wzxn.webp
-top_group_index: 9
 categories: 分享
 tags:
   - 技巧
