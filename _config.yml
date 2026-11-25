@@ -186,6 +186,8 @@ deploy:
   type: git
   repository: git@github.com:ShenDoyle/ShenDoyle.github.io.git
   branch: main
+  # 允许发布 .well-known 等隐藏目录，供证书 HTTP-01 校验使用。
+  ignore_hidden: false
 
 # Douban sync (hexo-douban 2.x): /books/ and /movies/
 # builtin: true 表示 hexo g 时自动执行 hexo douban。
