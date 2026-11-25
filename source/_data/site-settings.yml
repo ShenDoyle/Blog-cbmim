@@ -1,2 +1,281 @@
-# 由 tools/notion-settings.mjs 自动生成，请勿手改
-{}
+# 由 tools/notion-settings.mjs 自动生成：来自 Notion「⚙️ 站点设置」
+# 生效方式：scripts/apply-site-settings.js 在构建期深度合并进 hexo.theme.config
+CDN:
+  option:
+    meting_api: https://api.injahow.cn/meting/?server=:server&type=:type&id=:id&r=:r
+inject:
+  bottom:
+    - <script src="/js/cover-overlay.js" defer></script>
+    - <script src="/js/link-gate.js" defer></script>
+  head:
+    - <link rel="stylesheet" href="/css/cover-overlay.css">
+    - <link rel="stylesheet" href="/css/link-gate.css">
+peoplecanvas:
+  img: /img/site/peoplecanvas.webp
+rightClickMenu:
+  enable: true
+linkPageTop:
+  title: 同道中人
+post_head_ai_description:
+  gptName: 南城
+greetingBox:
+  list:
+    - greeting: 晚安😴
+      startTime: 0
+      endTime: 5
+    - greeting: 早上好鸭👋, 祝你一天好心情！
+      startTime: 6
+      endTime: 9
+    - greeting: 上午好👋, 状态很好，鼓励一下～
+      startTime: 10
+      endTime: 10
+    - greeting: 11点多啦, 在坚持一下就吃饭啦～
+      startTime: 11
+      endTime: 11
+    - greeting: 午安👋, 宝贝
+      startTime: 12
+      endTime: 14
+    - greeting: 🌈充实的一天辛苦啦！
+      startTime: 14
+      endTime: 18
+    - greeting: 19点喽, 奖励一顿丰盛的大餐吧🍔。
+      startTime: 19
+      endTime: 19
+    - greeting: 晚上好👋, 在属于自己的时间好好放松😌~
+      startTime: 20
+      endTime: 24
+  enable: true
+ptool:
+  mode: /cc/
+  categories: true
+visitorMail:
+  mail: 12345@qq.com
+diytitle:
+  backTitle: ✨
+  leaveTitle: 👉 南城左立方
+LA:
+  ck: KJ3EZA6rfBMKxUcQ
+  LingQueMonitorID: KJ3FEbxyPhUmhK4x
+  enable: true
+home_top:
+  banner:
+    link: https://5301314.xyz/
+    title: 导航
+    image: /img/site/nav_guide.webp
+    tips: 一个简单的自用导航
+  swiper:
+    enable: true
+  category:
+    - name: 运营
+      path: /categories/运营/
+      shadow: var(--anzhiyu-shadow-red)
+      class: red
+      icon: anzhiyu-icon-dove
+    - name: 兴趣
+      path: /categories/兴趣/
+      shadow: var(--anzhiyu-shadow-blue)
+      class: blue
+      icon: anzhiyu-icon-plant-fill
+    - name: 技术
+      path: /categories/技术/
+      shadow: var(--anzhiyu-shadow-red)
+      class: red
+      icon: anzhiyu-icon-fire
+    - name: 分享
+      path: /categories/分享/
+      shadow: var(--anzhiyu-shadow-green)
+      class: green
+      icon: anzhiyu-icon-book
+  subTitle: ——网络运营
+  title: 企业的品牌基建
+pwa:
+  favicon_32_32: /img/site/favicon.ico
+  favicon_16_16: /img/site/favicon.ico
+  bookmark_icon: /img/site/favicon.ico
+  apple_touch_icon: /img/site/favicon.ico
+  mask_icon: /img/site/favicon.ico
+pangu:
+  enable: true
+darkmode:
+  end: 22
+  start: 8
+runtimeshow:
+  publish_date: 8/17/2019 08:00:00
+busuanzi:
+  site_pv: true
+aside:
+  card_weixin:
+    backFace: /img/site/face.webp
+    face: /img/site/face.webp
+  card_announcement:
+    content: 感谢来到我的博客~
+  card_author:
+    description: >-
+      <div style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);"><b
+      style="color:#fff">互联网运营经理</b>，分享一些<b style="color:#fff">网络运营</b>的知识。</div><div
+      style="line-height:1.38;margin:0.6rem 0;text-align:justify;color:rgba(255, 255, 255, 0.8);">其他也有分享，比如<b
+      style="color:#fff">Linux、一些生活经验、趣事、建站的小经验</b>等等。</div>
+preloader:
+  avatar: /img/site/avatar.webp
+index_top_img_height: 300px
+index_site_info_top: 300px
+h2Divider: true
+footer:
+  footerBar:
+    linkList:
+      - link: /privacy/
+        text: 隐私协议
+    cc:
+      link: /cc/
+      enable: true
+  list:
+    project:
+      - title: 服务
+        links:
+          - title: 51la统计
+            link: https://v6.51.la/
+          - title: 图片托管
+            link: https://gitee.com/
+      - title: 导航
+        links:
+          - title: 友链
+            link: /link/
+          - title: 留言
+            link: /comments/
+      - title: 协议
+        links:
+          - title: 隐私
+            link: /privacy/
+          - title: 版权
+            link: /cc/
+    enable: true
+  socialBar:
+    right:
+      - title: Bilibili
+        link: https://space.bilibili.com/322919283
+        icon: anzhiyu-icon-bilibili
+      - title: CC
+        link: /cc/
+        icon: anzhiyu-icon-copyright-line
+    left:
+      - title: email
+        link: mailto:t3@outlook.ie
+        icon: anzhiyu-icon-envelope
+      - title: RSS
+        link: atom.xml
+        icon: anzhiyu-icon-rss
+    enable: true
+  bdageitem:
+    list:
+      - link: https://hexo.io/
+        shields: /img/site/Frame-Hexo.svg
+        message: 博客框架为 Hexo_v7.0.0
+      - link: https://github.com/anzhiyu-c/hexo-theme-anzhiyu
+        shields: /img/site/Theme-AnZhiYu-2E67D3.svg
+        message: 本站使用 AnZhiYu 主题
+      - link: https://github.com/
+        shields: /img/site/Source-Github.svg
+        message: 本站项目由 Github 托管
+      - link: http://creativecommons.org/licenses/by-nc-sa/4.0/
+        shields: /img/site/Copyright-BY-NC-SA.svg
+        message: 本站采用知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议进行许可
+    enable: true
+  runtime:
+    offduty_description: 回归生活了
+    offduty_img: /img/site/offline.svg
+    work_description: 搬砖小能手
+    work_img: /img/site/online.svg
+  owner:
+    since: 2019
+twikoo:
+  envId: https://pmoore-twikoocbm.hf.space
+waline:
+  serverURL: null
+valine:
+  bg: /img/site/comment_bg.webp
+comments:
+  count: false
+  use: Giscus
+noticeOutdate:
+  message_next: 天前，部分内容具有时效性，请自行鉴别。
+  message_prev: 本文更新于
+  limit_day: 60
+  enable: true
+reward:
+  QR_code:
+    - img: /img/pay/wechat.webp
+      link: null
+      text: wechat
+    - img: /img/pay/alipay.webp
+      link: null
+      text: alipay
+  enable: true
+post_copyright:
+  location: 昆明
+toc:
+  expand: true
+wordcount:
+  enable: true
+mainTone:
+  mode: both
+post_meta:
+  post:
+    unread: true
+  page:
+    date_format: relative
+error_404:
+  background: /img/site/search_bg.webp
+error_img:
+  post_page: /img/site/loading.webp
+  flink: /img/site/loading.webp
+cover:
+  default_cover:
+    - /img/site/default.webp
+default_top_img: /img/site/default.webp
+avatar:
+  img: /img/site/avatar.webp
+favicon: /img/site/favicon.ico
+local_search:
+  enable: true
+author_status:
+  skills:
+    - 📈 数据分析师
+    - 💡 创意策划师
+    - 🚀 增长加速器
+    - 🤝 团队粘合剂
+    - 🏃 结果导向者
+  statusImg: /img/site/ico.webp
+  enable: true
+social:
+  Twitter: https://twitter.com/cbm_im || anzhiyu-icon-dove
+  BiliBili: https://space.bilibili.com/322919283 || anzhiyu-icon-bilibili
+highlight_theme: mac
+nav:
+  menu:
+    - title: 协议
+      item:
+        - name: Copyright
+          link: /cc/
+          icon: /img/site/favicon.ico
+    - title: 项目
+      item:
+        - name: Markdown
+          link: https://md.5301314.xyz/
+          icon: /img/site/favicon.ico
+  enable: true
+menu:
+  首页: /
+  文章:
+    归档: /archives/ || anzhiyu-icon-box-archive
+    分类: /categories/ || anzhiyu-icon-shapes
+    标签: /tags/ || anzhiyu-icon-tags
+  爱好:
+    音乐: /music/ || anzhiyu-icon-music
+    阅读: /books/ || anzhiyu-icon-book
+    影视: /movies/ || anzhiyu-icon-bilibili
+    追番: /bangumis/ || anzhiyu-icon-bilibili
+    好物: /equipment/ || anzhiyu-icon-bolt
+  关于:
+    我: /about/ || anzhiyu-icon-paper-plane
+    友链: /link/ || anzhiyu-icon-link
+    留言: /comments/ || anzhiyu-icon-envelope
