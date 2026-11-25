@@ -5,19 +5,22 @@ cbm.im 博客的 Hexo 源码仓库。文章与页面内容的唯一后台是 **N
 ## 架构一览
 
 ```
-Notion（唯一内容后台）
-  ├─ 🗂 博文     ─┐
-  ├─ 📄 页面     ─┤→ GitHub Actions（每 6 小时 / 手动触发）
-  │               │     ① 拉取 Notion → 写回 md/yml（本仓库）
-  │               │     ② hexo generate
-  └─ 变更提交回本仓 ┘     ③ 强推 public/ → ShenDoyle.github.io（GitHub Pages 服务该分支）
-                              ↓
-                            cbm.im（jsDelivr CDN 供图）
+Notion（文章、页面、站点设置）
+        ↓ API
+GitHub Actions（每 6 小时 / 手动触发）
+        ↓
+Hexo 构建
+        ↓
+ShenDoyle.github.io（GitHub Pages 源站）＋ ShenDoyle/img（独立图片仓）
+        ↓
+阿里云 ESA 免费版
+        ↓
+cbm.im / www.cbm.im
 ```
 
 - 源码仓（本仓库）与产物仓（`ShenDoyle.github.io`）严格分离——`hexo-deployer-git` 是 force push，共用一仓会覆盖源码。
-- 文章图片落地到 `source/img/cbmim/<slug>/`，正文引用 `cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/...`。
-- 主题为 npm 依赖 `hexo-theme-cbmim`（github:ShenDoyle/CBMIM-theme#main），本仓库不含主题源码；主题定制通过 `_config.cbmim.yml` 覆盖。
+- 文章图片落地到 `source/img/cbmim/<slug>/`，正文默认引用同源 `/img/cbmim/<slug>/...`；独立图片仓通过 GitHub Pages 提供 `/img/`。
+- 主题为 npm 依赖 `hexo-theme-cbmim`（固定 commit），本仓库不含主题源码；主题定制通过 `_config.cbmim.yml` 覆盖。
 
 ## 怎么更新内容（日常）
 
@@ -30,14 +33,14 @@ Notion（唯一内容后台）
 
 主题设置库的用法（详见主题仓 `docs/使用与部署手册.md` §4.1）：
 
-- **唯一要动手的是「值」列：填了就生效，留空 = 沿用仓库现值。**
-- 「启用」是**状态列**（● = 该功能当前已开着），不用操作；「优先级」管排序，常用功能在最上面。
-- 「说明 / 当前值 / 优先级」是脚本自动生成的，刷新会覆盖 → 笔记请写在行自身的页面正文里。
+- **优先改「值」列：填了就生效。** 兼容旧库时，「值」留空且「启用」已勾选，会沿用仓库 `_config.cbmim.yml` 的精确当前值；两者都留空则不覆盖。
+- 「启用」是旧库兼容开关，新建行会按仓库状态初始化；「优先级」管排序，常用功能在最上面。
+- 「说明 / 当前值 / 优先级」是脚本自动生成的，刷新会覆盖；「当前值」仅作展示，不会反向覆盖仓库配置。笔记请写在行自身的页面正文里。
 - 视图：默认「⚙️ 全部设置（按优先级）」；另有「✅ 当前已启用」只看开着的功能。
 
 ### 图片：自动落地 + 自动清理
 
-Notion 图床的图（正文图与封面）同步时自动下载到 `source/img/cbmim/<slug>/notion-<hash>.<ext>` 并改写成 jsDelivr 地址；外部图床地址原样保留。
+Notion 图床的图（正文图与封面）同步时自动下载到 `source/img/cbmim/<slug>/notion-<hash>.<ext>` 并改写成同源 `/img/` 地址；外部图床地址原样保留。发布时同步到独立图片仓 `ShenDoyle/img`。
 
 CI 的同步步骤带 `--prune-assets`：扫描全站引用关系后，**自动删除 `source/img/cbmim/` 下已无任何引用的图片**（换图、换 slug、删文章留下的孤儿），避免仓库越滚越大。主题自带的默认图/占位图在主题包里，不在这个目录，不受影响。每次删除都会打印文件名，git 可回滚。
 
@@ -60,7 +63,7 @@ npx hexo clean && npx hexo generate && npx hexo deploy
 | **手动 Run workflow** | 强制构建 + 部署（`dry_run` 只预览，`force` 全量重建） | 想立刻上线 / 排错 |
 
 ⚠️ 定时触发不会因为"源码改了"而部署 —— 源码改动必须 push（push 本身即触发部署，不用再点任何按钮）。
-判断线上是否为最新：**看产物仓 `ShenDoyle.github.io` 的最后一次提交时间**（`cbm.im` 的 `Server: Vercel` 只是前置缓存，不是托管方）。
+判断线上是否为最新：**看产物仓 `ShenDoyle.github.io` 的最后一次提交时间**；`cbm.im` 由阿里云 ESA 免费版加速，源站仍是 GitHub Pages。
 
 📘 完整的可执行方案（从零到线上、改主题流程、回滚、排错手册、标签签名速查）见主题仓：
 [`CBMIM-theme/docs/使用与部署手册.md`](https://github.com/ShenDoyle/CBMIM-theme/blob/main/docs/使用与部署手册.md)
@@ -78,7 +81,7 @@ npx hexo clean && npx hexo generate && npx hexo deploy
 │  ├─ _posts/                # 文章（Notion「🗂 博文」同步落地，front-matter 带 notion_page_id）
 │  ├─ _data/                 # 结构化数据（Notion「📄 页面」同步落地，除 bangumis.json 为插件生成）
 │  ├─ cc|privacy|about/      # 独立页面（cc/privacy 正文由 Notion 管理）
-│  ├─ img/cbmim/             # 文章图片（脚本自动下载落地，jsDelivr 供图）
+│  ├─ img/cbmim/             # 文章图片（脚本自动下载落地，发布到独立图片仓）
 │  └─ js|css/                # 站点级自定义脚本/样式（封面文字层、友链门禁）
 ├─ tools/                    # Notion 同步工具链（node tools/…，放这里是因为 Hexo 会执行 scripts/）
 │  ├─ notion-sync.mjs        # 文章同步 CLI（--dry-run/--force/--only）
@@ -118,7 +121,7 @@ npx hexo clean && npx hexo generate && npx hexo deploy
 ## 安全
 
 - `NOTION_TOKEN` 等敏感信息只放本机 `.env`（已 gitignore）与仓库 Secrets，绝不进代码。
-- Actions 需要的 Secrets：`NOTION_TOKEN`、`NOTION_DATABASE_ID`、`DEPLOY_KEY`（ShenDoyle.github.io 的可写 Deploy Key）。
+- Actions 需要的 Secrets：`NOTION_TOKEN`、`NOTION_DATABASE_ID`、`DEPLOY_KEY`（产物仓可写 Deploy Key）、`IMG_DEPLOY_KEY`（独立图片仓可写 Deploy Key）。
 
 ## 许可
 

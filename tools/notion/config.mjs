@@ -5,8 +5,9 @@
  *
  * 依赖的仓库约定（与现有 25 篇文章保持一致，勿随意改动）：
  *   文章：source/_posts/<slug>.md
- *   图片：source/img/<IMG_NAMESPACE>/<slug>/<文件>
- *   引用：https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/<IMG_NAMESPACE>/<slug>/<文件>
+ *   图片：source/img/<IMG_NAMESPACE>/<slug>/<文件>，并同步到独立仓 ShenDoyle/img 的根目录
+ *   引用：/img/<IMG_NAMESPACE>/<slug>/<文件>（同源，经 ESA 分发）
+ *   兜底：jsDelivr 固定 commit SHA，不使用会静默变化的 @main
  */
 
 import path from 'node:path';
@@ -30,10 +31,12 @@ export const PAGES_STATE_FILE = path.join(SITE_ROOT, '.notion-pages-state.json')
 /** 图片命名空间：与既有文章一致 → source/img/cbmim/<slug>/xxx.webp */
 export const IMG_NAMESPACE = 'cbmim';
 
-/** 发布产物仓库；jsDelivr 的 @main 指向的就是它（GitHub Pages 产物仓） */
+/** 静态产物仓与独立图片仓；图片仓根目录对应站点的 /img/。 */
 export const SITE_REPO = 'ShenDoyle/ShenDoyle.github.io';
-export const CDN_BASE = `https://cdn.jsdelivr.net/gh/${SITE_REPO}@main`;
-export const CDN_IMG_BASE = `${CDN_BASE}/img`;
+export const IMG_REPO = 'ShenDoyle/img';
+export const IMG_REPO_SHA = (process.env.IMG_REPO_SHA || '338d57d5b5320a7e6b6f67a5c1510e1119b13252').trim();
+export const IMG_PUBLIC_BASE = '/img';
+export const CDN_IMG_BASE = `https://cdn.jsdelivr.net/gh/${IMG_REPO}@${IMG_REPO_SHA}`;
 
 /** 时区：Notion 日期统一按东八区落盘，和现有文章一致 */
 export const TIMEZONE = 'Asia/Shanghai';

@@ -58,6 +58,14 @@ function show(v) {
   try { return JSON.stringify(v); } catch (e) { return String(v); }
 }
 
+hexo.extend.filter.register('after_render:html', function (data) {
+  // 兼容主题默认值或历史正文里残留的产物仓图片地址，统一走同源 /img。
+  return data
+    .replace(/https?:\/\/cdn\.jsdelivr\.net\/gh\/ShenDoyle\/ShenDoyle\.github\.io@[^/]+\/img\//g, '/img/')
+    // 主题把二维码脚本硬编码在 cbd；改为固定版本的 jsDelivr，避免继续依赖该第三方源。
+    .replace(/https?:\/\/cdn\.cbd\.int\/qrcodejs@1\.0\.0\/qrcode\.min\.js/g, 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js');
+});
+
 hexo.extend.filter.register('before_generate', function () {
   var file = path.join(hexo.source_dir, '_data', 'site-settings.yml');
   if (!fs.existsSync(file)) return;
@@ -69,7 +77,10 @@ hexo.extend.filter.register('before_generate', function () {
     hexo.log.warn('[settings] site-settings.yml 解析失败，已跳过：' + e.message);
     return;
   }
-  if (!isPlainObject(data) || !Object.keys(data).length) return;
+  if (!isPlainObject(data) || !Object.keys(data).length) {
+    hexo.log.warn('[settings] site-settings.yml 为空或格式不正确；本次构建未应用任何 Notion 覆盖，请检查 Notion「站点设置」的「值 / 启用」列。');
+    return;
+  }
 
   var applied = [];
   var rejected = [];

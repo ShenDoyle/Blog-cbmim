@@ -11,9 +11,10 @@
  * 设计要点：
  *   · 键清单**自动生成**：从主题默认配置（node_modules/hexo-theme-cbmim/_config.yml）
  *     拍平成 `a.b.c` 键路径，站点覆盖文件（_config.cbmim.yml）里的值作为「当前值」参考。
- *   · 生效条件只有一个：「值」非空。留空 = 沿用仓库现值（不覆盖）。
- *     「启用」列不参与判定，它表示**该功能在当前博客是否已经开着**（状态列）——
- *     判定方式：站点配置值 ≠ 主题默认值，且新值不是「空/false」。
+ *   · 「值」非空时始终生效；兼容旧库：若「值」为空但「启用」已勾选，
+ *     则使用「当前值」（优先取仓库里的精确类型值）。这样历史上只勾了「启用」的
+ *     设置也能继续生效，而 false / 0 / null 不会被当成空值。
+ *   · 没有任何生效项时，不覆盖已有的非空 site-settings.yml，避免一次空同步抹掉全站设置。
  *   · 「优先级」= 分组分层（GROUP_TIERS，越常改的越靠前）+ 组内 enable 优先、其余按路径排序，
  *     拍平成连续序号。Notion 视图按它升序排，常用的功能自然在最上面。
  *   · 「说明」三层拼装：人工词条（KEY_DESC）→ 分组说明 + 末级键语义 → 主题 _config.yml 注释。
@@ -24,7 +25,9 @@
 
 import fs from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
+import os from 'node:os';
 import path from 'node:path';
+import assert from 'node:assert/strict';
 import yaml from 'js-yaml';
 
 import { createClient, explainError, queryAllPages } from './notion/api.mjs';
@@ -320,9 +323,10 @@ const SCHEMA_PROPS = {
   启用: { checkbox: {} },
 };
 
-const DB_DESC = '主题设置。改法：在「值」里填新值即生效（下次构建），留空 = 沿用仓库现值。'
-  + '「启用」是状态列：表示该功能在当前博客已经开着，不用管它。'
-  + '「优先级」控制显示顺序（常用功能在最上面），「说明」「当前值」「优先级」为自动生成，请勿手改。';
+const DB_DESC = '主题设置。改法：在「值」里填新值即生效（下次构建）。兼容旧库：若「值」为空但「启用」已勾选，'
+  + '则沿用仓库 _config.cbmim.yml 中该键的精确当前值，仓库未定义时再取主题默认值；取消勾选且「值」留空则不覆盖。'
+  + '「当前值」仅为自动生成的展示缓存，请勿手改，也不会反向覆盖仓库配置。'
+  + '「优先级」控制显示顺序（常用功能在最上面），「说明」「当前值」「优先级」为自动生成。';
 
 async function createDb(notion) {
   // v5（API 2025-09-03）用 initial_data_source.properties；旧版用 properties
@@ -395,7 +399,7 @@ function rowProps(row, titleName) {
   p['风险'] = { select: { name: row.risk } };
   p['优先级'] = { number: row.prio };
   p['说明'] = { rich_text: [{ text: { content: row.desc } }] };
-  // 「启用」= 当前博客是否已经开着这个功能（状态展示，不参与生效判定）
+  // 「启用」在新建行时按当前站点状态初始化；刷新已有行时保留用户勾选状态。
   p['启用'] = { checkbox: row.state === 'active' };
   const cur = show(row.cur !== undefined ? row.cur : row.def);
   if (cur) p['当前值'] = { rich_text: [{ text: { content: cur.slice(0, 1900) } }] };
@@ -499,6 +503,8 @@ async function runRefresh(notion, opts) {
     const row = byKey.get(key);
     if (!row) { unknown.push(key || '(空)'); continue; }
     jobs.push({ id: page.id, props: rowProps(row, titleName) });
+    // 「启用」现在是兼容旧库的输入开关，刷新不能把用户的取消勾选重新打开。
+    delete jobs[jobs.length - 1].props['启用'];
   }
 
   log.info(`库里 ${pages.length} 行｜本次刷新 ${jobs.length} 行｜主题里已不存在的键 ${unknown.length} 个（跳过）`);
@@ -532,30 +538,53 @@ async function runRefresh(notion, opts) {
   log.ok(`刷新完成：${done} 行（「值」列未被触碰）`);
 }
 
-async function runSync(notion, opts) {
-  const found = await findDb(notion);
-  if (!found) throw new Error(`未找到数据库「${DB_TITLE}」，请先跑一次 npm run notion:settings -- --init`);
-  const dsId = found.dsId;
-  const ds = found.raw || await dsSchema(notion, dsId);
-  const titleName = Object.keys(ds?.properties || {}).find((k) => ds.properties[k].type === 'title') || '键';
+function validateSettingsSchema(ds, titleName) {
+  const props = ds?.properties || {};
+  if (!props[titleName] || props[titleName].type !== 'title') {
+    throw new Error('站点设置库缺少可识别的标题列，无法读取配置键');
+  }
+  if (!props['值'] || props['值'].type !== 'rich_text') {
+    throw new Error('站点设置库缺少「值」列，或该列不是文本类型；已停止同步，避免误写空设置');
+  }
+  for (const [name, type] of [['启用', 'checkbox'], ['当前值', 'rich_text'], ['类型', 'select']]) {
+    if (props[name] && props[name].type !== type) log.warn(`「${name}」列类型异常（应为 ${type}），相关兼容逻辑可能不可用`);
+  }
+}
 
-  const pages = await queryAllPages(notion, dsId);
-  const filled = pages.filter((p) => textOf(p.properties['值']).trim()).length;
-  log.info(`设置行：${pages.length}｜其中填了「值」的：${filled}`);
-
-  const defaults = loadYaml(THEME_DEFAULT);
-  const current = loadYaml(SITE_THEME_CFG);
+/** 把 Notion 行解析成覆盖配置；纯函数，便于离线回归。 */
+function buildSettings(pages, titleName, defaults, current) {
   const out = {};
   const applied = [];
   const problems = [];
+  const stats = { rows: pages.length, explicit: 0, enabled: 0, fallback: 0 };
 
   for (const page of pages) {
     const key = textOf(page.properties[titleName]).trim();
     if (!key) continue;
-    // 生效条件只有一个：「值」非空。留空 = 沿用仓库现值。
-    // 「启用」是状态列（该功能当前是否开着），不参与判定。
-    const raw = textOf(page.properties['值']).trim();
-    if (!raw) continue;
+
+    const explicitRaw = textOf(page.properties['值']).trim();
+    const enabled = page.properties['启用']?.checkbox === true;
+    if (enabled) stats.enabled += 1;
+
+    let raw = explicitRaw;
+    let source = '值';
+    let exactValue;
+    let hasExactValue = false;
+
+    if (!raw && enabled) {
+      const local = pick(current, key);
+      const expected = local !== undefined ? local : pick(defaults, key);
+      if (expected !== undefined) {
+        // 仓库/主题默认值是精确类型的事实来源；Notion「当前值」只是展示缓存，
+        // 代码升级后它可能滞后，不能用旧展示值把新配置反向覆盖掉。
+        exactValue = expected;
+        hasExactValue = true;
+        source = '当前值';
+        stats.fallback += 1;
+      }
+    }
+
+    if (!raw && !hasExactValue) continue;
 
     const risk = riskOf(key);
     if (risk === '屏蔽') { problems.push(`${key}：该键被硬屏蔽，已忽略`); continue; }
@@ -563,27 +592,64 @@ async function runSync(notion, opts) {
     const type = page.properties['类型']?.select?.name || 'string';
     let val;
     try {
-      val = parseValue(raw, type);
+      val = hasExactValue ? exactValue : parseValue(raw, type);
     } catch (e) {
-      problems.push(`${key}：值解析失败（${e.message}），已跳过`);
+      problems.push(`${key}：${source}解析失败（${e.message}），已跳过`);
       continue;
     }
     setPath(out, key, val);
-    applied.push({ key, value: val, was: pick(current, key) !== undefined ? pick(current, key) : pick(defaults, key) });
+    if (source === '值') stats.explicit += 1;
+    applied.push({
+      key,
+      value: val,
+      source,
+      was: pick(current, key) !== undefined ? pick(current, key) : pick(defaults, key),
+    });
   }
 
-  if (problems.length) for (const p of problems) log.warn(p);
+  return { out, applied, problems, stats };
+}
+
+async function hasUsableSettings(file) {
+  try {
+    const data = yaml.load(await fs.readFile(file, 'utf8'));
+    return Boolean(data && typeof data === 'object' && !Array.isArray(data) && Object.keys(data).length);
+  } catch {
+    return false;
+  }
+}
+
+async function runSync(notion, opts) {
+  const found = await findDb(notion);
+  if (!found) throw new Error(`未找到数据库「${DB_TITLE}」，请先跑一次 npm run notion:settings -- --init`);
+  const dsId = found.dsId;
+  const ds = found.raw || await dsSchema(notion, dsId);
+  const titleName = Object.keys(ds?.properties || {}).find((k) => ds.properties[k].type === 'title') || '键';
+  validateSettingsSchema(ds, titleName);
+
+  const pages = await queryAllPages(notion, dsId);
+  const defaults = loadYaml(THEME_DEFAULT);
+  const current = loadYaml(SITE_THEME_CFG);
+  const { out, applied, problems, stats } = buildSettings(pages, titleName, defaults, current);
+  log.info(`设置行：${stats.rows}｜「值」已填 ${stats.explicit}｜「启用」勾选 ${stats.enabled}｜兼容「当前值」${stats.fallback}`);
+
+  for (const p of problems) log.warn(p);
 
   if (!applied.length) {
-    log.info('没有任何生效的设置（所有行的「值」都是空的 → 全部沿用仓库现值）');
-    if (!opts.dryRun) {
+    const keep = !opts.dryRun && await hasUsableSettings(OUT_FILE);
+    log.warn(keep
+      ? '本次没有任何生效设置；保留已有非空 site-settings.yml，未用空配置覆盖。'
+      : '本次没有任何生效设置；请检查「值」与「启用」，站点将沿用仓库默认配置。');
+    if (!opts.dryRun && !keep) {
       await fs.mkdir(path.dirname(OUT_FILE), { recursive: true });
-      await fs.writeFile(OUT_FILE, '# 由 tools/notion-settings.mjs 自动生成，请勿手改\n{}\n');
+      await fs.writeFile(OUT_FILE, '# 未发现生效的 Notion 设置；站点沿用仓库配置\n{}\n');
     }
     return;
   }
 
-  log.table([['键', '原值', 'Notion 值'], ...applied.map((a) => [a.key, show(a.was).slice(0, 40), show(a.value).slice(0, 40)])]);
+  log.table([['键', '来源', '原值', 'Notion 值'], ...applied.map((a) => [
+    a.key, a.source, show(a.was).slice(0, 32), show(a.value).slice(0, 40),
+  ])]);
 
   if (opts.dryRun) { log.info('[dry-run] 未写文件'); return; }
 
@@ -628,7 +694,102 @@ function setPath(obj, dotted, value) {
   cur[parts[parts.length - 1]] = value;
 }
 
+async function runSettingsSelfTest() {
+  const rich = (content = '') => ({ type: 'rich_text', rich_text: content ? [{ plain_text: content }] : [] });
+  const page = (key, { value = '', current = '', enabled = false, type = 'string' } = {}) => ({
+    properties: {
+      键: { type: 'title', title: [{ plain_text: key }] },
+      值: rich(value),
+      当前值: rich(current),
+      启用: { type: 'checkbox', checkbox: enabled },
+      类型: { type: 'select', select: { name: type } },
+    },
+  });
+  const defaults = {
+    avatar: { effect: true, size: 8 },
+    comments: { use: 'Waline', lazyload: false },
+    empty: { list: [], map: {}, nil: null },
+  };
+  const current = {
+    avatar: { effect: false, size: 0 },
+    comments: { use: 'Giscus', lazyload: true },
+    empty: { list: ['a'], map: { a: 1 }, nil: null },
+  };
+  const pages = [
+    page('avatar.effect', { enabled: true, current: 'false', type: 'bool' }),
+    page('avatar.size', { enabled: true, current: '0', type: 'number' }),
+    page('empty.list', { enabled: true, current: '["a"]', type: 'array' }),
+    page('empty.map', { enabled: true, current: '{"a":1}', type: 'map' }),
+    page('empty.nil', { enabled: true, current: 'null' }),
+    page('comments.use', { value: 'Giscus', current: 'Waline', enabled: true }),
+    page('comments.lazyload', { current: 'false', enabled: false, type: 'bool' }),
+    page('avatar.effect', { value: 'true', current: 'false', enabled: false, type: 'bool' }),
+  ];
+  // 同名键只保留最后一个，符合 Notion 视图按优先级展示唯一行的预期。
+  const result = buildSettings(pages, '键', defaults, current);
+  assert.equal(result.out.avatar.effect, true);
+  assert.equal(result.out.avatar.size, 0);
+  assert.deepEqual(result.out.empty.list, ['a']);
+  assert.deepEqual(result.out.empty.map, { a: 1 });
+  assert.equal(result.out.empty.nil, null);
+  assert.equal(result.out.comments.use, 'Giscus');
+  assert.equal('comments' in result.out && 'lazyload' in result.out.comments, false);
+  assert.equal(result.stats.fallback, 5);
+
+  const typed = buildSettings([
+    page('comments.lazyload', { value: 'false', type: 'bool' }),
+    page('avatar.size', { value: '0', type: 'number' }),
+    page('empty.list', { value: '[]', type: 'array' }),
+    page('empty.map', { value: '{}', type: 'map' }),
+  ], '键', defaults, current);
+  assert.equal(typed.out.comments.lazyload, false);
+  assert.equal(typed.out.avatar.size, 0);
+  assert.deepEqual(typed.out.empty.list, []);
+  assert.deepEqual(typed.out.empty.map, {});
+
+  const invalid = buildSettings([
+    page('comments.lazyload', { value: 'maybe', type: 'bool' }),
+    page('deploy.type', { value: 'git', enabled: true }),
+  ], '键', defaults, current);
+  assert.equal(invalid.applied.length, 0);
+  assert.equal(invalid.problems.length, 2);
+  assert.match(invalid.problems[0], /解析失败/);
+  assert.match(invalid.problems[1], /硬屏蔽/);
+
+  const staleCurrent = buildSettings([
+    page('comments.use', { current: 'Waline', enabled: true }),
+  ], '键', defaults, current);
+  assert.equal(staleCurrent.out.comments.use, 'Giscus', '展示缓存不能反向覆盖仓库新配置');
+
+  const first = buildSettings(pages, '键', defaults, current);
+  const second = buildSettings(pages, '键', defaults, current);
+  assert.deepEqual(first.out, second.out, '同一输入重复同步必须幂等');
+
+  assert.throws(() => validateSettingsSchema({ properties: { 键: { type: 'title' } } }, '键'), /缺少「值」列/);
+  const tmp = await fs.mkdtemp(path.join(os.tmpdir(), 'cbmim-settings-test-'));
+  try {
+    const file = path.join(tmp, 'site-settings.yml');
+    await fs.writeFile(file, 'avatar:\n  effect: false\n');
+    assert.equal(await hasUsableSettings(file), true);
+    await fs.writeFile(file, '{}\n');
+    assert.equal(await hasUsableSettings(file), false);
+  } finally {
+    await fs.rm(tmp, { recursive: true, force: true });
+  }
+  log.ok('Notion 设置离线自检通过（显式值、启用兼容、false/0/null、空配置保护、幂等）');
+}
+
 async function main() {
+  if (process.argv.includes('--selftest')) {
+    try {
+      await runSettingsSelfTest();
+    } catch (err) {
+      log.err('Notion 设置离线自检失败：' + err.stack);
+      process.exit(1);
+    }
+    return;
+  }
+
   const opts = parseArgs(process.argv.slice(2));
   setVerbose(opts.verbose);
 

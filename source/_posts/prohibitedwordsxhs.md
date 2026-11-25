@@ -2,7 +2,7 @@
 title: 小红书违禁词：保持内容创作的纯净和合规
 date: 2024/01/13 13:40:00
 updated: 2026/09/26 19:21:00
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/prohibitedwordsxhs/2024215181707991787040time_prohibitedwordsxhs.webp
+cover: /img/cbmim/prohibitedwordsxhs/2024215181707991787040time_prohibitedwordsxhs.webp
 categories: 运营
 tags:
   - 实用

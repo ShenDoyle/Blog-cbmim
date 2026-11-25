@@ -28,12 +28,12 @@ nav:
       item:
         - name: Copyright
           link: /cc/
-          icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
+          icon: /img/site/favicon.ico
     - title: 项目
       item:
         - name: Markdown
           link: https://md.5301314.xyz/
-          icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
+          icon: /img/site/favicon.ico
 
 # mourn （哀悼日，指定日期网站简单变灰，不包括滚动条）
 # 注意： 仅网站首页变灰，其他页面正常显示
@@ -71,7 +71,7 @@ social:
 author_status:
   enable: true
   # 可以是任何图片，建议放表情包或者emoji图片，效果都很好，[表情包速查](https://emotion.xiaokang.me/)
-  statusImg: "https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/ico.webp"
+  statusImg: "/img/site/ico.webp"
   skills:
     - 📈 数据分析师
     - 💡 创意策划师
@@ -106,7 +106,7 @@ docsearch:
 # Local search
 local_search:
   enable: true
-  preload: true
+  preload: false
   CDN:
 
 # Math (数学)
@@ -131,11 +131,11 @@ katex:
 # --------------------------------------
 
 # Favicon（网站图标）
-favicon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
+favicon: /img/site/favicon.ico
 
 # Avatar (头像)
 avatar:
-  img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp
+  img: /img/site/avatar.webp
   effect: false
 
 # Disable all banner image
@@ -147,10 +147,10 @@ disable_top_img: false
 # 注意：此处须为 false，不可写成空值或删除，否则会回落到 default_top_img
 index_img: false
 
-archive_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/archive_top.webp
+archive_img: /img/site/archive_top.webp
 
 # If the banner of page not setting, it will show the top_img
-default_top_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/default.webp
+default_top_img: /img/site/default.webp
 
 cover:
   # display the cover or not (是否显示文章封面)
@@ -162,18 +162,18 @@ cover:
   position: left
   # When cover is not set, the default cover is displayed (当没有设置cover时，默认的封面显示)
   default_cover:
-    - https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/default.webp
+    - /img/site/default.webp
 
 # Replace Broken Images (替换无法显示的图片)
 error_img:
-  flink: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/loading.webp
-  post_page: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/loading.webp
+  flink: /img/site/loading.webp
+  post_page: /img/site/loading.webp
 
 # A simple 404 page
 error_404:
   enable: true
   subtitle: "请尝试站内搜索寻找文章"
-  background: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/search_bg.webp
+  background: /img/site/search_bg.webp
 
 post_meta:
   page: # Home Page
@@ -245,12 +245,12 @@ post_copyright:
 # Sponsor/reward
 reward:
   enable: true
-  coinAudio: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/coin.mp3
+  coinAudio: /img/coin.mp3
   QR_code:
-    - img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/pay/wechat.webp
+    - img: /img/pay/wechat.webp
       link:
       text: wechat
-    - img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/pay/alipay.webp
+    - img: /img/pay/alipay.webp
       link:
       text: alipay
 
@@ -313,15 +313,12 @@ addtoany:
 # --------------------------------------
 
 comments:
-  # Up to two comments system, the first will be shown as default
-  # Choose: Valine/Waline/Twikoo/Artalk
-  use: Waline # Waline（仅保留 Waline）
-  text: true # Display the comment name next to the button
-  # lazyload: The comment system will be load when comment element enters the browser's viewport.
-  # If you set it to true, the comment count will be invalid
+  # GitHub Discussions，无需自建服务；主题在 lazyload=false 时使用 IntersectionObserver。
+  use: Giscus
+  text: true
   lazyload: false
-  count: true # Display comment count in post's top_img
-  card_post_count: false # Display comment count in Home Page
+  count: false
+  card_post_count: false
 
 # valine
 # https://valine.js.org
@@ -335,7 +332,7 @@ valine:
   guest_info: nick,mail,link # valine comment header info (nick/mail/link)
   recordIP: false # Record reviewer IP
   serverURLs: # This configuration is suitable for domestic custom domain name users, overseas version will be automatically detected (no need to manually fill in)
-  bg: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/comment_bg.webp # valine background
+  bg: /img/site/comment_bg.webp # valine background
   emojiCDN: //i0.hdslb.com/bfs/emote/ # emoji CDN
   enableQQ: true # enable the Nickname box to automatically get QQ Nickname and QQ Avatar
   requiredFields: nick,mail # required fields (nick/mail)
@@ -350,7 +347,8 @@ valine:
 # waline - A simple comment system with backend support fork from Valine
 # https://waline.js.org/
 waline:
-  serverURL: https://comments.5311314.xyz # Waline server address url
+  # 已迁移到 giscus；保留空配置，避免继续请求旧评论服务。
+  serverURL:
   bg: # waline background
   pageview: false # 文章页的访问人数统计功能由不蒜子切换到 waline
   meta: true # 归属地, 操作系统 前是否显示图标
@@ -373,6 +371,23 @@ artalk:
   site:
   visitor: false
   option:
+
+# giscus - GitHub Discussions
+# https://giscus.app/
+giscus:
+  repo: ShenDoyle/ShenDoyle.github.io
+  repo_id: 316776190
+  category_id: 53458537
+  theme:
+    light: light
+    dark: dark
+  option:
+    data-lang: zh-CN
+    data-mapping: pathname
+    data-category: General
+    data-input-position: top
+    data-reactions-enabled: 1
+    data-emit-metadata: 0
 
 # Chat Services
 # --------------------------------------
@@ -418,9 +433,9 @@ footer:
   runtime:
     enable: false
     # launch_time: 08/17/2019 00:00:00 # 网站上线时间
-    work_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/online.svg
+    work_img: /img/site/online.svg
     work_description: 搬砖小能手
-    offduty_img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/offline.svg
+    offduty_img: /img/site/offline.svg
     offduty_description: 回归生活了
   # 徽标部分配置项 https://shields.io/
   # https://img.shields.io/badge/CDN-jsDelivr-orange?style=flat&logo=jsDelivr
@@ -428,22 +443,19 @@ footer:
     enable: true
     list:
       - link: https://hexo.io/ #徽标指向网站链接
-        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/Frame-Hexo.svg #徽标 API
+        shields: /img/site/Frame-Hexo.svg #徽标 API
         message: 博客框架为 Hexo_v7.0.0 #徽标提示语
       - link: https://github.com/anzhiyu-c/hexo-theme-anzhiyu
-        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/Theme-AnZhiYu-2E67D3.svg
+        shields: /img/site/Theme-AnZhiYu-2E67D3.svg
         message: 本站使用 AnZhiYu 主题
       - link: https://github.com/
-        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/Source-Github.svg
+        shields: /img/site/Source-Github.svg
         message: 本站项目由 Github 托管
-      - link: https://vercel.com/
-        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/vercel.svg
-        message: 本站项目由 Vercel 分发
       # - link: https://space.bilibili.com/22919283
       #   shields: https://img.shields.io/badge/%E5%9B%9B%E5%8D%81%E5%85%AD-BiliBili-blue
       #   message: 日渐增长的 bilibili
       - link: http://creativecommons.org/licenses/by-nc-sa/4.0/
-        shields: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/Copyright-BY-NC-SA.svg
+        shields: /img/site/Copyright-BY-NC-SA.svg
         message: 本站采用知识共享署名-非商业性使用-相同方式共享 4.0 国际许可协议进行许可
   socialBar:
     enable: true #这里一定要注意缩进问题
@@ -763,7 +775,7 @@ preloader:
   source: 3
   # pace theme (see https://codebyzach.github.io/pace/)
   pace_css_url:
-  avatar: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/avatar.webp # 自定加载头像
+  avatar: /img/site/avatar.webp # 自定加载头像
 
 # aside (侧边栏)
 # --------------------------------------
@@ -788,8 +800,8 @@ aside:
     content: 感谢来到我的博客~
   card_weixin:
     enable: false
-    face: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/face.webp
-    backFace: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/face.webp
+    face: /img/site/face.webp
+    backFace: /img/site/face.webp
   card_recent_post:
     enable: true
     limit: 5 # if set 0 will show all
@@ -1006,11 +1018,11 @@ pwa:
   startup_image_enable: true
   manifest: /manifest.json
   theme_color: var(--anzhiyu-main)
-  mask_icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
-  apple_touch_icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
-  bookmark_icon: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
-  favicon_32_32: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
-  favicon_16_16: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/favicon.ico
+  mask_icon: /img/site/favicon.ico
+  apple_touch_icon: /img/site/favicon.ico
+  bookmark_icon: /img/site/favicon.ico
+  favicon_32_32: /img/site/favicon.ico
+  favicon_16_16: /img/site/favicon.ico
 
 # Open graph meta tags
 # https://developers.facebook.com/docs/sharing/webmasters/
@@ -1055,7 +1067,7 @@ home_top:
   banner:
     tips: 一个简单的自用导航
     title: 导航
-    image: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/nav_guide.webp
+    image: /img/site/nav_guide.webp
     link: https://5301314.xyz/
 
 # 朋友圈配置
@@ -1200,7 +1212,7 @@ rightClickMenu:
 # 首页随便逛逛people模式 而非技能点模式，关闭后为技能点模式需要配置creativity.yml
 peoplecanvas:
   enable: false
-  img: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/peoplecanvas.webp
+  img: /img/site/peoplecanvas.webp
 
 # 动效
 dynamicEffect:
@@ -1239,7 +1251,7 @@ CDN:
 
   # The CDN provider of third party scripts (第三方 js 的 cdn 配置)
   # option: elemecdn/jsdelivr/unpkg/cdnjs/onmicrosoft/cbd/anheyu/custom
-  third_party_provider: cbd
+  third_party_provider: local
 
   # Add version number to CDN, true or false
   version: true

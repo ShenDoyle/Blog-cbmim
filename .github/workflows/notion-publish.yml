@@ -81,12 +81,15 @@ jobs:
           [ -n "$NOTION_TOKEN" ]       || { echo "::error::缺少 secret：NOTION_TOKEN"; fail=1; }
           [ -n "$NOTION_DATABASE_ID" ] || { echo "::error::缺少 secret：NOTION_DATABASE_ID"; fail=1; }
           if [ "${{ inputs.dry_run }}" != "true" ]; then
-            [ -n "${{ secrets.DEPLOY_KEY }}" ] || { echo "::error::缺少 secret：DEPLOY_KEY（ShenDoyle.github.io 的可写部署密钥）"; fail=1; }
+            [ -n "${{ secrets.DEPLOY_KEY }}" ] || { echo "::error::缺少 secret：DEPLOY_KEY（产物仓可写部署密钥）"; fail=1; }
+            [ -n "${{ secrets.IMG_DEPLOY_KEY }}" ] || { echo "::error::缺少 secret：IMG_DEPLOY_KEY（图片仓可写部署密钥）"; fail=1; }
           fi
           exit $fail
 
-      - name: 离线自检（转换规则回归）
-        run: npm run notion:selftest
+      - name: 离线自检（转换规则与设置回归）
+        run: |
+          npm run notion:selftest
+          npm run notion:settings -- --selftest
 
       - name: 同步 Notion
         id: sync
@@ -159,21 +162,34 @@ jobs:
           }
           echo "产物文件数：$(find public -type f | wc -l)"
 
-      - name: 发布前预检（部署密钥与产物仓可写性）
+      - name: 发布前预检（部署密钥与两个目标仓可写性）
         if: env.NEED_DEPLOY == '1'
         env:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
+          IMG_DEPLOY_KEY: ${{ secrets.IMG_DEPLOY_KEY }}
         run: |
           mkdir -p ~/.ssh && chmod 700 ~/.ssh
           printf '%s\n' "$DEPLOY_KEY" > ~/.ssh/deploy_key
-          chmod 600 ~/.ssh/deploy_key
-          echo "密钥类型：$(head -1 ~/.ssh/deploy_key)"
-          echo "密钥指纹（sha256，可用于比对是否配对）：$(sha256sum ~/.ssh/deploy_key | cut -c1-16)"
+          printf '%s\n' "$IMG_DEPLOY_KEY" > ~/.ssh/img_deploy_key
+          chmod 600 ~/.ssh/deploy_key ~/.ssh/img_deploy_key
+          # 只输出公钥指纹，不输出私钥内容或私钥哈希。
+          echo "产物仓公钥指纹：$(ssh-keygen -y -f ~/.ssh/deploy_key | ssh-keygen -lf - -E sha256 | cut -d' ' -f2)"
+          echo "图片仓公钥指纹：$(ssh-keygen -y -f ~/.ssh/img_deploy_key | ssh-keygen -lf - -E sha256 | cut -d' ' -f2)"
           # accept-new：首次连接自动记录主机指纹，避免 keyscan 失败导致 ssh 直接拒绝
           ssh-keyscan -t rsa,ecdsa,ed25519 github.com >> ~/.ssh/known_hosts 2>/dev/null || true
           export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
           echo "--- ssh 认证探测 ---"
           ssh -T -i ~/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new git@github.com 2>&1 || true
+          git ls-remote git@github.com:ShenDoyle/ShenDoyle.github.io.git refs/heads/main >/dev/null
+          git ls-remote git@github.com:ShenDoyle/img.git refs/heads/main >/dev/null
+
+      - name: 发布图片到独立仓库
+        if: env.NEED_DEPLOY == '1'
+        env:
+          IMG_DEPLOY_KEY: ${{ secrets.IMG_DEPLOY_KEY }}
+        run: |
+          export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/img_deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"
+          node tools/publish-images.mjs
 
       - name: 发布到 GitHub Pages 仓库
         if: env.NEED_DEPLOY == '1'
@@ -181,7 +197,7 @@ jobs:
           DEPLOY_KEY: ${{ secrets.DEPLOY_KEY }}
         run: |
           if [ -z "$DEPLOY_KEY" ]; then
-            echo "缺少 secret：DEPLOY_KEY（ShenDoyle.github.io 的可写部署密钥）"
+            echo "缺少 secret：DEPLOY_KEY（产物仓可写部署密钥）"
             exit 1
           fi
           export GIT_SSH_COMMAND="ssh -i $HOME/.ssh/deploy_key -o IdentitiesOnly=yes -o StrictHostKeyChecking=accept-new"

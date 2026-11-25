@@ -6,14 +6,14 @@
  *
  * 落盘规则（与站点现有 25 篇文章一致）：
  *   source/img/cbmim/<slug>/notion-<hash>.<ext>
- *   引用 https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/<slug>/notion-<hash>.<ext>
+ *   引用 /img/<IMG_NAMESPACE>/<slug>/notion-<hash>.<ext>（同源）
  */
 
 import crypto from 'node:crypto';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 
-import { CDN_IMG_BASE, IMG_NAMESPACE, IMG_ROOT, NOTION_IMAGE_HOSTS, SITE_ROOT } from './config.mjs';
+import { IMG_PUBLIC_BASE, IMG_NAMESPACE, IMG_ROOT, NOTION_IMAGE_HOSTS, SITE_ROOT } from './config.mjs';
 import { log } from './log.mjs';
 
 const EXT_BY_TYPE = {
@@ -115,7 +115,7 @@ export async function localizeUrls(urls, { slug, dryRun = false }) {
   for (const url of targets) {
     const hash = hashOf(url);
     let ext = extFromUrl(url);
-    const cdnOf = (e) => `${CDN_IMG_BASE}/${IMG_NAMESPACE}/${slug}/notion-${hash}.${e}`;
+    const cdnOf = (e) => `${IMG_PUBLIC_BASE}/${IMG_NAMESPACE}/${slug}/notion-${hash}.${e}`;
 
     try {
       // 已落地过就直接复用，不重复下载
@@ -151,7 +151,7 @@ export async function localizeUrls(urls, { slug, dryRun = false }) {
   return { map, created, reused, failed };
 }
 
-/** 把正文和封面里的 Notion 图片换成本地 CDN 地址 */
+/** 把正文和封面里的 Notion 图片换成本地同源地址 */
 export function rewriteMarkdownImages(markdown, map) {
   if (!map.size) return markdown;
   return markdown.replace(MD_IMAGE, (full, alt, url, title) => {

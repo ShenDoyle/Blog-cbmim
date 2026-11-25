@@ -57,7 +57,7 @@ const CHILDREN = {
     block('b8', 'image', {
       caption: [rt('外链图')],
       type: 'external',
-      external: { url: 'https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/a.webp' },
+      external: { url: '/img/site/a.webp' },
     }),
     block('b9', 'image', {
       caption: [],
@@ -177,17 +177,16 @@ await check('第一条分割线 → <!--more-->，后续分割线保持原样', 
   assert.ok(out.lastIndexOf('---') > firstMore, '后续分割线应保留为 ---');
 });
 
-await check('图片：Notion 自有图床可识别，自家 CDN 不重复落地', () => {
+await check('图片：Notion 自有图床可识别，同源图片不重复落地', () => {
   const urls = collectMarkdownImageUrls(body);
-  assert.equal(urls.length, 2, `应收集到 2 张图，实际 ${urls.length}`);
+  assert.equal(urls.length, 1, `只应收集 1 张外链图，实际 ${urls.length}`);
   const notionUrl = urls.find((u) => u.includes('prod-files-secure'));
-  const ownUrl = urls.find((u) => u.includes('jsdelivr'));
-  assert.ok(isNotionHosted(notionUrl), 'Notion 图床未被识别');
-  assert.equal(isNotionHosted(ownUrl), false, '自家 CDN 被误判为 Notion 图床');
+  assert.ok(notionUrl && isNotionHosted(notionUrl), 'Notion 图床未被识别');
+  assert.equal(isNotionHosted('/img/site/a.webp'), false, '同源图片被误判为 Notion 图床');
 });
 
 await check('图片本地化：正文图片可回写为 CDN 地址', () => {
-  const map = new Map([['https://prod-files-secure.s3.us-west-2.amazonaws.com/ws/abc/pic.png', 'https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/demo/notion-abc123.png']]);
+  const map = new Map([['https://prod-files-secure.s3.us-west-2.amazonaws.com/ws/abc/pic.png', '/img/cbmim/demo/notion-abc123.png']]);
   const out = rewriteMarkdownImages('![x](https://prod-files-secure.s3.us-west-2.amazonaws.com/ws/abc/pic.png)', map);
   assert.ok(out.includes('/img/cbmim/demo/notion-abc123.png'), '未替换为 CDN 地址');
 });
@@ -202,7 +201,7 @@ await check('front-matter 字段与现有 25 篇完全对齐', () => {
     title: 'GEO 的分享',
     date: '2025/08/15 16:28:53',
     updated: '2025/08/15 16:28:53',
-    cover: 'https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/site/a.webp',
+    cover: '/img/site/a.webp',
     top_group_index: 9,
     categories: '运营',
     tags: ['运营', 'GEO', 'AI'],
@@ -264,7 +263,7 @@ await check('图片下载（dry-run）不落盘也能给出映射', async () => 
   );
   assert.equal(res.map.size, 1);
   const url = [...res.map.values()][0];
-  assert.ok(url.startsWith('https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/__selftest__/notion-'));
+  assert.ok(url.startsWith('/img/cbmim/__selftest__/notion-'));
   assert.ok(url.endsWith('.png'));
 });
 

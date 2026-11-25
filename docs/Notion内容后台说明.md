@@ -77,22 +77,24 @@ Notion 数据库 ──①同步脚本──▶ source/_posts/*.md ──②hexo
 
 1. 新建**源码仓库**，例如 `ShenDoyle/blog-source`（建议 public，Actions 免费不限量），把本站源码推上去。
    主站仓 `ShenDoyle.github.io` 从此**只放生成的网页**。
-2. 生成部署密钥（本机执行）：
+2. 分别为产物仓和图片仓生成部署密钥（本机执行）：
 
    ```bash
-   ssh-keygen -t ed25519 -C "blog-source deploy" -f ~/.ssh/blog_source_deploy -N ""
+   ssh-keygen -t ed25519 -C "cbmim pages deploy" -f ~/.ssh/cbmim_pages_deploy -N ""
+   ssh-keygen -t ed25519 -C "cbmim images deploy" -f ~/.ssh/cbmim_images_deploy -N ""
    ```
 
-   - 公钥 `~/.ssh/blog_source_deploy.pub` → 贴到 **ShenDoyle.github.io → Settings → Deploy keys → Add**，并**勾选 Allow write access**。
-   - 私钥文件内容 → 源码仓 **Settings → Secrets and variables → Actions → New repository secret**，名字 `DEPLOY_KEY`。
+   - `cbmim_pages_deploy.pub` → **ShenDoyle.github.io → Settings → Deploy keys → Add**，勾选 Allow write access；私钥存入源码仓 Secret `DEPLOY_KEY`。
+   - `cbmim_images_deploy.pub` → **ShenDoyle/img → Settings → Deploy keys → Add**，勾选 Allow write access；私钥存入源码仓 Secret `IMG_DEPLOY_KEY`。
 
-3. 再加两个 Secrets：
+3. 再配置以下 Secrets：
 
    | Secret 名 | 值 |
    |---|---|
    | `NOTION_TOKEN` | 第 1 步拿到的 token |
    | `NOTION_DATABASE_ID` | 第 2.4 步复制的数据库 ID |
-   | `DEPLOY_KEY` | 上一步的私钥全文（含 `-----BEGIN/END-----` 两行） |
+   | `DEPLOY_KEY` | 产物仓私钥全文 |
+   | `IMG_DEPLOY_KEY` | 图片仓私钥全文 |
 
 4. 完成。Actions 页会出现「Notion 同步并发布」，点 **Run workflow** 跑第一次。
 
