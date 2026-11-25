@@ -165,6 +165,8 @@ jobs:
             mkdir -p public/.well-known/acme-challenge
             cp source/.well-known/acme-challenge/* public/.well-known/acme-challenge/
           fi
+          # 关闭 GitHub Pages 的 Jekyll 处理，确保 .well-known 等隐藏路径也能直接访问。
+          touch public/.nojekyll
           echo "产物文件数：$(find public -type f | wc -l)"
 
       - name: 发布前预检（部署密钥与两个目标仓可写性）
