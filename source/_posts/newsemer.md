@@ -2,7 +2,7 @@
 title: 新手探索 SEM 世界
 date: 2023/12/16 22:51:00
 updated: 2026/09/26 19:26:00
-cover: /img/cbmim/newsemer/2024215181707993652755time_aboutsem.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/newsemer/2024215181707993652755time_aboutsem.webp
 categories: 运营
 tags:
   - SEM

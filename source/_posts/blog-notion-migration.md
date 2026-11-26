@@ -2,7 +2,7 @@
 title: 把博客搬进 Notion：一次完整的后台迁移实录
 date: 2026/09/26 08:00:00
 updated: 2026/09/27 22:53:00
-cover: /img/cbmim/blog-notion-migration/cover.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/cover.webp
 categories: 技术
 tags:
   - Notion
@@ -105,7 +105,7 @@ hexo generate → hexo deploy → 强推产物仓 → Pages → cbm.im
 图片是这次迁移最省事的部分：**Notion 图床的图会在同步时自动下载落地**，正文图和封面图都覆盖。
 
 - 落盘：source/img/cbmim/&lt;slug&gt;/notion-&lt;hash&gt;.&lt;ext&gt;
-- 引用：自动改写成同源 `/img/cbmim/<slug>/...`，由独立图片仓 `ShenDoyle/img` 提供。
+- 引用：自动改写成 [cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/](http://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/)...
 - 外链：不是 Notion 图床的图片原样保留（比如你自己图床的地址）
 - 去重：同一张图重复同步不会重复下载
 
@@ -206,15 +206,15 @@ Actions 接管发布，本地环境退居二线。
 
 {% btns %}
 
-{% cell 打开 Notion, https://www.notion.so/, /img/cbmim/blog-notion-migration/site-avatar.webp %}
+{% cell 打开 Notion, https://www.notion.so/, https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-avatar.webp %}
 
-{% cell 源码仓库, https://github.com/ShenDoyle/Blog-cbmim, /img/cbmim/blog-notion-migration/site-avatar.webp %}
+{% cell 源码仓库, https://github.com/ShenDoyle/Blog-cbmim, https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-avatar.webp %}
 
 {% endbtns %}
 
 {% sitegroup %}
 
-{% site 南城左立方, url=https://cbm.im/, screenshot=/img/cbmim/blog-notion-migration/notion-10d1493be8.webp, avatar=/img/cbmim/blog-notion-migration/site-avatar.webp, description=就是本站：运营笔记与 GEO 实践 %}
+{% site 南城左立方, url=https://cbm.im/, screenshot=https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/notion-10d1493be8.webp, avatar=https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/site-avatar.webp, description=就是本站：运营笔记与 GEO 实践 %}
 
 {% endsitegroup %}
 
@@ -232,9 +232,9 @@ Actions 接管发布，本地环境退居二线。
 
 {% gallery %}
 
-![封面：雨夜搬迁](/img/cbmim/blog-notion-migration/cover.webp)
+![封面：雨夜搬迁](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/cover.webp)
 
-![正文配图](/img/cbmim/blog-notion-migration/body-full.webp)
+![正文配图](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/blog-notion-migration/body-full.webp)
 
 {% endgallery %}
 

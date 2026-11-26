@@ -2,7 +2,7 @@
 title: Excel 快捷键
 date: 2020/10/02 20:00:00
 updated: 2026/09/26 19:19:00
-cover: /img/cbmim/excel/2024215171707989442043time_excel.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/excel/2024215171707989442043time_excel.webp
 categories: 技术
 tags:
   - Excel
@@ -65,11 +65,11 @@ notion_page_id: 3e77adb0-e2e0-81f9-b4bc-f4162f5f1cb9
 
 通过粘贴选项我们可以选择多种粘贴方式，值、公式、保留格式、转图片等等。
 
-![粘贴选项](/img/cbmim/excel/excel1.webp)
+![粘贴选项](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/excel/excel1.webp)
 
 **方案二：**使用快捷键组合`Ctrl+Alt+v`粘贴，这时候会直接跳出**选择性粘贴**的对话窗口：
 
-![选择性粘贴](/img/cbmim/excel/excel2.webp)
+![选择性粘贴](https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/excel/excel2.webp)
 
 这里我们可以选择我们要粘贴的内容，选择我们需要的结果。
 

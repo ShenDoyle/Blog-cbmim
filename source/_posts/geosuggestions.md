@@ -2,7 +2,7 @@
 title: 现阶段企业该不该做 GEO
 date: 2025/08/28 14:32:00
 updated: 2026/09/26 19:28:00
-cover: /img/cbmim/geosuggestions/2025828161756371132576time_Cover.webp
+cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/geosuggestions/2025828161756371132576time_Cover.webp
 top_group_index: 9
 categories: 运营
 tags:
