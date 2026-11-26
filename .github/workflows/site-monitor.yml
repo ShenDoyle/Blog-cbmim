@@ -1,0 +1,88 @@
+name: Site availability monitor
+
+on:
+  schedule:
+    - cron: '*/5 * * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  issues: write
+
+concurrency:
+  group: site-monitor
+  cancel-in-progress: false
+
+jobs:
+  check:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 3
+    steps:
+      - name: Check cbm.im and manage status issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          trap 'rm -rf "$tmp"' EXIT
+          failures=""
+
+          check_https() {
+            local label="$1" url="$2" marker="$3"
+            local headers="$tmp/$label.headers" body="$tmp/$label.body" status server
+            status="$(curl --silent --show-error --location --output "$body" --dump-header "$headers" \
+              --connect-timeout 10 --max-time 25 --retry 2 --retry-delay 2 --retry-all-errors \
+              --write-out '%{http_code}' "$url" || true)"
+            server="$(awk 'BEGIN { IGNORECASE=1 } /^Server:/ { sub(/\r$/, ""); print $2; exit }' "$headers" 2>/dev/null || true)"
+            if [[ "$status" != "200" ]]; then
+              failures+="- $label：HTTP $status（期望 200）"$'\n'
+            elif [[ "${server,,}" != "esa" ]]; then
+              failures+="- $label：未经过 ESA（Server: ${server:-unknown}）"$'\n'
+            elif ! grep -qiF "$marker" "$body"; then
+              failures+="- $label：响应内容缺少 $marker"$'\n'
+            fi
+          }
+
+          check_redirect() {
+            local label="$1" url="$2" expected="$3"
+            local headers="$tmp/$label.headers" status location
+            status="$(curl --silent --show-error --output /dev/null --dump-header "$headers" \
+              --connect-timeout 10 --max-time 25 --retry 2 --retry-delay 2 --retry-all-errors \
+              --write-out '%{http_code}' "$url" || true)"
+            location="$(awk 'BEGIN { IGNORECASE=1 } /^Location:/ { sub(/\r$/, ""); sub(/^[^:]+:[[:space:]]*/, ""); print; exit }' "$headers" 2>/dev/null || true)"
+            if [[ "$status" != "301" && "$status" != "308" ]] || [[ "$location" != "$expected"* ]]; then
+              failures+="- $label：HTTP $status，Location: ${location:-unknown}（期望跳转 $expected）"$'\n'
+            fi
+          }
+
+          check_https root 'https://cbm.im/' '<html'
+          check_https www 'https://www.cbm.im/' '<html'
+          check_https rss 'https://cbm.im/atom.xml' '<feed'
+          check_redirect http-root 'http://cbm.im/' 'https://cbm.im/'
+          check_redirect http-www 'http://www.cbm.im/' 'https://www.cbm.im/'
+
+          if ! gh label view site-monitor >/dev/null 2>&1; then
+            gh label create site-monitor --color D93F0B --description 'cbm.im availability alerts'
+          fi
+
+          title='[监控] cbm.im 可用性异常'
+          existing="$(gh issue list --label site-monitor --state open --limit 50 \
+            --json number,title --jq 'first(.[] | select(.title == "[监控] cbm.im 可用性异常") | .number) // empty')"
+
+          if [[ -n "$failures" ]]; then
+            body="$(printf '检测时间：%s\n\n%s\n\n监控每 5 分钟运行一次；连续失败会更新同一个 Issue，恢复后自动关闭。' \
+              "$(date -u '+%Y-%m-%d %H:%M:%S UTC')" "${failures%$'\n'}")"
+            if [[ -n "$existing" ]]; then
+              gh issue comment "$existing" --body "$body"
+            else
+              gh issue create --title "$title" --label site-monitor --body "$body"
+            fi
+            printf '%s\n' "$failures"
+            exit 1
+          fi
+
+          if [[ -n "$existing" ]]; then
+            gh issue close "$existing" --comment "检测时间：$(date -u '+%Y-%m-%d %H:%M:%S UTC')，cbm.im 已恢复：根域、www、RSS 与 HTTP 跳转均正常。"
+          fi
+          printf 'cbm.im monitor: all checks passed\n'
