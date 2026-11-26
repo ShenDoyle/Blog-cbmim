@@ -160,6 +160,9 @@ jobs:
             npx hexo clean
             npx hexo generate
           }
+          # local CDN 模式必须把主题引用的第三方脚本/样式真正放进产物，否则会带着 404 上线。
+          node tools/vendor-third-party.mjs
+          node tools/vendor-third-party.mjs --check
           # Hexo 默认忽略 source 下的隐藏目录；证书 HTTP-01 校验文件需在构建后显式复制。
           if [ -d source/.well-known/acme-challenge ]; then
             mkdir -p public/.well-known/acme-challenge
