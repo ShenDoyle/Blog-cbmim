@@ -1,14 +1,13 @@
 /**
  * scripts/apply-site-settings.js — 把 Notion 设置合并进主题配置（构建期执行）
  *
- * 数据来源：source/_data/site-settings.yml（由 tools/notion-settings.mjs 生成）
- * 生效方式：深度合并进 hexo.theme.config —— **不重写** _config.cbmim.yml，
- *           配置文件里的值永远是"默认层"，Notion 只是覆盖层。
+ * 唯一站点覆盖来源：source/_data/site-settings.yml（由 tools/notion-settings.mjs 生成）。
+ * _config.yml 只负责 Hexo 核心配置；主题默认值来自主题包；不存在第二份站点主题 YAML。
  *
  * 安全：
- *   · 硬黑名单（theme / deploy / server / render / plugin…）直接拒绝，防止把站点改坏；
- *   · 只接受已经出现在主题默认配置里的键，未知键只告警不写入；
- *   · 单键写入失败不影响其它键。
+ *   · 文件缺失、YAML 损坏、空配置（无显式允许标记）或危险键 → 直接终止构建；
+ *   · 允许主题扩展键，但拒绝 __proto__ / prototype / constructor 等危险路径；
+ *   · 先完整校验再一次性合并，避免“应用一半”的配置。
  */
 
 'use strict';
@@ -17,45 +16,54 @@ var fs = require('fs');
 var path = require('path');
 var yaml = require('js-yaml');
 
-// 永不可改（这些不是主题配置，或改坏会直接导致构建/发布失败）
 var BLOCK = ['theme', 'deploy', 'server', 'render', 'plugin', 'database', 'skip_render'];
+var UNSAFE = ['__proto__', 'prototype', 'constructor'];
 
 function isPlainObject(v) {
-  return v !== null && typeof v === 'object' && !Array.isArray(v);
+  if (v === null || typeof v !== 'object' || Array.isArray(v)) return false;
+  var proto = Object.getPrototypeOf(v);
+  return proto === Object.prototype || proto === null;
 }
 
 function deepMerge(target, patch) {
   Object.keys(patch).forEach(function (k) {
-    var pv = patch[k];
-    if (isPlainObject(pv) && isPlainObject(target[k])) deepMerge(target[k], pv);
-    else target[k] = pv;
+    var value = patch[k];
+    if (isPlainObject(value) && Object.keys(value).length && isPlainObject(target[k])) {
+      deepMerge(target[k], value);
+    } else {
+      target[k] = value;
+    }
   });
   return target;
 }
 
-function hasPath(obj, dotted) {
-  var cur = obj;
-  var parts = dotted.split('.');
-  for (var i = 0; i < parts.length; i++) {
-    if (!isPlainObject(cur) || !(parts[i] in cur)) return false;
-    cur = cur[parts[i]];
+function validateTree(node, prefix, errors) {
+  if (Array.isArray(node)) {
+    node.forEach(function (item, index) { validateTree(item, prefix + '[' + index + ']', errors); });
+    return;
   }
-  return true;
+  if (isPlainObject(node)) {
+    Object.keys(node).forEach(function (key) {
+      var dotted = prefix ? prefix + '.' + key : key;
+      if (!prefix && BLOCK.indexOf(key) > -1) errors.push(dotted + '（黑名单，永不可改）');
+      if (!key || UNSAFE.indexOf(key) > -1) errors.push(dotted + '（危险字段）');
+      validateTree(node[key], dotted, errors);
+    });
+    return;
+  }
+  if (node !== null && typeof node === 'object') {
+    errors.push((prefix || '(根)') + '（不支持的对象类型）');
+  }
 }
 
-function getPath(obj, dotted) {
-  var cur = obj;
-  var parts = dotted.split('.');
-  for (var i = 0; i < parts.length; i++) {
-    if (!isPlainObject(cur)) return undefined;
-    cur = cur[parts[i]];
+function leafPaths(node, prefix, out) {
+  if (isPlainObject(node) && Object.keys(node).length) {
+    Object.keys(node).forEach(function (key) {
+      leafPaths(node[key], prefix ? prefix + '.' + key : key, out);
+    });
+  } else if (prefix) {
+    out.push(prefix);
   }
-  return cur;
-}
-
-function show(v) {
-  if (typeof v === 'string') return v;
-  try { return JSON.stringify(v); } catch (e) { return String(v); }
 }
 
 hexo.extend.filter.register('after_render:html', function (data) {
@@ -67,69 +75,50 @@ hexo.extend.filter.register('after_render:html', function (data) {
 });
 
 hexo.extend.filter.register('before_generate', function () {
-  var file = path.join(hexo.source_dir, '_data', 'site-settings.yml');
-  if (!fs.existsSync(file)) return;
+  var marker = path.join(hexo.base_dir, '.notion-settings-only');
+  if (fs.existsSync(marker)) {
+    var variants = fs.readdirSync(hexo.base_dir).filter(function (name) {
+      return name.indexOf('_config.cbmim.yml') === 0;
+    });
+    if (variants.length) {
+      throw new Error('[settings] 检测到旧配置变体：' + variants.join(', ') + '；Notion 单一配置模式禁止加载');
+    }
+  }
 
+  var requested = process.env.CBMIM_SETTINGS_FILE || 'site-settings.yml';
+  if (path.basename(requested) !== requested || requested === '.' || requested === '..') {
+    throw new Error('[settings] CBMIM_SETTINGS_FILE 只能是 source/_data 下的文件名');
+  }
+  var file = path.join(hexo.source_dir, '_data', requested);
+  if (!fs.existsSync(file)) {
+    throw new Error('[settings] 缺少 source/_data/' + requested + '；Notion 设置是唯一覆盖来源，必须先运行 notion:settings');
+  }
+
+  var raw = fs.readFileSync(file, 'utf8');
   var data;
   try {
-    data = yaml.load(fs.readFileSync(file, 'utf8')) || {};
-  } catch (e) {
-    hexo.log.warn('[settings] site-settings.yml 解析失败，已跳过：' + e.message);
-    return;
+    data = yaml.load(raw);
+  } catch (err) {
+    var line = Number.isFinite(err?.mark?.line) ? '（第 ' + (err.mark.line + 1) + ' 行附近）' : '';
+    throw new Error('[settings] ' + requested + ' 解析失败' + line + '（' + (err?.reason || '语法错误') + '）');
   }
-  if (!isPlainObject(data) || !Object.keys(data).length) {
-    hexo.log.warn('[settings] site-settings.yml 为空或格式不正确；本次构建未应用任何 Notion 覆盖，请检查 Notion「站点设置」的「值 / 启用」列。');
-    return;
+  if (data == null) data = {};
+  if (!isPlainObject(data)) {
+    throw new Error('[settings] site-settings.yml 顶层必须是映射');
+  }
+  if (!Object.keys(data).length && raw.indexOf('# allow-empty: true') < 0) {
+    throw new Error('[settings] site-settings.yml 为空；已终止构建，避免静默丢失全站设置');
   }
 
+  var errors = [];
+  validateTree(data, '', errors);
+  if (errors.length) {
+    throw new Error('[settings] 配置校验失败，未应用任何设置：' + errors.join('；'));
+  }
+
+  deepMerge(hexo.theme.config, data);
   var applied = [];
-  var rejected = [];
-
-  Object.keys(data).forEach(function (top) {
-    if (BLOCK.indexOf(top) > -1) {
-      rejected.push(top + '（黑名单，永不可改）');
-      return;
-    }
-    if (!isPlainObject(data[top])) {
-      if (hexo.theme.config[top] === undefined) { rejected.push(top + '（主题无此键）'); return; }
-      hexo.theme.config[top] = data[top];
-      applied.push(top + ' = ' + show(data[top]).slice(0, 60));
-      return;
-    }
-    // 逐叶子键合并，边合边校验
-    var walk = function (node, prefix) {
-      Object.keys(node).forEach(function (k) {
-        var dotted = prefix ? prefix + '.' + k : k;
-        var v = node[k];
-        if (isPlainObject(v)) { walk(v, dotted); return; }
-        if (!hasPath(hexo.theme.config, dotted)) {
-          rejected.push(dotted + '（主题配置里不存在该键，已忽略）');
-          return;
-        }
-        var before = getPath(hexo.theme.config, dotted);
-        deepMerge(hexo.theme.config, setPath({}, dotted, v));
-        applied.push(dotted + '：' + show(before).slice(0, 30) + ' → ' + show(v).slice(0, 30));
-      });
-    };
-    walk(data[top], top);
-  });
-
-  if (rejected.length) {
-    hexo.log.warn('[settings] 忽略 ' + rejected.length + ' 项：' + rejected.join('；'));
-  }
-  if (applied.length) {
-    hexo.log.info('[settings] Notion 设置已应用 ' + applied.length + ' 项：');
-    applied.forEach(function (a) { hexo.log.info('[settings]   ' + a); });
-  }
-});
-
-function setPath(obj, dotted, value) {
-  var parts = dotted.split('.');
-  var cur = obj;
-  for (var i = 0; i < parts.length - 1; i++) {
-    if (!isPlainObject(cur[parts[i]])) cur[parts[i]] = {};
-    cur = cur[parts[i]];
-  }
-  cur[parts[parts.length - 1]] = value;
-  return obj;
-}
+  leafPaths(data, '', applied);
+  hexo.log.info('[settings] Notion 设置已应用 ' + applied.length + ' 项（唯一覆盖来源）');
+  applied.forEach(function (key) { hexo.log.info('[settings]   ' + key); });
+}, 2);

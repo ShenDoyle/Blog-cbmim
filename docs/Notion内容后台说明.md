@@ -1,13 +1,13 @@
 # Notion 内容后台 · 使用说明
 
-站点：https://cbm.im/ ｜ 框架：Hexo 7 + anzhiyu 1.7.1 ｜ 发布：GitHub Pages
-后台：Notion 数据库 ｜ 触发：GitHub Actions（定时 + 手动）
+站点：https://cbm.im/ ｜ 框架：Hexo 7 + CBMIM theme 1.7.1 ｜ 发布：GitHub Pages → 阿里云 ESA
+后台：Notion 数据库（文章 / 页面 / 站点设置） ｜ 触发：GitHub Actions（定时 + 手动）
 
 ---
 
-## 零、当前状态（2026-09-26）
+## 零、当前状态（2026-11-26）
 
-Notion 侧结构与首次导入**已经建好**，下面「一次性配置」的第 1、2 步不用再手工做：
+Notion 侧结构与首次导入**已经建好**，下面「一次性配置」的第 1、2 步不用再手工做。站点设置正在切换为「Notion 单一值来源」：迁移与校验工具已就绪，实际写入和删除旧 YAML 需要本机临时 Integration token。
 
 | 项 | 值 |
 |---|---|
@@ -18,12 +18,12 @@ Notion 侧结构与首次导入**已经建好**，下面「一次性配置」的
 | 本地托管标记 | 25 篇 `source/_posts/*.md` 已写入 `notion_page_id` |
 | slug → 页面 ID 映射 | `tools/_import/page-ids.json` |
 
-**还差一步才能真正跑通**：给同步脚本一个 Notion **Integration token**（OAuth 连接器那个 token 不能给脚本用）：
+**生产环境不需要本地 Token 或 Node**：给同步脚本一个 Notion **Integration token**（OAuth 连接器那个 token 不能给脚本用），并把它写入 GitHub repository Secrets：
 
 1. https://www.notion.so/profile/integrations → **New integration** → Internal → 拿 `ntn_` 开头的 token
 2. 打开 Notion 里的「CBMIM 博客」页面 → 右上角 `···` → **连接** → 选中刚建的 Integration（父页面连上，下面的两个库自动生效）
-3. 把 token 写进站点根目录的 `.env`：`NOTION_TOKEN=ntn_xxx`、`NOTION_DATABASE_ID=8aee0783-0b53-41e0-861e-0b26993518e3`
-4. 跑 `npm run notion:preview`（不写文件）确认无误，再跑 `npm run notion:sync`
+3. 在仓库 Settings → Secrets and variables → Actions 中配置 `NOTION_TOKEN` 与 `NOTION_DATABASE_ID`
+4. 在 Actions 手动运行 **拉取 Notion → 构建 → 发布**；本机 `.env` 与 npm 命令只作为可选开发排障工具
 
 > ⚠️ `npm run notion:sync` 会用 Notion 侧内容**重写**这 25 篇的 front-matter（字段顺序会变、`updated` 会更新为 Notion 的最后编辑时间）。
 > 执行前先 `git status` 确认工作区干净，跑完用 `git diff` 检查，不满意直接 `git checkout -- source/_posts` 回滚。
@@ -33,13 +33,14 @@ Notion 侧结构与首次导入**已经建好**，下面「一次性配置」的
 ## 一、原理（一眼看懂）
 
 ```
-Notion 数据库 ──①同步脚本──▶ source/_posts/*.md ──②hexo 构建──▶ public/ ──③推送──▶ GitHub Pages
-   （写文章）     notion-sync.mjs   （自动生成）                    （自动上线 cbm.im）
+Notion 数据库 ──①同步脚本──▶ source/_posts/*.md / source/_data/* ──②hexo 构建──▶ public/ ──③推送──▶ GitHub Pages → ESA
+   （文章/页面/设置） notion-sync / pages / settings      （自动生成）                    （自动上线 cbm.im）
 ```
 
 - **主题、样式、所有功能零改动**：脚本不碰 `themes/anzhiyu/`、`_config.yml`、`_config.anzhiyu.yml`。
-- **只接管「文章」**：关于页、留言板、友链、豆瓣书影、追番、音乐列表继续手工维护。
-- **手写文章不受影响**：脚本只管理 front-matter 里带 `notion_page_id` 的文件。
+- **接管文章、独立页面/数据与站点设置**：Notion 是内容与站点覆盖配置的唯一后台。
+- **手写文章不受影响**：文章脚本只管理 front-matter 里带 `notion_page_id` 的文件。
+- **不再使用第二份站点主题 YAML**：`_config.yml` 仅保留 Hexo 核心配置，主题默认值来自主题包，站点覆盖值只来自 Notion「值」列。
 - **平时不用开电脑**：Notion 改完，最多 6 小时后自动上线；也能手动点一下立刻发。
 
 ---
@@ -169,10 +170,28 @@ Notion 的 **Toggle** 块会自动转成主题的折叠面板，标题取 toggle
 
 ---
 
-## 四、命令速查
+### 站点设置（Notion 单一值来源）
+
+在 Notion「⚙️ 站点设置」只编辑「值」列：
+
+- 留空 = 使用主题包默认值；填了才覆盖。
+- 「启用」已废弃，不参与取值；关闭功能请填 `false`。
+- `false / 0 / null / [] / {}` 保留精确类型；空字符串写 `""`。
+- 「当前值 / 说明 / 优先级 / 类型 / 分组 / 风险」是自动生成列，不要手改。
+- 设置同步生成 `source/_data/site-settings.yml`，构建脚本在 `before_generate` 优先级 2 合并；文件缺失、损坏、空配置、黑名单键或危险路径都会让构建失败。
+
+旧 `_config.cbmim.yml` 的一次性迁移全程在 GitHub Actions 执行：
+
+1. 运行 **Notion 站点设置云端迁移**，`mode=preview`，只预览合并计划。
+2. `mode=migrate`、`confirmation=MIGRATE`，写入 Notion、逐叶校验、构建并提交设置快照；旧 YAML 暂不删除。
+3. `mode=finalize`、`confirmation=FINALIZE`，重新同步 Notion 并确认与快照完全一致，然后删除旧 YAML、构建并触发正式发布。
+
+成功后产生 `.notion-settings-only`，CI 拒绝任何 `_config.cbmim.yml*` 变体。重试基线在写入 Notion 前创建，使用 Notion Token 加密后保存为保留期 30 天的 Actions artifact，finalize 成功后删除；不需要本机 `.cbmim-migration/`。迁移快照暂存于 `source/_data/site-settings.migration.yml`，finalize 一致后才替换正式生成物并删除旧 YAML。
+
+## 四、本机排障命令速查（可选，不是网站依赖）
 
 ```bash
-# 首次：把令牌放进本机 .env（不会被提交）
+# 仅在本机排障时：把令牌放进 .env（不会被提交）
 cp .env.example .env      # 然后填入 NOTION_TOKEN 和 NOTION_DATABASE_ID
 
 # 离线自检（不需要令牌，验证转换规则）
@@ -181,8 +200,10 @@ npm run notion:selftest
 # 预览：只打印将要做什么，不写文件
 npm run notion:preview
 
-# 正式同步（读 .env，或读系统环境变量）
+# 正式同步文章 / 页面 / 站点设置（读 .env，或读系统环境变量）
 npm run notion:sync
+npm run notion:pages
+npm run notion:settings
 
 # 强制全量重写（怀疑状态文件出错时用）
 npm run notion:sync -- --force
@@ -190,9 +211,11 @@ npm run notion:sync -- --force
 # 只处理某一篇（调试）
 npm run notion:sync -- --only my-post-slug --verbose
 
-# 本地一条龙：同步 → 构建 → 部署（不用 Actions 时）
+# 本地一条龙：同步文章 / 页面 / 设置 → 构建 → 部署（不用 Actions 时）
 npm run publish
 ```
+
+`notion:settings` 在 `.notion-settings-only` 存在前会主动跳过，避免迁移窗口内覆盖旧配置；只有云端 finalize 的一致性校验使用 `--force`。本机命令仅用于开发排障，生产迁移与发布仍全部在 GitHub Actions 执行。
 
 **首次导入相关（已完成，留档备用）**
 
@@ -205,8 +228,7 @@ npm run notion:link -- --dry-run    # 先看会改什么
 npm run notion:link                 # 实际写入
 ```
 
-> 令牌优先级：系统环境变量 > `.env`。`.env` 已在 `.gitignore` 里，不会进仓库；
-> 想更安全就只放 GitHub Secrets，本地不用 `.env`。
+> 生产环境统一使用 GitHub repository Secrets，不依赖本机 `.env`。本机排障时令牌优先级为系统环境变量 > `.env`；`.env` 已在 `.gitignore` 里，不会进仓库。
 
 ### 增量与安全规则
 
@@ -238,8 +260,11 @@ npm run notion:link                 # 实际写入
 
 | 路径 | 作用 |
 |---|---|
-| `tools/notion-sync.mjs` | 同步入口（CLI） |
-| `tools/notion-selftest.mjs` | 离线自检（15 项断言） |
+| `tools/notion-sync.mjs` | 文章同步入口（CLI） |
+| `tools/notion-pages-sync.mjs` | 独立页面与数据文件同步（CLI） |
+| `tools/notion-settings.mjs` | 站点设置同步、旧 YAML 迁移与校验（CLI） |
+| `scripts/apply-site-settings.js` | 构建期应用 Notion 设置；缺失/空/危险配置直接失败 |
+| `tools/notion-selftest.mjs` | 文章转换离线自检 |
 | `tools/notion-import-prep.mjs` | 本地文章 → Notion 导入包（首次导入用） |
 | `tools/notion-link-existing.mjs` | 把 `notion_page_id` 回写进 md（首次导入用） |
 | `tools/_import/` | 首次导入的中间产物：`<slug>.json` + `page-ids.json` |
@@ -250,10 +275,12 @@ npm run notion:link                 # 实际写入
 | `tools/notion/assets.mjs` | 图片下载落地 + CDN 改写 |
 | `tools/notion/state.mjs` | 增量状态与磁盘自愈 |
 | `.github/workflows/notion-publish.yml` | 定时 / 手动发布流水线 |
-| `.notion-sync-state.json` | 增量状态（**需要提交**） |
-| `.env.example` | 本机令牌模板；复制成 `.env` 后填入（`.env` 不进仓库） |
+| `.notion-sync-state.json` | 文章增量状态（**需要提交**） |
+| `source/_data/site-settings.yml` | Notion 站点设置生成物（**需要提交**） |
+| `.notion-settings-only` | 迁移完成标记；禁止旧主题 YAML 变体 |
+| `.env.example` | 可选的本机排障令牌模板；生产环境只使用 GitHub Secrets（`.env` 不进仓库） |
 
-**不改动**：`themes/anzhiyu/**`（主题定制版另存于 [CBMIM-theme](https://github.com/ShenDoyle/CBMIM-theme)）、`_config.yml`、`_config.anzhiyu.yml`。
+**不改动**：`themes/**`（主题定制版另存于 [CBMIM-theme](https://github.com/ShenDoyle/CBMIM-theme)）、`_config.yml`。旧 `_config.cbmim.yml` 仅在迁移窗口内存在，校验通过后删除且不留同名备份。
 
 **关于原有 25 篇文章**：正文与 front-matter 全部原样保留，只多了一行 `notion_page_id`（首次导入的托管标记）。
 所以它们**现在是 Notion 托管的**——第一次跑 `notion:sync` 会按 Notion 侧内容重写一次（内容等价，字段顺序会变）。

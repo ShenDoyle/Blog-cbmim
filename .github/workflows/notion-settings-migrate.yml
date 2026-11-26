@@ -1,0 +1,352 @@
+name: Notion 站点设置云端迁移
+
+# 一次性迁移：preview 只预览；migrate 写入 Notion 并提交快照；finalize 删除旧 YAML 并触发正式发布。
+# 全程在 GitHub 托管 runner 执行，不依赖本机 Node、.env 或本地文件。
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'preview=只预览；migrate=写入 Notion 并提交快照；finalize=删除旧 YAML 并触发正式发布'
+        required: true
+        type: choice
+        default: preview
+        options:
+          - preview
+          - migrate
+          - finalize
+      confirmation:
+        description: 'migrate 填 MIGRATE；finalize 填 FINALIZE；preview 留空'
+        required: false
+        default: ''
+        type: string
+
+permissions:
+  contents: write
+  actions: write
+
+# 与发布流水线共用并发组，迁移期间不会并行构建/发布。
+concurrency:
+  group: notion-publish
+  cancel-in-progress: false
+
+jobs:
+  migrate:
+    name: 云端迁移 Notion 站点设置
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+    env:
+      NOTION_TOKEN: ${{ secrets.NOTION_TOKEN }}
+      NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
+      NOTION_SETTINGS_DATA_SOURCE_ID: ${{ secrets.NOTION_SETTINGS_DATA_SOURCE_ID }}
+      GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      GH_REPO: ${{ github.repository }}
+      TZ: Asia/Shanghai
+
+    steps:
+      - name: 检出源码
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+
+      - name: 校验操作与迁移状态
+        env:
+          MODE: ${{ inputs.mode }}
+          CONFIRMATION: ${{ inputs.confirmation }}
+        run: |
+          set -euo pipefail
+          mode="$MODE"
+          confirmation="$CONFIRMATION"
+
+          case "$mode" in
+            preview) ;;
+            migrate)
+              if [ "$confirmation" != 'MIGRATE' ]; then
+                echo '::error::migrate 需要在 confirmation 输入 MIGRATE'
+                exit 1
+              fi
+              ;;
+            finalize)
+              if [ "$confirmation" != 'FINALIZE' ]; then
+                echo '::error::finalize 需要在 confirmation 输入 FINALIZE'
+                exit 1
+              fi
+              ;;
+            *)
+              echo "::error::未知迁移模式：$mode"
+              exit 1
+              ;;
+          esac
+
+          if [ -f .notion-settings-only ]; then
+            echo '::error::Notion 单一配置迁移已完成，无需重复运行'
+            exit 1
+          fi
+          if [ ! -f _config.cbmim.yml ]; then
+            echo '::error::缺少 _config.cbmim.yml，无法迁移'
+            exit 1
+          fi
+          if [ "$mode" = 'migrate' ] && [ -f .notion-settings-migrated ]; then
+            echo '::error::迁移快照已提交；请直接运行 finalize，不要重复 migrate'
+            exit 1
+          fi
+          if [ "$mode" = 'finalize' ] && [ ! -f .notion-settings-migrated ]; then
+            echo '::error::尚未提交迁移快照；请先运行 migrate'
+            exit 1
+          fi
+
+      - name: 准备 Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: '22'
+          cache: npm
+
+      - name: 安装依赖
+        run: npm ci --no-audit --no-fund
+
+      - name: 配置 git 身份
+        run: |
+          git config --global user.name 'github-actions[bot]'
+          git config --global user.email '41898282+github-actions[bot]@users.noreply.github.com'
+
+      - name: 凭据预检
+        run: |
+          set -euo pipefail
+          [ -n "$NOTION_TOKEN" ] || { echo '::error::缺少 secret：NOTION_TOKEN'; exit 1; }
+          [ -n "$NOTION_DATABASE_ID" ] || { echo '::error::缺少 secret：NOTION_DATABASE_ID'; exit 1; }
+
+      - name: 离线自检
+        run: |
+          npm run notion:selftest
+          npm run notion:settings -- --selftest
+
+      - name: 恢复或准备加密迁移基线
+        if: inputs.mode == 'migrate'
+        run: |
+          set -euo pipefail
+          artifact_id="$(gh api "repos/$GH_REPO/actions/artifacts?name=notion-settings-baseline&per_page=100" \
+            --jq '.artifacts[0].id // empty')"
+          if [ -z "$artifact_id" ]; then
+            echo '没有历史迁移基线，将在写入 Notion 前创建并上传'
+            npm run notion:settings:baseline
+          else
+            tmp="$(mktemp -d)"
+            trap 'rm -rf "$tmp"' EXIT
+            gh api "repos/$GH_REPO/actions/artifacts/$artifact_id/zip" > "$tmp/baseline.zip"
+            unzip -p "$tmp/baseline.zip" notion-settings-baseline.enc > "$tmp/baseline.enc"
+            unzip -p "$tmp/baseline.zip" notion-settings-baseline.meta.json > "$tmp/baseline.meta.json"
+            mkdir -p .cbmim-migration
+            openssl enc -d -aes-256-cbc -pbkdf2 -pass env:NOTION_TOKEN \
+              -in "$tmp/baseline.enc" -out .cbmim-migration/settings-baseline.json
+            node - "$tmp/baseline.meta.json" <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const meta = JSON.parse(fs.readFileSync(process.argv[2], 'utf8'));
+          const files = {
+            legacy: '_config.cbmim.yml',
+            generated: 'source/_data/site-settings.yml',
+            theme: 'node_modules/hexo-theme-cbmim/_config.yml',
+            lock: 'package-lock.json',
+          };
+          for (const [key, file] of Object.entries(files)) {
+            const actual = crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+            if (meta[key] !== actual) throw new Error(`迁移基线来源已变化：${key}`);
+          }
+          JSON.parse(fs.readFileSync('.cbmim-migration/settings-baseline.json', 'utf8'));
+          console.log('历史迁移基线已恢复且来源校验通过');
+          NODE
+          fi
+
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const files = {
+            legacy: '_config.cbmim.yml',
+            generated: 'source/_data/site-settings.yml',
+            theme: 'node_modules/hexo-theme-cbmim/_config.yml',
+            lock: 'package-lock.json',
+          };
+          const meta = Object.fromEntries(Object.entries(files).map(([key, file]) => [
+            key,
+            crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'),
+          ]));
+          fs.writeFileSync(process.env.RUNNER_TEMP + '/notion-settings-baseline.meta.json', JSON.stringify(meta, null, 2) + '\n');
+          NODE
+
+      - name: 加密并保存迁移基线
+        if: inputs.mode == 'migrate'
+        run: |
+          set -euo pipefail
+          openssl enc -aes-256-cbc -pbkdf2 -salt -pass env:NOTION_TOKEN \
+            -in .cbmim-migration/settings-baseline.json \
+            -out "$RUNNER_TEMP/notion-settings-baseline.enc"
+
+      - name: 上传加密迁移基线
+        if: inputs.mode == 'migrate'
+        uses: actions/upload-artifact@v4
+        with:
+          name: notion-settings-baseline
+          path: |
+            ${{ runner.temp }}/notion-settings-baseline.enc
+            ${{ runner.temp }}/notion-settings-baseline.meta.json
+          if-no-files-found: error
+          retention-days: 30
+
+      - name: 预览迁移
+        if: inputs.mode == 'preview'
+        run: npm run notion:settings -- --migrate-file --dry-run
+
+      - name: 写入 Notion 并校验
+        if: inputs.mode == 'migrate'
+        run: |
+          npm run notion:settings:migrate
+          npm run notion:settings:verify
+
+      - name: 构建并检查迁移快照
+        if: inputs.mode == 'migrate'
+        run: |
+          CBMIM_SETTINGS_FILE=site-settings.migration.yml npm run build
+          npm run vendor:third-party:check
+
+      - name: 提交迁移快照
+        if: inputs.mode == 'migrate'
+        run: |
+          set -euo pipefail
+          if ! git diff --quiet -- source/_data/site-settings.yml; then
+            echo '::error::迁移过程改写了迁移前 site-settings.yml，已停止'
+            exit 1
+          fi
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const files = {
+            legacy: '_config.cbmim.yml',
+            snapshot: 'source/_data/site-settings.migration.yml',
+            theme: 'node_modules/hexo-theme-cbmim/_config.yml',
+            lock: 'package-lock.json',
+          };
+          const meta = Object.fromEntries(Object.entries(files).map(([key, file]) => [
+            key,
+            crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex'),
+          ]));
+          fs.writeFileSync('.notion-settings-migrated', JSON.stringify(meta, null, 2) + '\n');
+          NODE
+          git add source/_data/site-settings.migration.yml .notion-settings-migrated
+          if git diff --cached --quiet; then
+            echo '迁移快照无变化'
+          else
+            git commit -m 'chore(notion): snapshot migrated settings'
+            git pull --rebase origin main
+            node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const meta = JSON.parse(fs.readFileSync('.notion-settings-migrated', 'utf8'));
+          const files = {
+            legacy: '_config.cbmim.yml',
+            snapshot: 'source/_data/site-settings.migration.yml',
+            theme: 'node_modules/hexo-theme-cbmim/_config.yml',
+            lock: 'package-lock.json',
+          };
+          for (const [key, file] of Object.entries(files)) {
+            const actual = crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+            if (meta[key] !== actual) throw new Error(`rebase 后迁移来源已变化：${key}`);
+          }
+          NODE
+            git push origin HEAD:main
+          fi
+
+      - name: 校验 Notion 与迁移快照一致
+        if: inputs.mode == 'finalize'
+        run: |
+          set -euo pipefail
+          git pull --rebase origin main
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const meta = JSON.parse(fs.readFileSync('.notion-settings-migrated', 'utf8'));
+          const files = {
+            legacy: '_config.cbmim.yml',
+            snapshot: 'source/_data/site-settings.migration.yml',
+            theme: 'node_modules/hexo-theme-cbmim/_config.yml',
+            lock: 'package-lock.json',
+          };
+          for (const [key, file] of Object.entries(files)) {
+            const actual = crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+            if (meta[key] !== actual) throw new Error(`迁移来源与快照不一致：${key}`);
+          }
+          fs.copyFileSync('.notion-settings-migrated', process.env.RUNNER_TEMP + '/migration-hashes.json');
+          NODE
+          npm run notion:settings -- --force
+          if ! cmp -s source/_data/site-settings.yml source/_data/site-settings.migration.yml; then
+            echo '::error::Notion 设置与迁移快照不一致，已停止删除旧 YAML'
+            exit 1
+          fi
+          echo 'Notion 设置与迁移快照完全一致'
+
+      - name: 删除旧 YAML 并构建
+        if: inputs.mode == 'finalize'
+        run: |
+          set -euo pipefail
+          rm _config.cbmim.yml
+          rm .notion-settings-migrated
+          rm source/_data/site-settings.migration.yml
+          printf '%s\n' '# Notion 是站点主题设置的唯一值来源；禁止恢复 _config.cbmim.yml*' > .notion-settings-only
+          npm run build
+          npm run vendor:third-party:check
+
+      - name: 提交单一配置标记
+        if: inputs.mode == 'finalize'
+        run: |
+          set -euo pipefail
+          git add _config.cbmim.yml .notion-settings-migrated .notion-settings-only source/_data/site-settings.yml source/_data/site-settings.migration.yml
+          git commit -m 'refactor(notion): remove legacy theme settings file'
+          git pull --rebase origin main
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const meta = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/migration-hashes.json', 'utf8'));
+          const files = {
+            snapshot: 'source/_data/site-settings.yml',
+            theme: 'node_modules/hexo-theme-cbmim/_config.yml',
+            lock: 'package-lock.json',
+          };
+          for (const [key, file] of Object.entries(files)) {
+            const actual = crypto.createHash('sha256').update(fs.readFileSync(file)).digest('hex');
+            if (meta[key] !== actual) throw new Error(`rebase 后单一配置来源已变化：${key}`);
+          }
+          if (fs.existsSync('_config.cbmim.yml')) throw new Error('rebase 后旧 YAML 被恢复，已停止');
+          if (!fs.existsSync('.notion-settings-only')) throw new Error('rebase 后单一配置标记丢失，已停止');
+          NODE
+          npm run notion:settings -- --force
+          node <<'NODE'
+          const fs = require('node:fs');
+          const crypto = require('node:crypto');
+          const meta = JSON.parse(fs.readFileSync(process.env.RUNNER_TEMP + '/migration-hashes.json', 'utf8'));
+          const actual = crypto.createHash('sha256').update(fs.readFileSync('source/_data/site-settings.yml')).digest('hex');
+          if (meta.snapshot !== actual) throw new Error('rebase 后 Notion 设置与迁移快照不一致');
+          NODE
+          npm run build
+          npm run vendor:third-party:check
+          git add source/_data/site-settings.yml
+          if ! git diff --cached --quiet; then
+            echo '::error::rebase 后 Notion 设置发生变化，已停止推送'
+            exit 1
+          fi
+          git push origin HEAD:main
+
+      - name: 触发正式发布
+        if: inputs.mode == 'finalize'
+        run: |
+          gh workflow run notion-publish.yml --ref main -f force=true
+          echo '已触发 notion-publish 正式发布，请在 Actions 页面查看结果'
+
+      - name: 删除加密迁移基线
+        if: inputs.mode == 'finalize'
+        run: |
+          set -euo pipefail
+          artifact_ids="$(gh api "repos/$GH_REPO/actions/artifacts?name=notion-settings-baseline&per_page=100" \
+            --jq '.artifacts[].id')"
+          for artifact_id in $artifact_ids; do
+            gh api -X DELETE "repos/$GH_REPO/actions/artifacts/$artifact_id" >/dev/null
+          done
+          echo '加密迁移基线已清理'
