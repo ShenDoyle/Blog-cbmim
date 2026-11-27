@@ -27,6 +27,12 @@ const PLUGINS_FILE = path.join(SITE_ROOT, 'node_modules', 'hexo-theme-cbmim', 'p
 const TEXT_EXTENSIONS = new Set(['.html', '.htm', '.css', '.js', '.mjs', '.xml', '.json', '.svg']);
 const CSS_URL_RE = /url\(\s*(?:"([^"]*)"|'([^']*)'|([^)]*))\s*\)/gi;
 const REGISTRY_BASE = 'https://registry.npmjs.org';
+const SITE_PLUGINS = {
+  swiper_css: { name: 'swiper', version: '8.0.6', file: 'swiper.min.css' },
+  swiper_js: { name: 'swiper', version: '8.0.6', file: 'swiper-bundle.min.js' },
+};
+const SWIPER_CDN_RE = /https:\/\/npm\.elemecdn\.com\/anzhiyu-theme-static@1\.0\.0\/swiper\//;
+const SWIPER_ASYNC_CSS_RE = /<link\b[^>]*href="\/pluginsSrc\/swiper\/swiper\.min\.css"[^>]*(?:media="print"|onload=)/i;
 
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -68,7 +74,7 @@ async function loadPlugins() {
   if (!plugins || typeof plugins !== 'object' || Array.isArray(plugins)) {
     throw new Error(`主题插件清单格式无效：${PLUGINS_FILE}`);
   }
-  return plugins;
+  return { ...plugins, ...SITE_PLUGINS };
 }
 
 async function collectReferences(publicDir, plugins) {
@@ -90,6 +96,12 @@ async function collectReferences(publicDir, plugins) {
   const files = await walkTextFiles(publicDir, path.join(publicDir, 'pluginsSrc'));
   for (const file of files) {
     const content = await fs.readFile(file, 'utf8');
+    if (SWIPER_CDN_RE.test(content)) {
+      throw new Error(`Swiper 仍引用公共 CDN，请检查 scripts/local-swiper.js：${path.relative(publicDir, file)}`);
+    }
+    if (SWIPER_ASYNC_CSS_RE.test(content)) {
+      throw new Error(`Swiper CSS 必须同步加载，避免初始化早于样式：${path.relative(publicDir, file)}`);
+    }
     for (const match of content.matchAll(/\/pluginsSrc\/[^\s"'<>)]+/g)) {
       const url = match[0].replaceAll('&amp;', '&').split(/[?#]/)[0];
       const plugin = byUrl.get(url);
