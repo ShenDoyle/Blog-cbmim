@@ -22,7 +22,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { createClient, explainError, queryAllPages, resolveDataSource } from './notion/api.mjs';
-import { collectMarkdownImageUrls, collectReferencedAssets, localizeUrls, pruneOrphanAssets, rewriteMarkdownImages } from './notion/assets.mjs';
+import { collectMarkdownImageUrls, collectReferencedAssets, localizeUrls, normalizeLegacySiteImageUrls, pruneOrphanAssets, rewriteMarkdownImages } from './notion/assets.mjs';
 import { MANAGED_FIELD, POSTS_DIR, PROPS, readEnv } from './notion/config.mjs';
 import {
   buildFrontMatter,
@@ -198,14 +198,15 @@ async function processPage({ page, props, state, managedPosts, notion, opts, cou
   }
 
   /* ── 正文 ── */
-  let body = await renderPageBody({ notion, pageId: page.id });
+  let body = normalizeLegacySiteImageUrls(await renderPageBody({ notion, pageId: page.id }));
 
   /* ── 封面 ── */
-  const coverRaw =
+  const coverRaw = normalizeLegacySiteImageUrls(
     readImageUrl(pick(props, PROPS.cover)) ||
     page.cover?.external?.url ||
     page.cover?.file?.url ||
-    '';
+    ''
+  );
 
   /* ── 图片本地化 ── */
   const urls = [...collectMarkdownImageUrls(body), coverRaw].filter(Boolean);
@@ -257,7 +258,7 @@ async function processPage({ page, props, state, managedPosts, notion, opts, cou
   }
 
   // 主题可选配置：留空不写入 front-matter
-  const topImgRaw = readText(pick(props, PROPS.topImg));
+  const topImgRaw = normalizeLegacySiteImageUrls(readText(pick(props, PROPS.topImg)));
 
   const fields = {
     title,

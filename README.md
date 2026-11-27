@@ -1,6 +1,6 @@
 # Blog-cbmim · cbm.im 源码仓
 
-cbm.im 博客的 Hexo 源码仓库。文章与页面内容的唯一后台是 **Notion**，发布由 **GitHub Actions** 全自动完成。网站访问、构建、发布和一次性设置迁移均不依赖本机；本地 Node 只作为可选的开发排障工具。
+cbm.im 博客的 Hexo 源码仓库。文章、页面与站点主题设置的唯一后台是 **Notion**，发布由 **GitHub Actions** 全自动完成。网站访问、构建、发布均不依赖本机；本地 Node 只作为可选的开发排障工具。
 
 ## 架构一览
 
@@ -11,7 +11,8 @@ GitHub Actions（每 6 小时 / 手动触发）
         ↓
 Hexo 构建
         ↓
-ShenDoyle.github.io（GitHub Pages 源站）＋ ShenDoyle/img（独立图片仓）
+ShenDoyle.github.io（GitHub Pages 源站）
+ShenDoyle/img（图片镜像 / 备份，不提供线上 URL）
         ↓
 阿里云 ESA 免费版
         ↓
@@ -19,7 +20,7 @@ cbm.im / www.cbm.im
 ```
 
 - 源码仓（本仓库）与产物仓（`ShenDoyle.github.io`）严格分离——`hexo-deployer-git` 是 force push，共用一仓会覆盖源码。
-- 文章图片落地到 `source/img/cbmim/<slug>/`，正文默认引用同源 `/img/cbmim/<slug>/...`；独立图片仓通过 GitHub Pages 提供 `/img/`。
+- 文章图片落地到 `source/img/cbmim/<slug>/`，正文、封面与头图统一引用同源 `/img/cbmim/<slug>/...`；`ShenDoyle/img` 只保存镜像，线上地址由 ESA 从 GitHub Pages 同源分发。
 - 主题为 npm 依赖 `hexo-theme-cbmim`（固定 commit），本仓库不含主题源码；站点主题设置以 Notion「⚙️ 站点设置」为唯一值来源，`_config.yml` 只保留 Hexo 核心配置。
 - `CDN.third_party_provider=local` 时，构建会把页面实际引用的第三方脚本/样式按主题固定版本发布到 `public/pluginsSrc/`，运行时不依赖公共 CDN；CI 会再次检查引用文件，缺失即中断发布。
 
@@ -43,29 +44,15 @@ cbm.im / www.cbm.im
 
 ### 图片：自动落地 + 自动清理
 
-Notion 图床的图（正文图与封面）同步时自动下载到 `source/img/cbmim/<slug>/notion-<hash>.<ext>` 并改写成同源 `/img/` 地址；外部图床地址原样保留。发布时同步到独立图片仓 `ShenDoyle/img`。
+Notion 图床的图（正文图与封面）同步时自动下载到 `source/img/cbmim/<slug>/notion-<hash>.<ext>` 并改写成同源 `/img/` 地址；外部图床地址原样保留。历史本站 jsDelivr 图片 URL 在文章、页面与数据同步落盘前直接归一为 `/img/`，不依赖构建期重写。发布时只把 `source/img` 镜像到独立图片仓 `ShenDoyle/img`。
 
 CI 的同步步骤带 `--prune-assets`：扫描全站引用关系后，**自动删除 `source/img/cbmim/` 下已无任何引用的图片**（换图、换 slug、删文章留下的孤儿），避免仓库越滚越大。主题自带的默认图/占位图在主题包里，不在这个目录，不受影响。每次删除都会打印文件名，git 可回滚。
 
-紧急修站也可以本地跑（有 Node 环境时）：
+### 发布与排障
 
-```bash
-npm ci
-npm run notion:sync      # 同步文章
-npm run notion:pages     # 同步独立页面与数据文件
-npm run notion:settings  # 同步主题设置（Notion「⚙️ 站点设置」）
-npm run clean && npm run build && npx hexo deploy
-```
+日常立即发布：进入仓库 **Actions → Notion 同步并发布 → Run workflow**。`dry_run=true` 只预览，`force=true` 忽略文章增量并清理无引用图片。
 
-### 旧主题 YAML 的一次性迁移
-
-迁移全程在 GitHub Actions 的托管 runner 上执行，不需要本机 Node、`.env` 或本地文件。打开仓库 Actions，选择 **Notion 站点设置云端迁移**，按顺序运行：
-
-1. `mode=preview`：只预览「主题默认值 + `_config.cbmim.yml` + 现有 Notion 显式值」的合并计划，不写入 Notion。
-2. `mode=migrate`、`confirmation=MIGRATE`：先在写入 Notion 前加密保存基线，再写入 Notion、逐叶校验、构建并提交 `source/_data/site-settings.migration.yml` 与 `.notion-settings-migrated` 快照标记；旧 YAML 和迁移前生成物保持不变。
-3. `mode=finalize`、`confirmation=FINALIZE`：重新同步 Notion 并确认与已提交快照完全一致，然后删除旧 YAML 与迁移快照、写入 `.notion-settings-only`、构建并自动触发正式发布。
-
-重试所需的迁移基线会先加密再保存为保留期 30 天的 Actions artifact，不会以明文进入日志或仓库；finalize 成功后自动删除。普通发布在 `.notion-settings-only` 存在前仍使用迁移前配置，避免新同步逻辑提前读取旧的 Notion「启用」语义。迁移只允许从 `main` 运行，并与发布流水线共用并发组。
+本地 Node 与 `.env` 只用于修改同步脚本后的可选排障；生产发布不需要本地一条龙命令，也不存在旧主题 YAML 迁移分支。`.notion-settings-only` 必须存在，任何 `_config.cbmim.yml*` 变体都会让 CI 直接失败。
 
 ### 发布的三种触发方式（2026-09-27 起）
 
@@ -85,24 +72,25 @@ npm run clean && npm run build && npx hexo deploy
 
 ```
 ├─ _config.yml               # Hexo 核心配置（URL / theme / 插件 / 渲染 / 部署）
-├─ .notion-settings-only     # 迁移完成后创建：禁止旧 _config.cbmim.yml* 变体
+├─ .notion-settings-only     # 强制 Notion 单一配置模式：禁止旧 _config.cbmim.yml* 变体
 ├─ .github/workflows/
 │  ├─ notion-publish.yml     # 自动发布流水线（cron 每 6 小时 + 手动）
-│  └─ notion-settings-migrate.yml # 一次性设置迁移（preview / migrate / finalize）
+│  └─ site-monitor.yml       # 每 5 分钟可用性监控
 ├─ scripts/
 │  └─ covermeta.js           # 封面效果生成器（covertitle/coverset/coverdim → covermeta.json）
 ├─ source/
 │  ├─ _posts/                # 文章（Notion「🗂 博文」同步落地，front-matter 带 notion_page_id）
 │  ├─ _data/                 # 结构化数据（Notion「📄 页面」同步落地，除 bangumis.json 为插件生成）
 │  ├─ cc|privacy|about/      # 独立页面（cc/privacy 正文由 Notion 管理）
-│  ├─ img/cbmim/             # 文章图片（脚本自动下载落地，发布到独立图片仓）
+│  ├─ img/cbmim/             # 文章图片（脚本自动下载落地，并镜像到独立图片仓）
 │  └─ js|css/                # 站点级自定义脚本/样式（封面文字层、友链门禁）
 ├─ tools/                    # Notion 同步工具链（node tools/…，放这里是因为 Hexo 会执行 scripts/）
 │  ├─ notion-sync.mjs        # 文章同步 CLI（--dry-run/--force/--only）
 │  ├─ notion-pages-sync.mjs  # 独立页面 + 数据文件同步 CLI
-│  ├─ notion-settings.mjs    # 站点设置同步 / 旧 YAML 迁移 / 迁移校验 CLI
+│  ├─ notion-settings.mjs    # 站点设置同步 / 初始化 / 刷新 / 离线自检 CLI
+│  ├─ publish-images.mjs     # source/img → ShenDoyle/img 镜像
 │  ├─ vendor-third-party.mjs # local CDN 第三方资源本地化与完整性检查
-│  ├─ notion-selftest.mjs    # 离线自检（16 项，不需要令牌）
+│  ├─ notion-selftest.mjs    # 离线自检（18 项，不需要令牌）
 │  └─ notion/                # 同步模块（config/api/render/convert/assets/state/log）
 └─ docs/                     # 设计文档（Notion 接入结构、字段说明）
 ```
@@ -136,7 +124,7 @@ npm run clean && npm run build && npx hexo deploy
 
 ## 安全
 
-- 生产发布与云端迁移的 `NOTION_TOKEN` 等敏感信息只放 GitHub repository Secrets，绝不进代码或日志；本机 `.env` 仅用于可选开发调试且已 gitignore。
+- 生产发布的 `NOTION_TOKEN` 等敏感信息只放 GitHub repository Secrets，绝不进代码或日志；本机 `.env` 仅用于可选开发调试且已 gitignore。
 - Actions 需要的 Secrets：`NOTION_TOKEN`、`NOTION_DATABASE_ID`、`DEPLOY_KEY`（产物仓可写 Deploy Key）、`IMG_DEPLOY_KEY`（独立图片仓可写 Deploy Key）；若存在多个同名站点设置数据库，可额外设置 `NOTION_SETTINGS_DATA_SOURCE_ID` 精确指定。
 - 设置同步会拒绝把 `appKey`、`masterKey`、`token`、`secret`、`password` 等真实敏感值写入公开仓库；此类值应通过 GitHub Secrets / 环境变量注入。YAML 解析错误不会回显可能含敏感值的原文片段。
 

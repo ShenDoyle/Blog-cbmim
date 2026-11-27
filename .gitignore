@@ -17,8 +17,5 @@ File/
 .env.local
 *.local.env
 
-# 一次性迁移基线与旧配置备份（可能含站点设置，勿提交）
-.cbmim-migration/
-
 # 同步状态需要提交，勿加入忽略
 !.notion-sync-state.json

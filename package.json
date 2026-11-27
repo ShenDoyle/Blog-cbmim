@@ -12,12 +12,7 @@
     "notion:sync": "node tools/notion-sync.mjs",
     "notion:pages": "node tools/notion-pages-sync.mjs",
     "notion:settings": "node tools/notion-settings.mjs",
-    "notion:settings:migrate": "node tools/notion-settings.mjs --migrate-file --migration-snapshot",
-    "notion:settings:baseline": "node tools/notion-settings.mjs --migrate-file --baseline-only",
-    "notion:settings:verify": "node tools/notion-settings.mjs --verify-file",
     "notion:selftest": "node tools/notion-selftest.mjs",
-    "notion:prep": "node tools/notion-import-prep.mjs",
-    "notion:link": "node tools/notion-link-existing.mjs",
     "notion:preview": "node tools/notion-sync.mjs --dry-run --verbose && node tools/notion-pages-sync.mjs --dry-run --verbose && node tools/notion-settings.mjs --dry-run --verbose",
     "notion:preview-server": "node tools/notion-sync.mjs && node tools/notion-pages-sync.mjs && node tools/notion-settings.mjs && hexo clean && npm run build && hexo server",
     "publish": "node tools/notion-sync.mjs && node tools/notion-pages-sync.mjs && node tools/notion-settings.mjs && hexo clean && npm run build && hexo deploy"
@@ -51,7 +46,6 @@
     "js-yaml": "4.1.0",
     "notion-to-md": "^3.1.9",
     "or": "^0.2.0",
-    "valine": "^1.5.1",
     "yarn": "^1.22.21"
   }
 }

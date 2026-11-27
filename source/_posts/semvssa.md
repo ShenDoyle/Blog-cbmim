@@ -2,7 +2,7 @@
 title: 点击还是被发现？探索竞价与信息流广告
 date: 2021/01/09 11:25:00
 updated: 2026/09/26 19:20:00
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/semvssa/2024215171707989448040time_semvsinfeed.webp
+cover: /img/cbmim/semvssa/2024215171707989448040time_semvsinfeed.webp
 categories: 运营
 tags:
   - 竞价

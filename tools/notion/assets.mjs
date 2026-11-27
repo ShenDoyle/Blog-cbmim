@@ -30,6 +30,15 @@ const EXT_BY_TYPE = {
 };
 
 const MD_IMAGE = /!\[([^\]]*)\]\((https?:\/\/[^)\s]+)((?:\s+"[^"]*")?)\)/g;
+const LEGACY_SITE_IMAGE_LINK = /\[(?:https?:\/\/)?cdn\.jsdelivr\.net\/gh\/ShenDoyle\/ShenDoyle\.github\.io@[^\]\s]+\/img\/\]\(\/img\/\)/g;
+const LEGACY_SITE_IMAGE = /(?:https?:\/\/)?cdn\.jsdelivr\.net\/gh\/ShenDoyle\/ShenDoyle\.github\.io@[^/\s)"'<>]+\/img\//g;
+
+/** 历史 Notion 内容可能仍带本站旧 jsDelivr 地址；同步落盘时直接归一为同源 /img。 */
+export function normalizeLegacySiteImageUrls(value) {
+  return String(value || '')
+    .replace(LEGACY_SITE_IMAGE_LINK, '`/img/`')
+    .replace(LEGACY_SITE_IMAGE, '/img/');
+}
 
 /** 会被扫描的内容文件类型（图片本身不在其中） */
 const TEXT_EXT = /\.(md|markdown|yml|yaml|json|txt|pug|html|styl|css|js|mjs|cjs)$/i;
@@ -115,7 +124,7 @@ export async function localizeUrls(urls, { slug, dryRun = false }) {
   for (const url of targets) {
     const hash = hashOf(url);
     let ext = extFromUrl(url);
-    const cdnOf = (e) => `${IMG_PUBLIC_BASE}/${IMG_NAMESPACE}/${slug}/notion-${hash}.${e}`;
+    const publicUrlOf = (e) => `${IMG_PUBLIC_BASE}/${IMG_NAMESPACE}/${slug}/notion-${hash}.${e}`;
 
     try {
       // 已落地过就直接复用，不重复下载
@@ -123,14 +132,14 @@ export async function localizeUrls(urls, { slug, dryRun = false }) {
         const existing = path.join(dir, `notion-${hash}.${ext}`);
         const stat = await fs.stat(existing).catch(() => null);
         if (stat && stat.size > 0) {
-          map.set(url, cdnOf(ext));
+          map.set(url, publicUrlOf(ext));
           reused += 1;
           continue;
         }
       }
 
       if (dryRun) {
-        map.set(url, cdnOf(ext || 'png'));
+        map.set(url, publicUrlOf(ext || 'png'));
         log.debug(`[dry-run] 将下载 ${url.slice(0, 80)}…`);
         continue;
       }
@@ -139,7 +148,7 @@ export async function localizeUrls(urls, { slug, dryRun = false }) {
       ext = EXT_BY_TYPE[contentType] || ext || 'png';
       const file = path.join(dir, `notion-${hash}.${ext}`);
       await fs.writeFile(file, buf);
-      map.set(url, cdnOf(ext));
+      map.set(url, publicUrlOf(ext));
       created += 1;
       log.debug(`已落地 ${path.relative(process.cwd(), file)}（${(buf.length / 1024).toFixed(1)} KB）`);
     } catch (err) {

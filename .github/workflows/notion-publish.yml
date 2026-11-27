@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     # 同步回写产生的 bot 提交不再触发第二次运行（防止 push 触发成环）；
-    # 云端迁移 finalize 会以 bot 身份手动触发一次正式发布，因此放行 workflow_dispatch。
+    # 手动触发仍放行，便于需要时由机器人执行一次正式发布。
     if: github.actor != 'github-actions[bot]' || github.event_name == 'workflow_dispatch'
 
     env:
@@ -63,13 +63,14 @@ jobs:
 
       - name: 单一配置来源守卫
         run: |
-          # 迁移完成并提交 .notion-settings-only 后，任何旧 YAML 变体都直接失败。
-          if [ -f .notion-settings-only ]; then
-            old_files="$(find . -maxdepth 1 -name '_config.cbmim.yml*' -print)"
-            if [ -n "$old_files" ]; then
-              echo "::error::Notion 单一配置模式下发现旧文件：$old_files"
-              exit 1
-            fi
+          if [ ! -f .notion-settings-only ]; then
+            echo "::error::缺少 .notion-settings-only；Notion 单一配置模式拒绝回退到旧配置"
+            exit 1
+          fi
+          old_files="$(find . -maxdepth 1 -name '_config.cbmim.yml*' -print)"
+          if [ -n "$old_files" ]; then
+            echo "::error::Notion 单一配置模式下发现旧文件：$old_files"
+            exit 1
           fi
 
       - name: 准备 Node
@@ -122,8 +123,6 @@ jobs:
           fi
 
       - name: 同步站点设置（Notion「⚙️ 站点设置」→ source/_data/site-settings.yml）
-        # 迁移完成前仍由旧 _config.cbmim.yml 提供设置，避免新同步逻辑提前读取旧的「启用」语义。
-        if: ${{ hashFiles('.notion-settings-only') != '' }}
         run: |
           if [ "${{ inputs.dry_run }}" = "true" ]; then
             npm run notion:settings -- --dry-run --verbose

@@ -2,7 +2,7 @@
 title: 刷机时光的珍藏
 date: 2019/02/07 20:36:00
 updated: 2026/09/26 19:20:00
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/flashing/2024215181707991789041time_flashing.webp
+cover: /img/cbmim/flashing/2024215181707991789041time_flashing.webp
 categories: 兴趣
 tags:
   - 乐趣

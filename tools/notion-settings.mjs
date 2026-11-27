@@ -7,11 +7,7 @@
  *   npm run notion:settings -- --refresh        # 刷新说明 / 优先级 / 当前值并同步库说明（不动「值」）
  *   npm run notion:settings -- --dry-run        # 只预览会应用哪些设置
  *   npm run notion:settings                      # 拉取 Notion → 生成 source/_data/site-settings.yml
- *   npm run notion:settings -- --migrate-file    # 把旧 _config.cbmim.yml 全量迁移到 Notion（先不删）
- *   npm run notion:settings -- --migrate-file --baseline-only      # 只生成基线，不写 Notion
- *   npm run notion:settings -- --migrate-file --migration-snapshot # 快照写到独立迁移文件
- *   npm run notion:settings -- --verify-file    # 只读校验迁移前后的有效配置是否一致
- *   npm run notion:settings -- --migrate-file --delete-file  # 校验 + 无旧 YAML 构建通过后才删除
+ *   npm run notion:settings -- --selftest       # 离线自检，不访问 Notion
  *
  * 设计要点：
  *   · Notion「值」列是站点主题配置的唯一覆盖来源；_config.yml 只保留 Hexo 核心配置。
@@ -19,7 +15,7 @@
  *   · 「值」留空 = 使用主题默认值；「启用」列仅保留兼容旧界面，不再参与取值。
  *   · false / 0 / null / [] / {} 保持精确类型；空字符串写成 ""，null 写成 null。
  *   · 没有任何生效项时默认报错，必须显式 --allow-empty 才会生成空覆盖，避免静默回退。
- *   · --migrate-file 写完 Notion 后会逐键校验；只有 --delete-file 且校验通过才删除旧文件。
+ *   · 正常同步要求 .notion-settings-only 存在，并拒绝任何 _config.cbmim.yml* 变体。
  *   · 「优先级」= 分组分层（GROUP_TIERS，越常改的越靠前）+ 组内 enable 优先、其余按路径排序，
  *     拍平成连续序号。Notion 视图按它升序排，常用的功能自然在最上面。
  *   · 「说明」三层拼装：人工词条（KEY_DESC）→ 分组说明 + 末级键语义 → 主题 _config.yml 注释。
@@ -30,7 +26,6 @@
 
 import fs from 'node:fs/promises';
 import { readFileSync } from 'node:fs';
-import { spawnSync } from 'node:child_process';
 import { setTimeout as delay } from 'node:timers/promises';
 import path from 'node:path';
 import assert from 'node:assert/strict';
@@ -43,14 +38,7 @@ import { log, setVerbose } from './notion/log.mjs';
 import { ENABLE_FIRST, GROUP_DESC, GROUP_TIERS, KEY_DESC, LEAF_DESC, LEAF_ORDER } from './notion/settings-dict.mjs';
 
 const THEME_DEFAULT = path.join(SITE_ROOT, 'node_modules', 'hexo-theme-cbmim', '_config.yml');
-// 仅供一次性 --migrate-file / --verify-file 使用；正常同步绝不读取它。
-const LEGACY_THEME_CFG = path.join(SITE_ROOT, '_config.cbmim.yml');
 const OUT_FILE = path.join(SITE_ROOT, 'source', '_data', 'site-settings.yml');
-const MIGRATION_OUT_FILE = path.join(SITE_ROOT, 'source', '_data', 'site-settings.migration.yml');
-const MIGRATION_DIR = path.join(SITE_ROOT, '.cbmim-migration');
-const BASELINE_FILE = path.join(MIGRATION_DIR, 'settings-baseline.json');
-const LEGACY_BACKUP = path.join(MIGRATION_DIR, 'legacy', '_config.cbmim.yml');
-const LEGACY_GENERATED_BACKUP = path.join(MIGRATION_DIR, 'legacy', 'site-settings.pre-migration.yml');
 const SETTINGS_ONLY_MARKER = path.join(SITE_ROOT, '.notion-settings-only');
 const UNSAFE_SEGMENTS = new Set(['__proto__', 'prototype', 'constructor']);
 const SENSITIVE_SEGMENTS = new Set(['appkey', 'app_key', 'masterkey', 'master_key', 'secret', 'token', 'password', 'privatekey', 'private_key', 'accesskey', 'access_key']);
@@ -73,33 +61,16 @@ const CAUTION = ['cover', 'post', 'index', 'aside', 'toc', 'comments', 'footer',
 /* ────────────────────────── 参数 ────────────────────────── */
 
 function parseArgs(argv) {
-  const opts = {
-    init: false, refresh: false, dryRun: false, verbose: false, force: false,
-    migrateFile: false, verifyFile: false, deleteFile: false, allowEmpty: false,
-    baselineOnly: false, migrationSnapshot: false,
-  };
+  const opts = { init: false, refresh: false, dryRun: false, verbose: false, allowEmpty: false };
   for (const a of argv) {
     if (a === '--init') opts.init = true;
     else if (a === '--refresh') opts.refresh = true;
     else if (a === '--dry-run' || a === '-n') opts.dryRun = true;
     else if (a === '--verbose' || a === '-v') opts.verbose = true;
-    else if (a === '--force') opts.force = true;
-    else if (a === '--migrate-file') opts.migrateFile = true;
-    else if (a === '--verify-file') opts.verifyFile = true;
-    else if (a === '--delete-file') opts.deleteFile = true;
     else if (a === '--allow-empty') opts.allowEmpty = true;
-    else if (a === '--baseline-only') opts.baselineOnly = true;
-    else if (a === '--migration-snapshot') opts.migrationSnapshot = true;
+    else throw new Error(`未知参数：${a}`);
   }
-  if (opts.deleteFile && !opts.migrateFile) throw new Error('--delete-file 只能与 --migrate-file 一起使用');
-  if (opts.baselineOnly && !opts.migrateFile) throw new Error('--baseline-only 只能与 --migrate-file 一起使用');
-  if (opts.migrationSnapshot && !opts.migrateFile) throw new Error('--migration-snapshot 只能与 --migrate-file 一起使用');
-  if (opts.baselineOnly && (opts.deleteFile || opts.dryRun)) throw new Error('--baseline-only 不能与 --delete-file / --dry-run 同时使用');
-  if (opts.migrationSnapshot && opts.deleteFile) throw new Error('--migration-snapshot 不能与 --delete-file 同时使用；删除旧 YAML 请使用云端 finalize');
-  if (opts.dryRun && opts.deleteFile) throw new Error('--dry-run 不能与 --delete-file 同时使用');
-  if ((opts.init && opts.refresh) || ((opts.init || opts.refresh) && (opts.migrateFile || opts.verifyFile)) || (opts.migrateFile && opts.verifyFile)) {
-    throw new Error('--init / --refresh / --migrate-file / --verify-file 必须单独使用');
-  }
+  if (opts.init && opts.refresh) throw new Error('--init / --refresh 必须单独使用');
   return opts;
 }
 
@@ -169,39 +140,6 @@ function assertSafeKey(key) {
   return key;
 }
 
-function withoutBlocked(config) {
-  const out = {};
-  for (const [key, value] of Object.entries(config)) {
-    assertSafeKey(key);
-    if (BLOCK.includes(key)) continue;
-    out[key] = value;
-  }
-  return out;
-}
-
-function flatMap(config) {
-  const out = {};
-  for (const { key, value } of flatten(config)) {
-    if (!key) continue;
-    assertSafeKey(key);
-    out[key] = value;
-  }
-  return Object.fromEntries(Object.keys(out).sort().map((key) => [key, out[key]]));
-}
-
-function diffFlat(expected, actual) {
-  const keys = [...new Set([...Object.keys(expected), ...Object.keys(actual)])].sort();
-  const diffs = [];
-  for (const key of keys) {
-    const hasExpected = Object.prototype.hasOwnProperty.call(expected, key);
-    const hasActual = Object.prototype.hasOwnProperty.call(actual, key);
-    if (!hasExpected || !hasActual || !isDeepStrictEqual(expected[key], actual[key])) {
-      diffs.push({ key, expected: hasExpected ? expected[key] : undefined, actual: hasActual ? actual[key] : undefined });
-    }
-  }
-  return diffs;
-}
-
 /** 主题默认键 + Notion 扩展键；current 只来自 Notion 的显式「值」。 */
 function themeKeys(current = {}) {
   const def = loadYaml(THEME_DEFAULT);
@@ -251,30 +189,6 @@ function themeKeys(current = {}) {
   const missing = [...new Set(list.map((r) => r.group))].filter((g) => tierOf(g).tier === 99);
   if (missing.length) log.warn(`以下分组未在 GROUP_TIERS 里排序，已排到最后：${missing.join(', ')}`);
   return list;
-}
-
-/** 完整有效快照只按实际叶子建行，避免父级 null/{} 与默认子键同时写回。 */
-function snapshotRows(snapshot) {
-  const defaults = loadYaml(THEME_DEFAULT);
-  const comments = parseThemeComments();
-  const rows = flatten(snapshot).filter(({ key }) => key).map(({ key, value }) => {
-    const def = pick(defaults, key);
-    const risk = riskOf(key);
-    const row = {
-      key,
-      type: typeOf(value),
-      group: key.split('.')[0],
-      def,
-      cur: value,
-      risk,
-      state: activeState(value, def),
-    };
-    row.desc = describeRow(row, comments);
-    return row;
-  });
-  rows.sort(priorityCompare);
-  rows.forEach((row, index) => { row.prio = (index + 1) * 10; });
-  return rows;
 }
 
 function pick(obj, dotted) {
@@ -841,10 +755,7 @@ async function writeSettingsFile(out, { allowEmpty = false, file = OUT_FILE } = 
 }
 
 async function runSync(notion, opts) {
-  if (!opts.force && !(await fileExists(SETTINGS_ONLY_MARKER))) {
-    log.warn('Notion 单一配置迁移尚未完成；跳过正常设置同步，继续使用迁移前配置。finalize 校验可用 --force');
-    return;
-  }
+  await requireNotionSettingsOnly();
   const found = await findDb(notion);
   if (!found) throw new Error(`未找到数据库「${DB_TITLE}」，请先跑一次 npm run notion:settings -- --init`);
   const dsId = found.dsId;
@@ -911,213 +822,18 @@ function setPath(obj, dotted, value) {
   cur[parts[parts.length - 1]] = value;
 }
 
-/* ───────────────── 一次性迁移 / 迁移校验 ───────────────── */
+/* ───────────────── 单一配置来源守卫 ───────────────── */
 
-async function fileExists(file) {
-  try { await fs.access(file); return true; } catch { return false; }
-}
-
-async function assertNoLegacyVariants() {
-  const files = (await fs.readdir(SITE_ROOT)).filter((name) => name.startsWith('_config.cbmim.yml'));
-  const unexpected = files.filter((name) => name !== '_config.cbmim.yml');
-  if (unexpected.length) {
-    throw new Error(`发现会被 Hexo 自动加载的旧配置变体，请先人工处理：${unexpected.join(', ')}`);
-  }
-}
-
-async function loadMigrationBaseline(notion, found, titleName, defaults, pages, { preferSaved = false } = {}) {
-  if (preferSaved && await fileExists(BASELINE_FILE)) {
-    const baseline = JSON.parse(await fs.readFile(BASELINE_FILE, 'utf8'));
-    if (!isPlainObject(baseline)) throw new Error('迁移基线文件格式不正确');
-    assertSafeValue(baseline, 'settings');
-    return baseline;
-  }
-  if (await fileExists(LEGACY_THEME_CFG)) {
-    const legacy = loadYaml(LEGACY_THEME_CFG);
-    const generated = loadYaml(OUT_FILE, { optional: true });
-    let notionValues = {};
-    if (found && pages) {
-      const built = buildSettings(pages, titleName, defaults);
-      if (built.problems.length) throw new Error(built.problems.join('\n'));
-      notionValues = built.out;
-    }
-    const snapshot = deepMerge(deepMerge(deepMerge({}, defaults), legacy), generated);
-    deepMerge(snapshot, notionValues);
-    const safe = withoutBlocked(snapshot);
-    assertSafeValue(safe, 'settings');
-    return safe;
-  }
-  if (await fileExists(BASELINE_FILE)) {
-    const baseline = JSON.parse(await fs.readFile(BASELINE_FILE, 'utf8'));
-    if (!isPlainObject(baseline)) throw new Error('迁移基线文件格式不正确');
-    assertSafeValue(baseline, 'settings');
-    return baseline;
-  }
-  throw new Error('旧 _config.cbmim.yml 和迁移基线均不存在，无法校验');
-}
-
-async function prepareSettingsDb(notion, opts) {
-  let found = await findDb(notion);
-  if (!found) {
-    if (opts.dryRun) return null;
-    const created = await createDb(notion);
-    const dsId = dataSourceIdOf(created);
-    found = { dsId, dbId: created.id, raw: await dsSchema(notion, dsId) };
-    log.ok(`已创建数据库「${DB_TITLE}」`);
-  }
-  const { dsId, dbId } = found;
-  const ds = found.raw || await dsSchema(notion, dsId);
-  let titleName = Object.keys(ds?.properties || {}).find((k) => ds.properties[k].type === 'title') || '键';
-  if (opts.dryRun) validateSettingsSchema(ds, titleName);
-  else {
-    titleName = await ensureSchema(notion, dsId, dbId, ds);
-    await ensureDbDescription(notion, dbId);
-  }
-  return { ...found, titleName };
-}
-
-async function verifyNotionAgainstBaseline(notion, found, defaults, { preferSaved = false } = {}) {
-  const pages = await queryAllPages(notion, found.dsId);
-  const built = buildSettings(pages, found.titleName, defaults);
-  if (built.problems.length) throw new Error(built.problems.join('\n'));
-  const baseline = await loadMigrationBaseline(notion, found, found.titleName, defaults, pages, { preferSaved });
-  const actual = withoutBlocked(deepMerge(deepMerge({}, defaults), built.out));
-  const diffs = diffFlat(flatMap(baseline), flatMap(actual));
-  if (diffs.length) {
-    const lines = diffs.slice(0, 30).map((d) => {
-      const reason = d.expected === undefined
-        ? 'Notion 多出迁移前不存在的值'
-        : d.actual === undefined
-          ? '迁移前存在、Notion 缺失'
-          : '值与迁移前不一致';
-      return `  ${d.key}：${reason}`;
-    });
-    throw new Error(`Notion 与迁移前有效配置不一致（${diffs.length} 项）：\n${lines.join('\n')}`);
-  }
-  log.ok(`迁移校验通过：${Object.keys(flatMap(baseline)).length} 个有效配置叶子完全一致`);
-  return { pages, built, baseline };
-}
-
-function runHexoBuildCheck() {
-  const npx = process.platform === 'win32' ? 'npx.cmd' : 'npx';
-  const options = { cwd: SITE_ROOT, stdio: 'inherit', shell: process.platform === 'win32', timeout: 600000 };
-  for (const args of [['hexo', 'clean'], ['hexo', 'generate']]) {
-    const result = spawnSync(npx, args, options);
-    if (result.error || result.status !== 0) {
-      throw new Error(`无旧 YAML 的 Hexo ${args[1]} 校验失败${result.error ? `：${result.error.message}` : ''}`);
-    }
-  }
-}
-
-async function runMigrate(notion, opts) {
-  if (opts.dryRun && opts.deleteFile) throw new Error('--dry-run 不能与 --delete-file 同时使用');
-  await assertNoLegacyVariants();
-  const found = await prepareSettingsDb(notion, opts.baselineOnly ? { dryRun: true } : opts);
-  const defaults = loadYaml(THEME_DEFAULT);
-  const pages = found ? await queryAllPages(notion, found.dsId) : [];
-  const baseline = await loadMigrationBaseline(notion, found, found?.titleName, defaults, pages, {
-    preferSaved: await fileExists(BASELINE_FILE),
-  });
-  const rows = snapshotRows(baseline);
-  log.info(`迁移快照：${rows.length} 个叶子（主题默认 + 旧 YAML + 现有 Notion 显式值）`);
-
-  if (opts.baselineOnly) {
-    await fs.mkdir(path.dirname(BASELINE_FILE), { recursive: true });
-    await fs.mkdir(path.dirname(LEGACY_BACKUP), { recursive: true });
-    await fs.writeFile(BASELINE_FILE, JSON.stringify(baseline, null, 2) + '\n');
-    if (await fileExists(OUT_FILE)) await fs.copyFile(OUT_FILE, LEGACY_GENERATED_BACKUP);
-    log.ok('迁移基线已生成；未写入 Notion');
-    return;
-  }
-
-  if (!found) {
-    log.info(`[dry-run] 将创建数据库「${DB_TITLE}」并写入 ${rows.length} 行`);
-    return;
-  }
-
-  const byKey = new Map();
-  for (const page of pages) {
-    const key = textOf(page.properties[found.titleName]).trim();
-    if (!key) continue;
-    if (byKey.has(key)) throw new Error(`Notion 中存在重复键：${key}`);
-    byKey.set(key, page);
-  }
-
-  const jobs = rows.map((row) => {
-    const page = byKey.get(row.key);
-    const target = serializeValue(row.cur !== undefined ? row.cur : row.def);
-    const currentRaw = page ? textOf(page.properties['值']) : '';
-    return { row, page, target, valueChanged: !page || currentRaw !== target };
-  });
-  const changed = jobs.filter((job) => job.valueChanged).length;
-  const created = jobs.filter((job) => !job.page).length;
-  log.info(`库内 ${pages.length} 行｜将新建 ${created} 行｜将更新值 ${changed} 行`);
-
-  if (opts.dryRun) { log.info('[dry-run] 未写入 Notion，也未改本地文件'); return; }
-
-  await fs.mkdir(path.dirname(BASELINE_FILE), { recursive: true });
-  await fs.mkdir(path.dirname(LEGACY_BACKUP), { recursive: true });
-  await fs.writeFile(BASELINE_FILE, JSON.stringify(baseline, null, 2) + '\n');
-  if (await fileExists(OUT_FILE)) await fs.copyFile(OUT_FILE, LEGACY_GENERATED_BACKUP);
-
-  let oldGenerated = null;
-  try { oldGenerated = await fs.readFile(OUT_FILE); } catch (err) { if (err?.code !== 'ENOENT') throw err; }
-
-  const CONCURRENCY = 4;
-  let idx = 0;
-  let done = 0;
-  const worker = async () => {
-    while (idx < jobs.length) {
-      const job = jobs[idx];
-      idx += 1;
-      const props = rowProps(job.row, found.titleName, { includeValue: true });
-      if (job.page) await notionWrite('迁移设置行', () => notion.pages.update({ page_id: job.page.id, properties: props }));
-      else await createRow(notion, found.dsId, found.dbId, props);
-      done += 1;
-      if (done % 25 === 0) log.info(`  已写入 ${done}/${jobs.length}`);
-    }
-  };
-  await Promise.all(Array.from({ length: CONCURRENCY }, worker));
-  log.ok(`Notion 快照写入完成：${done} 行`);
-
-  const verified = await verifyNotionAgainstBaseline(notion, found, defaults, { preferSaved: true });
-  const snapshotFile = opts.migrationSnapshot ? MIGRATION_OUT_FILE : OUT_FILE;
-  await writeSettingsFile(verified.built.out, { file: snapshotFile });
-  log.ok(`已生成 ${path.relative(SITE_ROOT, snapshotFile)}（${verified.built.applied.length} 项）`);
-
-  if (!opts.deleteFile) {
-    log.warn('旧 _config.cbmim.yml 暂未删除；确认迁移与构建后再加 --delete-file 执行安全删除');
-    return;
-  }
-
-  if (await fileExists(LEGACY_THEME_CFG)) {
-    await fs.copyFile(LEGACY_THEME_CFG, LEGACY_BACKUP);
-    await fs.unlink(LEGACY_THEME_CFG);
-    log.ok(`旧 YAML 已移至本地忽略备份：${path.relative(SITE_ROOT, LEGACY_BACKUP)}`);
-  }
-
+async function requireNotionSettingsOnly() {
   try {
-    runHexoBuildCheck();
-    await assertNoLegacyVariants();
-  } catch (err) {
-    if (!(await fileExists(LEGACY_THEME_CFG)) && await fileExists(LEGACY_BACKUP)) {
-      await fs.copyFile(LEGACY_BACKUP, LEGACY_THEME_CFG);
-    }
-    if (oldGenerated) await fs.writeFile(OUT_FILE, oldGenerated);
-    else await fs.rm(OUT_FILE, { force: true });
-    await fs.rm(SETTINGS_ONLY_MARKER, { force: true });
-    throw new Error(`${err.message}；已恢复旧 YAML 与迁移前 site-settings.yml`);
+    await fs.access(SETTINGS_ONLY_MARKER);
+  } catch {
+    throw new Error('缺少 .notion-settings-only；Notion 单一配置模式拒绝回退到旧配置');
   }
-  await fs.writeFile(SETTINGS_ONLY_MARKER, '# Notion 是站点主题设置的唯一值来源；禁止恢复 _config.cbmim.yml*\n');
-  log.ok('旧 YAML 已删除，且无旧 YAML 的 Hexo 构建通过');
-}
-
-async function runVerifyFile(notion) {
-  const found = await prepareSettingsDb(notion, { dryRun: true });
-  if (!found) throw new Error(`未找到数据库「${DB_TITLE}」`);
-  await verifyNotionAgainstBaseline(notion, found, loadYaml(THEME_DEFAULT), {
-    preferSaved: await fileExists(BASELINE_FILE),
-  });
+  const variants = (await fs.readdir(SITE_ROOT)).filter((name) => name.startsWith('_config.cbmim.yml'));
+  if (variants.length) {
+    throw new Error(`检测到旧配置变体：${variants.join(', ')}；Notion 单一配置模式禁止加载`);
+  }
 }
 
 async function runSettingsSelfTest() {
@@ -1201,20 +917,13 @@ async function runSettingsSelfTest() {
 
   const merged = deepMerge({ empty: { map: { old: true } } }, { empty: { map: {} } });
   assert.deepEqual(merged.empty.map, {}, '显式空映射必须清空默认映射');
-  assert.deepEqual(flatMap(deepMerge({ a: { x: 1, y: 2 } }, { a: null })), { a: null }, '父级 null 必须遮蔽默认子键');
-  assert.deepEqual(flatMap(deepMerge({ a: { x: 1, y: 2 } }, { a: {} })), { a: {} }, '父级空映射必须遮蔽默认子键');
-  assert.deepEqual(diffFlat({ a: 1 }, { a: 2 }), [{ key: 'a', expected: 1, actual: 2 }]);
-  const snapshot = snapshotRows({ avatar: { effect: false }, option: null, extension: { empty: {} } });
-  assert.deepEqual(snapshot.map((row) => row.key).sort(), ['avatar.effect', 'extension.empty', 'option']);
-  assert.equal(snapshot.find((row) => row.key === 'option').type, 'null');
-  assert.equal(snapshot.find((row) => row.key === 'extension.empty').type, 'map');
-
   const first = buildSettings(pages, '键', defaults);
   const second = buildSettings(pages, '键', defaults);
   assert.deepEqual(first.out, second.out, '同一输入重复同步必须幂等');
 
   assert.throws(() => validateSettingsSchema({ properties: { 键: { type: 'title' } } }, '键'), /缺少「值」列/);
   assert.throws(() => richText('x'.repeat(1901)), /拒绝截断/);
+  assert.throws(() => parseArgs(['--migrate-file']), /未知参数/);
 
   let descriptionWrites = 0;
   await ensureDbDescription({
@@ -1253,9 +962,7 @@ async function main() {
 
   const notion = createClient(token, { verbose: opts.verbose });
   try {
-    if (opts.migrateFile) await runMigrate(notion, opts);
-    else if (opts.verifyFile) await runVerifyFile(notion);
-    else if (opts.init) await runInit(notion, opts);
+    if (opts.init) await runInit(notion, opts);
     else if (opts.refresh) await runRefresh(notion, opts);
     else await runSync(notion, opts);
   } catch (err) {

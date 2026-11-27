@@ -4,7 +4,7 @@
  *
  * 「📄 页面」库字段：
  *   页面名称（标题）  页面标题
- *   路径（文本）      相对站点根的 md 路径，如 source/cc/index.md
+ *   路径（文本）      相对站点根的 md / yml / json 路径，如 source/cc/index.md
  *   说明（文本）      仅备注用，不参与同步
  *   发布（勾选）      勾上才同步；取消勾选只提示、不删本地文件
  *
@@ -23,6 +23,7 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 
 import { createClient, explainError, queryAllPages, resolveDataSource } from './notion/api.mjs';
+import { normalizeLegacySiteImageUrls } from './notion/assets.mjs';
 import { PAGES_DATA_SOURCE_ID, PAGES_STATE_FILE, SITE_ROOT, readEnv } from './notion/config.mjs';
 import { pick, readCheckbox, readText } from './notion/convert.mjs';
 import { log, setVerbose } from './notion/log.mjs';
@@ -172,7 +173,7 @@ async function main() {
     const rawPath = readText(pick(props, ['路径', 'Path']));
     const target = safeTargetPath(rawPath);
     if (!target) {
-      log.warn(`「${name}」的「路径」不是 source/ 下的 .md 文件（当前值：${rawPath || '空'}），已跳过`);
+      log.warn(`「${name}」的「路径」不是 source/ 下的 .md / .yml / .json 文件（当前值：${rawPath || '空'}），已跳过`);
       continue;
     }
 
@@ -192,7 +193,7 @@ async function main() {
     }
 
     // 渲染正文（页面不做 [more] 摘要处理）
-    const rendered = (await renderPageBody({ notion, pageId: row.id })).replace(/\n*$/, '\n');
+    const rendered = normalizeLegacySiteImageUrls(await renderPageBody({ notion, pageId: row.id })).replace(/\n*$/, '\n');
 
     let output;
     if (target.isMarkdown) {

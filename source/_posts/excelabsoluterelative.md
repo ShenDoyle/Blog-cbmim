@@ -2,7 +2,7 @@
 title: Excel：何时选择绝对引用，何时选择相对引用
 date: 2020/06/10 17:51:00
 updated: 2026/09/26 19:20:00
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/excelabsoluterelative/2024215181707993655753time_excelabsoluterelative.webp
+cover: /img/cbmim/excelabsoluterelative/2024215181707993655753time_excelabsoluterelative.webp
 categories: 技术
 tags:
   - Excel

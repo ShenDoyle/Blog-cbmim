@@ -67,28 +67,23 @@ function leafPaths(node, prefix, out) {
 }
 
 hexo.extend.filter.register('after_render:html', function (data) {
-  // 兼容主题默认值或历史正文里残留的产物仓图片地址，统一走同源 /img。
-  return data
-    .replace(/https?:\/\/cdn\.jsdelivr\.net\/gh\/ShenDoyle\/ShenDoyle\.github\.io@[^/]+\/img\//g, '/img/')
-    // 主题把二维码脚本硬编码在 cbd；改为固定版本的 jsDelivr，避免继续依赖该第三方源。
-    .replace(/https?:\/\/cdn\.cbd\.int\/qrcodejs@1\.0\.0\/qrcode\.min\.js/g, 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js');
+  // 仅替换主题硬编码的二维码脚本；本站图片地址必须在源码与同步落盘时保持同源 /img。
+  return data.replace(/https?:\/\/cdn\.cbd\.int\/qrcodejs@1\.0\.0\/qrcode\.min\.js/g, 'https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js');
 });
 
 hexo.extend.filter.register('before_generate', function () {
   var marker = path.join(hexo.base_dir, '.notion-settings-only');
-  if (fs.existsSync(marker)) {
-    var variants = fs.readdirSync(hexo.base_dir).filter(function (name) {
-      return name.indexOf('_config.cbmim.yml') === 0;
-    });
-    if (variants.length) {
-      throw new Error('[settings] 检测到旧配置变体：' + variants.join(', ') + '；Notion 单一配置模式禁止加载');
-    }
+  if (!fs.existsSync(marker)) {
+    throw new Error('[settings] 缺少 .notion-settings-only；Notion 单一配置模式拒绝回退到旧配置');
+  }
+  var variants = fs.readdirSync(hexo.base_dir).filter(function (name) {
+    return name.indexOf('_config.cbmim.yml') === 0;
+  });
+  if (variants.length) {
+    throw new Error('[settings] 检测到旧配置变体：' + variants.join(', ') + '；Notion 单一配置模式禁止加载');
   }
 
-  var requested = process.env.CBMIM_SETTINGS_FILE || 'site-settings.yml';
-  if (path.basename(requested) !== requested || requested === '.' || requested === '..') {
-    throw new Error('[settings] CBMIM_SETTINGS_FILE 只能是 source/_data 下的文件名');
-  }
+  var requested = 'site-settings.yml';
   var file = path.join(hexo.source_dir, '_data', requested);
   if (!fs.existsSync(file)) {
     throw new Error('[settings] 缺少 source/_data/' + requested + '；Notion 设置是唯一覆盖来源，必须先运行 notion:settings');

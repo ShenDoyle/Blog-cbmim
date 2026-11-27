@@ -4,15 +4,17 @@
  *
  * 不需要 Notion 令牌，用一份构造好的区块夹具把整条转换链跑一遍，
  * 验证：callout→note、toggle→hideToggle、[more]、front-matter 格式、
- * 图片识别与 CDN 改写、日期与时区。
+ * 图片识别与同源 /img 改写、历史 URL 归一、日期与时区。
  *
  * 用法：npm run notion:selftest
  */
 
 import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
-import { collectMarkdownImageUrls, isNotionHosted, localizeUrls, rewriteMarkdownImages } from './notion/assets.mjs';
-import { PROPS } from './notion/config.mjs';
+import { collectMarkdownImageUrls, isNotionHosted, localizeUrls, normalizeLegacySiteImageUrls, rewriteMarkdownImages } from './notion/assets.mjs';
+import { PROPS, SITE_ROOT } from './notion/config.mjs';
 import {
   buildFrontMatter,
   ensureMoreMarker,
@@ -185,10 +187,36 @@ await check('图片：Notion 自有图床可识别，同源图片不重复落地
   assert.equal(isNotionHosted('/img/site/a.webp'), false, '同源图片被误判为 Notion 图床');
 });
 
-await check('图片本地化：正文图片可回写为 CDN 地址', () => {
+await check('图片本地化：正文图片可回写为同源 /img 地址', () => {
   const map = new Map([['https://prod-files-secure.s3.us-west-2.amazonaws.com/ws/abc/pic.png', '/img/cbmim/demo/notion-abc123.png']]);
   const out = rewriteMarkdownImages('![x](https://prod-files-secure.s3.us-west-2.amazonaws.com/ws/abc/pic.png)', map);
-  assert.ok(out.includes('/img/cbmim/demo/notion-abc123.png'), '未替换为 CDN 地址');
+  assert.ok(out.includes('/img/cbmim/demo/notion-abc123.png'), '未替换为同源地址');
+});
+
+await check('历史本站 jsDelivr 图片 URL 在同步落盘前归一为 /img', () => {
+  const legacy = 'https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@338d57d5/img/cbmim/demo/a.png';
+  assert.equal(normalizeLegacySiteImageUrls(legacy), '/img/cbmim/demo/a.png');
+  assert.equal(normalizeLegacySiteImageUrls('[cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/](/img/)'), '`/img/`');
+  assert.equal(normalizeLegacySiteImageUrls('![x](https://example.com/a.png)'), '![x](https://example.com/a.png)');
+});
+
+await check('源码 source/ 中不存在本站旧 jsDelivr 图片 URL', async () => {
+  const pattern = /(?:https?:\/\/)?cdn\.jsdelivr\.net\/gh\/ShenDoyle\/ShenDoyle\.github\.io@[^/\s)"'<>]+\/img\//g;
+  const textExt = /\.(md|markdown|yml|yaml|json|txt|pug|html|styl|css|js|mjs|cjs)$/i;
+  const hits = [];
+  const walk = async (dir) => {
+    for (const entry of await fs.readdir(dir, { withFileTypes: true })) {
+      const full = path.join(dir, entry.name);
+      if (entry.isDirectory()) await walk(full);
+      else if (textExt.test(entry.name)) {
+        const raw = await fs.readFile(full, 'utf8');
+        if (pattern.test(raw)) hits.push(path.relative(SITE_ROOT, full));
+        pattern.lastIndex = 0;
+      }
+    }
+  };
+  await walk(path.join(SITE_ROOT, 'source'));
+  assert.deepEqual(hits, [], `仍有旧图片 URL：${hits.join(', ')}`);
 });
 
 await check('日期按东八区格式化，与现有文章格式一致', () => {
@@ -196,7 +224,7 @@ await check('日期按东八区格式化，与现有文章格式一致', () => {
   assert.equal(formatDate(''), '');
 });
 
-await check('front-matter 字段与现有 25 篇完全对齐', () => {
+await check('front-matter 字段与既有文章结构对齐', () => {
   const out = buildFrontMatter({
     title: 'GEO 的分享',
     date: '2025/08/15 16:28:53',

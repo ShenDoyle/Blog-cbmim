@@ -2,7 +2,7 @@
 title: 一个开源的 CMS 系统
 date: 2022/11/26 18:36:00
 updated: 2026/09/26 19:21:00
-cover: https://cdn.jsdelivr.net/gh/ShenDoyle/ShenDoyle.github.io@main/img/cbmim/yzncms/2024215171707989451050time_yzncms.webp
+cover: /img/cbmim/yzncms/2024215171707989451050time_yzncms.webp
 categories: 分享
 tags:
   - CMS

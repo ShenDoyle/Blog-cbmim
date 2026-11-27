@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 /**
- * 把 source/img 同步到独立图片仓 ShenDoyle/img 的根目录。
- * 站点通过 /img/<path> 访问；图片仓保留 README，其余内容与 source/img 保持一致。
- * 部署密钥只通过 GIT_SSH_COMMAND 使用，不写入日志或仓库。
+ * 把 source/img 镜像到独立图片仓 ShenDoyle/img 的根目录。
+ * 站点始终通过同源 /img/<path> 访问；图片仓只做备份，不提供线上 URL。
+ * 图片仓保留 README，其余内容与 source/img 保持一致；部署密钥只通过 GIT_SSH_COMMAND 使用。
  */
 import { spawnSync } from 'node:child_process';
 import fs from 'node:fs/promises';
@@ -10,9 +10,11 @@ import os from 'node:os';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 
+import { IMG_REPO } from './notion/config.mjs';
+
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const SOURCE = path.join(ROOT, 'source', 'img');
-const REPO = 'git@github.com:ShenDoyle/img.git';
+const REPO = `git@github.com:${IMG_REPO}.git`;
 const PRESERVE = new Set(['.git', 'README.md']);
 
 function run(command, args, { cwd, env = process.env, capture = false } = {}) {
@@ -59,10 +61,7 @@ try {
   }
 
   const sha = run('git', ['rev-parse', 'HEAD'], { cwd: checkout, capture: true });
-  console.log(`图片仓已同步：${sha}`);
-  if (process.env.GITHUB_ENV) {
-    await fs.appendFile(process.env.GITHUB_ENV, `IMG_REPO_SHA=${sha}\n`);
-  }
+  console.log(`图片镜像仓已同步：${sha}`);
 } finally {
   await fs.rm(temp, { recursive: true, force: true });
 }
